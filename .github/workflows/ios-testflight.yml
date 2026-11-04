@@ -1,0 +1,115 @@
+name: iOS → TestFlight
+
+# Elle başlatılır (Actions sekmesi → Run workflow) ya da "v" ile başlayan
+# bir etiket gönderilince çalışır: git tag v0.1.0 && git push origin v0.1.0
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+env:
+  FLUTTER_VERSION: '3.47.9'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+  ios:
+    needs: test
+    runs-on: macos-latest
+    timeout-minutes: 45
+    env:
+      KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+      ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Secret'ları kontrol et
+        run: |
+          for name in KEY_ID ISSUER_ID TEAM_ID; do
+            if [ -z "${!name}" ]; then echo "::error::$name secret'ı tanımlı değil"; exit 1; fi
+          done
+
+      - name: App Store Connect API anahtarını yerleştir
+        env:
+          API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+        run: |
+          mkdir -p "$HOME/private_keys"
+          printf '%s\n' "$API_KEY_P8" > "$HOME/private_keys/AuthKey_$KEY_ID.p8"
+          echo "API_KEY_PATH=$HOME/private_keys/AuthKey_$KEY_ID.p8" >> "$GITHUB_ENV"
+
+      - run: flutter pub get
+
+      # TikTok → Paylaş → Buzdolabı Şefi eklentisi Xcode projesine eklenir
+      # (Mac olmadan Xcode'da elle yapılamadığı için betikle).
+      - name: iOS eklentilerini (paylaşım, ana ekran aracı) projeye ekle
+        run: |
+          ruby -e "require 'xcodeproj'" 2>/dev/null || sudo gem install xcodeproj --no-document
+          ruby ios/scripts/add_share_extension.rb
+
+      # Derleme numarası her çalıştırmada artar; App Store aynı numarayı iki kez kabul etmez.
+      - name: Flutter iOS yapılandırması
+        # İsteğe bağlı ayarlar (GitHub → Settings → Secrets/Variables). Boşsa o
+        # özellik kapalı kalır, uygulama yine çalışır. Ayrıntı: README → Sunucu.
+        env:
+          CATALOG_URL: ${{ vars.CATALOG_URL }}
+          EXTRACT_URL: ${{ vars.EXTRACT_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          flutter build ios --release --no-codesign --config-only \
+            --build-number=${{ github.run_number }} \
+            --dart-define=CATALOG_URL="$CATALOG_URL" \
+            --dart-define=EXTRACT_URL="$EXTRACT_URL" \
+            --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" \
+            --dart-define=SENTRY_DSN="$SENTRY_DSN"
+
+      # İmzalama otomatik: sertifika ve provisioning profile'ı Xcode, API anahtarıyla
+      # Apple'dan kendisi oluşturur/indirir. Anahtarın "Admin" rolünde olması gerekir.
+      - name: Arşivle
+        run: |
+          xcodebuild \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$API_KEY_PATH" \
+            -authenticationKeyID "$KEY_ID" \
+            -authenticationKeyIssuerID "$ISSUER_ID" \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            CODE_SIGN_STYLE=Automatic \
+            archive
+
+      - name: App Store Connect'e yükle
+        run: |
+          sed "s/TEAM_ID_PLACEHOLDER/$TEAM_ID/" ios/ExportOptions.plist > "$RUNNER_TEMP/ExportOptions.plist"
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$API_KEY_PATH" \
+            -authenticationKeyID "$KEY_ID" \
+            -authenticationKeyIssuerID "$ISSUER_ID"
+
+      - name: Anahtarı sil
+        if: always()
+        run: rm -rf "$HOME/private_keys"

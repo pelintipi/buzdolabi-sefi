@@ -1,0 +1,55 @@
+name: buzdolabi_sefi
+description: Dolabındaki malzemelerle ne pişirebileceğini bulan tarif uygulaması.
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  provider: ^6.1.2
+  shared_preferences: ^2.3.2
+  wakelock_plus: ^1.2.8
+  http: ^1.2.2
+  url_launcher: ^6.3.0
+  share_plus: ^13.3.1
+  image_picker: ^1.2.4
+  path_provider: ^2.1.6
+  flutter_local_notifications: ^22.3.3
+  timezone: ^0.11.2
+  flutter_timezone: ^5.1.1
+  speech_to_text: ^7.5.0
+  flutter_tts: ^4.2.5
+  mobile_scanner: ^7.5.0
+  sentry_flutter: ^10.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  # 3D ikonlar: Microsoft Fluent UI Emoji (MIT, assets/icons/LICENSE-fluentui-emoji.txt)
+  assets:
+    - assets/icons/
+    # Tarif ve malzeme kataloğu (lib/data/catalog.dart okur)
+    - assets/data/
+
+  # Fontlar: SIL Open Font License (assets/fonts/*-OFL.txt)
+  fonts:
+    - family: PlusJakarta
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/PlusJakartaSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/PlusJakartaSans-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/PlusJakartaSans-ExtraBold.ttf
+          weight: 800

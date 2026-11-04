@@ -1,0 +1,6 @@
+# Satır sonları depoda LF: macOS (GitHub Actions, Xcode) Windows satır sonlarıyla
+# bozulabilir. Görseller ve fontlar ikili dosya.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ttf binary

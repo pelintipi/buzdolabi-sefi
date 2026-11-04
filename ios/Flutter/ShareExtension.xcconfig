@@ -1,0 +1,2 @@
+// Paylaşım eklentisi yalnızca sürüm numaralarını Flutter'dan alır.
+#include "Generated.xcconfig"

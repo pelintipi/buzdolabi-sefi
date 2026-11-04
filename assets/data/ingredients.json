@@ -1,0 +1,1721 @@
+{
+  "version": 1,
+  "ingredients": [
+    {
+      "id": "sut",
+      "name": "Süt",
+      "emoji": "🥛",
+      "baseUnit": "ml",
+      "density": 1.03,
+      "packageAmount": 1000,
+      "shelfLifeDays": 5,
+      "allergens": [
+        "milk"
+      ],
+      "tags": [
+        "animalProduct"
+      ],
+      "per100g": {
+        "kcal": 61,
+        "protein": 3.2,
+        "fat": 3.3,
+        "carbs": 4.8
+      },
+      "pricePerKg": 45
+    },
+    {
+      "id": "yogurt",
+      "name": "Yoğurt",
+      "emoji": "🥣",
+      "baseUnit": "gram",
+      "density": 1.05,
+      "packageAmount": 1000,
+      "shelfLifeDays": 10,
+      "allergens": [
+        "milk"
+      ],
+      "tags": [
+        "animalProduct"
+      ],
+      "per100g": {
+        "kcal": 61,
+        "protein": 3.5,
+        "fat": 3.3,
+        "carbs": 4.7
+      },
+      "pricePerKg": 70
+    },
+    {
+      "id": "peynir",
+      "name": "Peynir",
+      "emoji": "🧀",
+      "baseUnit": "gram",
+      "packageAmount": 500,
+      "shelfLifeDays": 14,
+      "allergens": [
+        "milk"
+      ],
+      "tags": [
+        "animalProduct"
+      ],
+      "per100g": {
+        "kcal": 300,
+        "protein": 20,
+        "fat": 24,
+        "carbs": 2
+      },
+      "pricePerKg": 300
+    },
+    {
+      "id": "beyaz_peynir",
+      "name": "Beyaz peynir",
+      "emoji": "🧀",
+      "parent": "peynir",
+      "synonyms": [
+        "feta"
+      ],
+      "baseUnit": "gram",
+      "packageAmount": 500,
+      "shelfLifeDays": 14,
+      "per100g": {
+        "kcal": 264,
+        "protein": 17,
+        "fat": 21,
+        "carbs": 1.5
+      },
+      "pricePerKg": 300
+    },
+    {
+      "id": "kasar",
+      "name": "Kaşar",
+      "emoji": "🧀",
+      "parent": "peynir",
+      "synonyms": [
+        "kaşar peyniri"
+      ],
+      "baseUnit": "gram",
+      "packageAmount": 400,
+      "shelfLifeDays": 30,
+      "per100g": {
+        "kcal": 360,
+        "protein": 25,
+        "fat": 28,
+        "carbs": 1
+      },
+      "pricePerKg": 450
+    },
+    {
+      "id": "lor",
+      "name": "Lor",
+      "emoji": "🧀",
+      "parent": "peynir",
+      "synonyms": [
+        "lor peyniri"
+      ],
+      "baseUnit": "gram",
+      "packageAmount": 500,
+      "shelfLifeDays": 5,
+      "per100g": {
+        "kcal": 98,
+        "protein": 11,
+        "fat": 4,
+        "carbs": 3.4
+      },
+      "pricePerKg": 120
+    },
+    {
+      "id": "tereyagi",
+      "name": "Tereyağı",
+      "emoji": "🧈",
+      "synonyms": [
+        "tereyağ"
+      ],
+      "baseUnit": "gram",
+      "density": 0.95,
+      "packageAmount": 250,
+      "shelfLifeDays": 30,
+      "allergens": [
+        "milk"
+      ],
+      "tags": [
+        "animalProduct"
+      ],
+      "per100g": {
+        "kcal": 717,
+        "protein": 0.9,
+        "fat": 81,
+        "carbs": 0.1
+      },
+      "pricePerKg": 700
+    },
+    {
+      "id": "yumurta",
+      "name": "Yumurta",
+      "emoji": "🥚",
+      "baseUnit": "piece",
+      "pieceGrams": 55,
+      "packageAmount": 10,
+      "shelfLifeDays": 21,
+      "allergens": [
+        "egg"
+      ],
+      "tags": [
+        "animalProduct"
+      ],
+      "per100g": {
+        "kcal": 143,
+        "protein": 12.6,
+        "fat": 9.5,
+        "carbs": 0.7
+      },
+      "pricePerKg": 130
+    },
+    {
+      "id": "tavuk",
+      "name": "Tavuk",
+      "emoji": "🍗",
+      "baseUnit": "gram",
+      "packageAmount": 500,
+      "shelfLifeDays": 2,
+      "tags": [
+        "meat"
+      ],
+      "per100g": {
+        "kcal": 150,
+        "protein": 21,
+        "fat": 7,
+        "carbs": 0
+      },
+      "pricePerKg": 220
+    },
+    {
+      "id": "tavuk_gogsu",
+      "name": "Tavuk göğsü",
+      "emoji": "🍗",
+      "parent": "tavuk",
+      "synonyms": [
+        "tavuk fileto",
+        "göğüs"
+      ],
+      "baseUnit": "gram",
+      "packageAmount": 500,
+      "shelfLifeDays": 2,
+      "per100g": {
+        "kcal": 120,
+        "protein": 23,
+        "fat": 2.6,
+        "carbs": 0
+      },
+      "pricePerKg": 260
+    },
+    {
+      "id": "tavuk_but",
+      "name": "Tavuk but",
+      "emoji": "🍗",
+      "parent": "tavuk",
+      "synonyms": [
+        "tavuk baget",
+        "baget"
+      ],
+      "baseUnit": "gram",
+      "packageAmount": 1000,
+      "shelfLifeDays": 2,
+      "per100g": {
+        "kcal": 177,
+        "protein": 19,
+        "fat": 11,
+        "carbs": 0
+      },
+      "pricePerKg": 180
+    },
+    {
+      "id": "kiyma",
+      "name": "Kıyma",
+      "emoji": "🥩",
+      "synonyms": [
+        "dana kıyma"
+      ],
+      "baseUnit": "gram",
+      "packageAmount": 500,
+      "shelfLifeDays": 2,
+      "tags": [
+        "meat"
+      ],
+      "per100g": {
+        "kcal": 250,
+        "protein": 17,
+        "fat": 20,
+        "carbs": 0
+      },
+      "pricePerKg": 650
+    },
+    {
+      "id": "sucuk",
+      "name": "Sucuk",
+      "emoji": "🌭",
+      "baseUnit": "gram",
+      "packageAmount": 250,
+      "shelfLifeDays": 30,
+      "tags": [
+        "meat"
+      ],
+      "per100g": {
+        "kcal": 450,
+        "protein": 20,
+        "fat": 40,
+        "carbs": 2
+      },
+      "pricePerKg": 800
+    },
+    {
+      "id": "ton_baligi",
+      "name": "Ton balığı",
+      "emoji": "🐟",
+      "synonyms": [
+        "ton",
+        "ton balık"
+      ],
+      "baseUnit": "gram",
+      "packageAmount": 160,
+      "shelfLifeDays": 365,
+      "allergens": [
+        "fish"
+      ],
+      "tags": [
+        "fish"
+      ],
+      "per100g": {
+        "kcal": 116,
+        "protein": 26,
+        "fat": 1,
+        "carbs": 0
+      },
+      "pricePerKg": 550
+    },
+    {
+      "id": "sogan",
+      "name": "Soğan",
+      "emoji": "🧅",
+      "synonyms": [
+        "kuru soğan"
+      ],
+      "baseUnit": "piece",
+      "pieceGrams": 110,
+      "packageAmount": 5,
+      "shelfLifeDays": 30,
+      "per100g": {
+        "kcal": 40,
+        "protein": 1.1,
+        "fat": 0.1,
+        "carbs": 9.3
+      },
+      "pricePerKg": 25
+    },
+    {
+      "id": "sarimsak",
+      "name": "Sarımsak",
+      "emoji": "🧄",
+      "baseUnit": "piece",
+      "pieceGrams": 5,
+      "pieceLabel": "diş",
+      "packageAmount": 10,
+      "shelfLifeDays": 60,
+      "per100g": {
+        "kcal": 149,
+        "protein": 6.4,
+        "fat": 0.5,
+        "carbs": 33
+      },
+      "pricePerKg": 250
+    },
+    {
+      "id": "domates",
+      "name": "Domates",
+      "emoji": "🍅",
+      "baseUnit": "piece",
+      "pieceGrams": 150,
+      "packageAmount": 6,
+      "shelfLifeDays": 7,
+      "per100g": {
+        "kcal": 18,
+        "protein": 0.9,
+        "fat": 0.2,
+        "carbs": 3.9
+      },
+      "pricePerKg": 45,
+      "season": [
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "id": "biber",
+      "name": "Biber",
+      "emoji": "🫑",
+      "baseUnit": "piece",
+      "pieceGrams": 40,
+      "packageAmount": 6,
+      "shelfLifeDays": 7,
+      "per100g": {
+        "kcal": 25,
+        "protein": 1,
+        "fat": 0.3,
+        "carbs": 5
+      },
+      "pricePerKg": 60,
+      "season": [
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "id": "sivri_biber",
+      "name": "Sivri biber",
+      "emoji": "🌶️",
+      "parent": "biber",
+      "synonyms": [
+        "yeşil biber",
+        "çarliston"
+      ],
+      "baseUnit": "piece",
+      "pieceGrams": 20,
+      "packageAmount": 10,
+      "shelfLifeDays": 7,
+      "per100g": {
+        "kcal": 25,
+        "protein": 1,
+        "fat": 0.3,
+        "carbs": 5
+      },
+      "pricePerKg": 60,
+      "season": [
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "id": "kapya_biber",
+      "name": "Kapya biber",
+      "emoji": "🫑",
+      "parent": "biber",
+      "synonyms": [
+        "kırmızı biber",
+        "kapya"
+      ],
+      "baseUnit": "piece",
+      "pieceGrams": 120,
+      "packageAmount": 4,
+      "shelfLifeDays": 7,
+      "per100g": {
+        "kcal": 31,
+        "protein": 1,
+        "fat": 0.3,
+        "carbs": 6
+      },
+      "pricePerKg": 70,
+      "season": [
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    {
+      "id": "patates",
+      "name": "Patates",
+      "emoji": "🥔",
+      "baseUnit": "piece",
+      "pieceGrams": 170,
+      "packageAmount": 6,
+      "shelfLifeDays": 30,
+      "per100g": {
+        "kcal": 77,
+        "protein": 2,
+        "fat": 0.1,
+        "carbs": 17
+      },
+      "pricePerKg": 30
+    },
+    {
+      "id": "havuc",
+      "name": "Havuç",
+      "emoji": "🥕",
+      "baseUnit": "piece",
+      "pieceGrams": 70,
+      "packageAmount": 5,
+      "shelfLifeDays": 21,
+      "per100g": {
+        "kcal": 41,
+        "protein": 0.9,
+        "fat": 0.2,
+        "carbs": 10
+      },
+      "pricePerKg": 30,
+      "season": [
+        1,
+        2,
+        3,
+        4,
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "id": "ispanak",
+      "name": "Ispanak",
+      "emoji": "🥬",
+      "baseUnit": "gram",
+      "packageAmount": 500,
+      "shelfLifeDays": 4,
+      "per100g": {
+        "kcal": 23,
+        "protein": 2.9,
+        "fat": 0.4,
+        "carbs": 3.6
+      },
+      "pricePerKg": 70,
+      "season": [
+        1,
+        2,
+        3,
+        4,
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "id": "kabak",
+      "name": "Kabak",
+      "emoji": "🥒",
+      "baseUnit": "piece",
+      "pieceGrams": 200,
+      "packageAmount": 3,
+      "shelfLifeDays": 7,
+      "per100g": {
+        "kcal": 17,
+        "protein": 1.2,
+        "fat": 0.3,
+        "carbs": 3.1
+      },
+      "pricePerKg": 45,
+      "season": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "id": "patlican",
+      "name": "Patlıcan",
+      "emoji": "🍆",
+      "baseUnit": "piece",
+      "pieceGrams": 250,
+      "packageAmount": 4,
+      "shelfLifeDays": 7,
+      "per100g": {
+        "kcal": 25,
+        "protein": 1,
+        "fat": 0.2,
+        "carbs": 6
+      },
+      "pricePerKg": 50,
+      "season": [
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "id": "mantar",
+      "name": "Mantar",
+      "emoji": "🍄",
+      "baseUnit": "gram",
+      "packageAmount": 400,
+      "shelfLifeDays": 5,
+      "per100g": {
+        "kcal": 22,
+        "protein": 3.1,
+        "fat": 0.3,
+        "carbs": 3.3
+      },
+      "pricePerKg": 160
+    },
+    {
+      "id": "maydanoz",
+      "name": "Maydanoz",
+      "emoji": "🌿",
+      "baseUnit": "piece",
+      "pieceGrams": 50,
+      "pieceLabel": "demet",
+      "packageAmount": 1,
+      "shelfLifeDays": 5,
+      "per100g": {
+        "kcal": 36,
+        "protein": 3,
+        "fat": 0.8,
+        "carbs": 6.3
+      },
+      "pricePerKg": 200
+    },
+    {
+      "id": "limon",
+      "name": "Limon",
+      "emoji": "🍋",
+      "baseUnit": "piece",
+      "packageAmount": 4,
+      "shelfLifeDays": 21,
+      "per100g": {
+        "kcal": 29,
+        "protein": 1.1,
+        "fat": 0.3,
+        "carbs": 9.3
+      },
+      "pricePerKg": 50,
+      "season": [
+        1,
+        2,
+        3,
+        11,
+        12
+      ]
+    },
+    {
+      "id": "salatalik",
+      "name": "Salatalık",
+      "emoji": "🥒",
+      "synonyms": [
+        "hıyar"
+      ],
+      "baseUnit": "piece",
+      "pieceGrams": 150,
+      "packageAmount": 4,
+      "shelfLifeDays": 7,
+      "per100g": {
+        "kcal": 15,
+        "protein": 0.7,
+        "fat": 0.1,
+        "carbs": 3.6
+      },
+      "pricePerKg": 40,
+      "season": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "id": "muz",
+      "name": "Muz",
+      "emoji": "🍌",
+      "baseUnit": "piece",
+      "pieceGrams": 120,
+      "packageAmount": 4,
+      "shelfLifeDays": 5,
+      "per100g": {
+        "kcal": 89,
+        "protein": 1.1,
+        "fat": 0.3,
+        "carbs": 23
+      },
+      "pricePerKg": 90,
+      "season": [
+        1,
+        2,
+        3,
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "id": "pirinc",
+      "name": "Pirinç",
+      "emoji": "🍚",
+      "baseUnit": "gram",
+      "density": 0.85,
+      "packageAmount": 1000,
+      "shelfLifeDays": 365,
+      "per100g": {
+        "kcal": 360,
+        "protein": 6.6,
+        "fat": 0.6,
+        "carbs": 80
+      },
+      "pricePerKg": 90
+    },
+    {
+      "id": "bulgur",
+      "name": "Bulgur",
+      "emoji": "🌾",
+      "baseUnit": "gram",
+      "density": 0.8,
+      "packageAmount": 1000,
+      "shelfLifeDays": 365,
+      "allergens": [
+        "gluten"
+      ],
+      "per100g": {
+        "kcal": 342,
+        "protein": 12,
+        "fat": 1.3,
+        "carbs": 76
+      },
+      "pricePerKg": 50
+    },
+    {
+      "id": "makarna",
+      "name": "Makarna",
+      "emoji": "🍝",
+      "baseUnit": "gram",
+      "packageAmount": 500,
+      "shelfLifeDays": 365,
+      "allergens": [
+        "gluten"
+      ],
+      "per100g": {
+        "kcal": 371,
+        "protein": 13,
+        "fat": 1.5,
+        "carbs": 75
+      },
+      "pricePerKg": 70
+    },
+    {
+      "id": "mercimek",
+      "name": "Kırmızı mercimek",
+      "emoji": "🫘",
+      "synonyms": [
+        "mercimek"
+      ],
+      "baseUnit": "gram",
+      "density": 0.85,
+      "packageAmount": 1000,
+      "shelfLifeDays": 365,
+      "per100g": {
+        "kcal": 358,
+        "protein": 24,
+        "fat": 1.5,
+        "carbs": 63
+      },
+      "pricePerKg": 90
+    },
+    {
+      "id": "nohut",
+      "name": "Nohut (haşlanmış)",
+      "emoji": "🫘",
+      "synonyms": [
+        "nohut",
+        "haşlanmış nohut"
+      ],
+      "baseUnit": "gram",
+      "packageAmount": 400,
+      "shelfLifeDays": 365,
+      "per100g": {
+        "kcal": 139,
+        "protein": 7,
+        "fat": 2.6,
+        "carbs": 22
+      },
+      "pricePerKg": 120
+    },
+    {
+      "id": "ekmek",
+      "name": "Ekmek",
+      "emoji": "🍞",
+      "synonyms": [
+        "tost ekmeği"
+      ],
+      "baseUnit": "gram",
+      "packageAmount": 350,
+      "shelfLifeDays": 3,
+      "allergens": [
+        "gluten"
+      ],
+      "per100g": {
+        "kcal": 265,
+        "protein": 9,
+        "fat": 3.2,
+        "carbs": 49
+      },
+      "pricePerKg": 60
+    },
+    {
+      "id": "lavas",
+      "name": "Lavaş",
+      "emoji": "🫓",
+      "synonyms": [
+        "dürüm",
+        "tortilla"
+      ],
+      "baseUnit": "piece",
+      "pieceGrams": 60,
+      "packageAmount": 6,
+      "shelfLifeDays": 7,
+      "allergens": [
+        "gluten"
+      ],
+      "per100g": {
+        "kcal": 300,
+        "protein": 9,
+        "fat": 6,
+        "carbs": 52
+      },
+      "pricePerKg": 150
+    },
+    {
+      "id": "yulaf",
+      "name": "Yulaf",
+      "emoji": "🥣",
+      "synonyms": [
+        "yulaf ezmesi"
+      ],
+      "baseUnit": "gram",
+      "density": 0.4,
+      "packageAmount": 500,
+      "shelfLifeDays": 180,
+      "allergens": [
+        "gluten"
+      ],
+      "per100g": {
+        "kcal": 389,
+        "protein": 17,
+        "fat": 7,
+        "carbs": 66
+      },
+      "pricePerKg": 140
+    },
+    {
+      "id": "bal",
+      "name": "Bal",
+      "emoji": "🍯",
+      "baseUnit": "gram",
+      "density": 1.4,
+      "packageAmount": 450,
+      "shelfLifeDays": 365,
+      "tags": [
+        "animalProduct"
+      ],
+      "per100g": {
+        "kcal": 304,
+        "protein": 0.3,
+        "fat": 0,
+        "carbs": 82
+      },
+      "pricePerKg": 500
+    },
+    {
+      "id": "ceviz",
+      "name": "Ceviz",
+      "emoji": "🌰",
+      "baseUnit": "gram",
+      "density": 0.5,
+      "packageAmount": 200,
+      "shelfLifeDays": 120,
+      "allergens": [
+        "treeNut"
+      ],
+      "per100g": {
+        "kcal": 654,
+        "protein": 15,
+        "fat": 65,
+        "carbs": 14
+      },
+      "pricePerKg": 600
+    },
+    {
+      "id": "fistik_ezmesi",
+      "name": "Fıstık ezmesi",
+      "emoji": "🥜",
+      "synonyms": [
+        "yer fıstığı ezmesi"
+      ],
+      "baseUnit": "gram",
+      "density": 1.05,
+      "packageAmount": 340,
+      "shelfLifeDays": 120,
+      "allergens": [
+        "peanut"
+      ],
+      "per100g": {
+        "kcal": 588,
+        "protein": 25,
+        "fat": 50,
+        "carbs": 20
+      },
+      "pricePerKg": 450
+    },
+    {
+      "id": "maya",
+      "name": "Kuru maya",
+      "emoji": "🫙",
+      "synonyms": [
+        "maya",
+        "instant maya"
+      ],
+      "baseUnit": "gram",
+      "density": 0.6,
+      "packageAmount": 10,
+      "shelfLifeDays": 365,
+      "per100g": {
+        "kcal": 325,
+        "protein": 40,
+        "fat": 7.6,
+        "carbs": 41
+      },
+      "pricePerKg": 1500
+    },
+    {
+      "id": "seker",
+      "name": "Şeker",
+      "emoji": "🍬",
+      "synonyms": [
+        "toz şeker"
+      ],
+      "baseUnit": "gram",
+      "density": 0.85,
+      "packageAmount": 1000,
+      "shelfLifeDays": 3650,
+      "per100g": {
+        "kcal": 387,
+        "protein": 0,
+        "fat": 0,
+        "carbs": 100
+      },
+      "pricePerKg": 45,
+      "staple": true
+    },
+    {
+      "id": "kabartma_tozu",
+      "name": "Kabartma tozu",
+      "emoji": "📦",
+      "synonyms": [
+        "kabartma"
+      ],
+      "baseUnit": "gram",
+      "density": 0.9,
+      "packageAmount": 10,
+      "shelfLifeDays": 730,
+      "per100g": {
+        "kcal": 53,
+        "protein": 0,
+        "fat": 0,
+        "carbs": 28
+      },
+      "pricePerKg": 600,
+      "staple": true
+    },
+    {
+      "id": "tuz",
+      "name": "Tuz",
+      "emoji": "🧂",
+      "baseUnit": "gram",
+      "density": 1.2,
+      "packageAmount": 750,
+      "shelfLifeDays": 3650,
+      "per100g": {
+        "kcal": 0,
+        "protein": 0,
+        "fat": 0,
+        "carbs": 0
+      },
+      "pricePerKg": 20,
+      "staple": true
+    },
+    {
+      "id": "karabiber",
+      "name": "Karabiber",
+      "emoji": "🧂",
+      "baseUnit": "gram",
+      "density": 0.5,
+      "packageAmount": 50,
+      "shelfLifeDays": 730,
+      "per100g": {
+        "kcal": 251,
+        "protein": 10,
+        "fat": 3,
+        "carbs": 64
+      },
+      "pricePerKg": 800,
+      "staple": true
+    },
+    {
+      "id": "pul_biber",
+      "name": "Pul biber",
+      "emoji": "🌶️",
+      "synonyms": [
+        "kırmızı pul biber"
+      ],
+      "baseUnit": "gram",
+      "density": 0.45,
+      "packageAmount": 100,
+      "shelfLifeDays": 730,
+      "per100g": {
+        "kcal": 282,
+        "protein": 12,
+        "fat": 14,
+        "carbs": 50
+      },
+      "pricePerKg": 500,
+      "staple": true
+    },
+    {
+      "id": "nane",
+      "name": "Kuru nane",
+      "emoji": "🌿",
+      "synonyms": [
+        "nane"
+      ],
+      "baseUnit": "gram",
+      "density": 0.3,
+      "packageAmount": 30,
+      "shelfLifeDays": 730,
+      "per100g": {
+        "kcal": 285,
+        "protein": 20,
+        "fat": 6,
+        "carbs": 52
+      },
+      "pricePerKg": 500,
+      "staple": true
+    },
+    {
+      "id": "zeytinyagi",
+      "name": "Zeytinyağı",
+      "emoji": "🫒",
+      "synonyms": [
+        "zeytinyağ"
+      ],
+      "baseUnit": "ml",
+      "density": 0.91,
+      "packageAmount": 1000,
+      "shelfLifeDays": 540,
+      "per100g": {
+        "kcal": 884,
+        "protein": 0,
+        "fat": 100,
+        "carbs": 0
+      },
+      "pricePerKg": 450,
+      "staple": true
+    },
+    {
+      "id": "sivi_yag",
+      "name": "Sıvı yağ",
+      "emoji": "🛢️",
+      "synonyms": [
+        "ayçiçek yağı",
+        "sıvıyağ",
+        "yağ"
+      ],
+      "baseUnit": "ml",
+      "density": 0.92,
+      "packageAmount": 1000,
+      "shelfLifeDays": 365,
+      "per100g": {
+        "kcal": 884,
+        "protein": 0,
+        "fat": 100,
+        "carbs": 0
+      },
+      "pricePerKg": 90,
+      "staple": true
+    },
+    {
+      "id": "salca",
+      "name": "Salça",
+      "emoji": "🥫",
+      "synonyms": [
+        "domates salçası",
+        "biber salçası"
+      ],
+      "baseUnit": "gram",
+      "density": 1.1,
+      "packageAmount": 700,
+      "shelfLifeDays": 180,
+      "per100g": {
+        "kcal": 82,
+        "protein": 4.3,
+        "fat": 0.5,
+        "carbs": 19
+      },
+      "pricePerKg": 120,
+      "staple": true
+    },
+    {
+      "id": "un",
+      "name": "Un",
+      "emoji": "🌾",
+      "synonyms": [
+        "buğday unu"
+      ],
+      "baseUnit": "gram",
+      "density": 0.55,
+      "packageAmount": 1000,
+      "shelfLifeDays": 365,
+      "allergens": [
+        "gluten"
+      ],
+      "per100g": {
+        "kcal": 364,
+        "protein": 10,
+        "fat": 1,
+        "carbs": 76
+      },
+      "pricePerKg": 30,
+      "staple": true
+    },
+    {
+      "id": "tahin",
+      "name": "Tahin",
+      "emoji": "🫙",
+      "baseUnit": "gram",
+      "density": 1.1,
+      "packageAmount": 300,
+      "shelfLifeDays": 365,
+      "allergens": [
+        "sesame"
+      ],
+      "per100g": {
+        "kcal": 595,
+        "protein": 17,
+        "fat": 54,
+        "carbs": 21
+      },
+      "pricePerKg": 300
+    },
+    {
+      "id": "pekmez",
+      "name": "Pekmez",
+      "emoji": "🍯",
+      "synonyms": [
+        "üzüm pekmezi"
+      ],
+      "baseUnit": "gram",
+      "density": 1.4,
+      "packageAmount": 700,
+      "shelfLifeDays": 365,
+      "per100g": {
+        "kcal": 293,
+        "protein": 0,
+        "fat": 0,
+        "carbs": 74
+      },
+      "pricePerKg": 150
+    },
+    {
+      "id": "yufka",
+      "name": "Yufka",
+      "emoji": "🫓",
+      "baseUnit": "piece",
+      "pieceGrams": 120,
+      "pieceLabel": "yaprak",
+      "packageAmount": 3,
+      "shelfLifeDays": 5,
+      "allergens": [
+        "gluten"
+      ],
+      "per100g": {
+        "kcal": 300,
+        "protein": 9,
+        "fat": 2,
+        "carbs": 60
+      },
+      "pricePerKg": 120
+    },
+    {
+      "id": "elma",
+      "name": "Elma",
+      "emoji": "🍎",
+      "baseUnit": "piece",
+      "pieceGrams": 180,
+      "packageAmount": 6,
+      "shelfLifeDays": 30,
+      "per100g": {
+        "kcal": 52,
+        "protein": 0.3,
+        "fat": 0.2,
+        "carbs": 14
+      },
+      "pricePerKg": 40,
+      "season": [
+        9,
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "id": "tarcin",
+      "name": "Tarçın",
+      "emoji": "🌿",
+      "baseUnit": "gram",
+      "density": 0.5,
+      "packageAmount": 50,
+      "shelfLifeDays": 730,
+      "per100g": {
+        "kcal": 247,
+        "protein": 4,
+        "fat": 1.2,
+        "carbs": 81
+      },
+      "pricePerKg": 600
+    },
+    {
+      "id": "misir",
+      "name": "Mısır (konserve)",
+      "emoji": "🌽",
+      "synonyms": [
+        "mısır",
+        "konserve mısır"
+      ],
+      "baseUnit": "gram",
+      "packageAmount": 220,
+      "shelfLifeDays": 365,
+      "per100g": {
+        "kcal": 86,
+        "protein": 3.3,
+        "fat": 1.4,
+        "carbs": 19
+      },
+      "pricePerKg": 150
+    },
+    {
+      "id": "kuru_fasulye",
+      "name": "Kuru fasulye",
+      "emoji": "🫘",
+      "synonyms": [
+        "fasulye"
+      ],
+      "baseUnit": "gram",
+      "density": 0.8,
+      "packageAmount": 1000,
+      "shelfLifeDays": 365,
+      "per100g": {
+        "kcal": 333,
+        "protein": 24,
+        "fat": 0.8,
+        "carbs": 60
+      },
+      "pricePerKg": 120
+    },
+    {
+      "id": "yesil_mercimek",
+      "name": "Yeşil mercimek",
+      "emoji": "🫘",
+      "baseUnit": "gram",
+      "density": 0.85,
+      "packageAmount": 1000,
+      "shelfLifeDays": 365,
+      "per100g": {
+        "kcal": 352,
+        "protein": 25,
+        "fat": 1,
+        "carbs": 60
+      },
+      "pricePerKg": 100
+    },
+    {
+      "id": "sehriye",
+      "name": "Tel şehriye",
+      "emoji": "🍜",
+      "synonyms": [
+        "şehriye",
+        "arpa şehriye"
+      ],
+      "baseUnit": "gram",
+      "density": 0.6,
+      "packageAmount": 500,
+      "shelfLifeDays": 365,
+      "allergens": [
+        "gluten"
+      ],
+      "per100g": {
+        "kcal": 371,
+        "protein": 13,
+        "fat": 1.5,
+        "carbs": 75
+      },
+      "pricePerKg": 70
+    },
+    {
+      "id": "irmik",
+      "name": "İrmik",
+      "emoji": "🌾",
+      "baseUnit": "gram",
+      "density": 0.7,
+      "packageAmount": 500,
+      "shelfLifeDays": 365,
+      "allergens": [
+        "gluten"
+      ],
+      "per100g": {
+        "kcal": 360,
+        "protein": 13,
+        "fat": 1,
+        "carbs": 73
+      },
+      "pricePerKg": 50
+    },
+    {
+      "id": "brokoli",
+      "name": "Brokoli",
+      "emoji": "🥦",
+      "baseUnit": "gram",
+      "packageAmount": 500,
+      "shelfLifeDays": 5,
+      "per100g": {
+        "kcal": 34,
+        "protein": 2.8,
+        "fat": 0.4,
+        "carbs": 7
+      },
+      "pricePerKg": 80,
+      "season": [
+        1,
+        2,
+        3,
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "id": "karnabahar",
+      "name": "Karnabahar",
+      "emoji": "🥦",
+      "baseUnit": "gram",
+      "packageAmount": 800,
+      "shelfLifeDays": 7,
+      "per100g": {
+        "kcal": 25,
+        "protein": 1.9,
+        "fat": 0.3,
+        "carbs": 5
+      },
+      "pricePerKg": 40,
+      "season": [
+        1,
+        2,
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "id": "taze_fasulye",
+      "name": "Taze fasulye",
+      "emoji": "🫛",
+      "synonyms": [
+        "yeşil fasulye",
+        "çalı fasulye"
+      ],
+      "baseUnit": "gram",
+      "packageAmount": 500,
+      "shelfLifeDays": 5,
+      "per100g": {
+        "kcal": 31,
+        "protein": 1.8,
+        "fat": 0.2,
+        "carbs": 7
+      },
+      "pricePerKg": 70,
+      "season": [
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "id": "bezelye",
+      "name": "Bezelye",
+      "emoji": "🫛",
+      "synonyms": [
+        "dondurulmuş bezelye"
+      ],
+      "baseUnit": "gram",
+      "packageAmount": 450,
+      "shelfLifeDays": 180,
+      "per100g": {
+        "kcal": 81,
+        "protein": 5.4,
+        "fat": 0.4,
+        "carbs": 14
+      },
+      "pricePerKg": 110,
+      "season": [
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "id": "pirasa",
+      "name": "Pırasa",
+      "emoji": "🥬",
+      "baseUnit": "piece",
+      "pieceGrams": 250,
+      "packageAmount": 3,
+      "shelfLifeDays": 10,
+      "per100g": {
+        "kcal": 61,
+        "protein": 1.5,
+        "fat": 0.3,
+        "carbs": 14
+      },
+      "pricePerKg": 30,
+      "season": [
+        1,
+        2,
+        3,
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "id": "marul",
+      "name": "Marul",
+      "emoji": "🥬",
+      "synonyms": [
+        "göbek marul",
+        "yeşillik"
+      ],
+      "baseUnit": "piece",
+      "pieceGrams": 400,
+      "packageAmount": 1,
+      "shelfLifeDays": 6,
+      "per100g": {
+        "kcal": 15,
+        "protein": 1.4,
+        "fat": 0.2,
+        "carbs": 3
+      },
+      "pricePerKg": 50,
+      "season": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        10,
+        11,
+        12
+      ]
+    },
+    {
+      "id": "dereotu",
+      "name": "Dereotu",
+      "emoji": "🌿",
+      "baseUnit": "piece",
+      "pieceGrams": 50,
+      "pieceLabel": "demet",
+      "packageAmount": 1,
+      "shelfLifeDays": 5,
+      "per100g": {
+        "kcal": 43,
+        "protein": 3.5,
+        "fat": 1.1,
+        "carbs": 7
+      },
+      "pricePerKg": 200,
+      "season": [
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "id": "taze_sogan",
+      "name": "Taze soğan",
+      "emoji": "🧅",
+      "synonyms": [
+        "yeşil soğan"
+      ],
+      "baseUnit": "piece",
+      "pieceGrams": 15,
+      "packageAmount": 6,
+      "shelfLifeDays": 7,
+      "per100g": {
+        "kcal": 32,
+        "protein": 1.8,
+        "fat": 0.2,
+        "carbs": 7
+      },
+      "pricePerKg": 100,
+      "season": [
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "id": "dana_kusbasi",
+      "name": "Dana kuşbaşı",
+      "emoji": "🥩",
+      "synonyms": [
+        "kuşbaşı",
+        "dana eti",
+        "et"
+      ],
+      "baseUnit": "gram",
+      "packageAmount": 500,
+      "shelfLifeDays": 3,
+      "tags": [
+        "meat"
+      ],
+      "per100g": {
+        "kcal": 220,
+        "protein": 26,
+        "fat": 12,
+        "carbs": 0
+      },
+      "pricePerKg": 800
+    },
+    {
+      "id": "somon",
+      "name": "Somon",
+      "emoji": "🐟",
+      "baseUnit": "gram",
+      "packageAmount": 400,
+      "shelfLifeDays": 2,
+      "allergens": [
+        "fish"
+      ],
+      "tags": [
+        "fish"
+      ],
+      "per100g": {
+        "kcal": 208,
+        "protein": 20,
+        "fat": 13,
+        "carbs": 0
+      },
+      "pricePerKg": 1200
+    },
+    {
+      "id": "krema",
+      "name": "Krema",
+      "emoji": "🥛",
+      "synonyms": [
+        "sıvı krema"
+      ],
+      "baseUnit": "ml",
+      "packageAmount": 200,
+      "shelfLifeDays": 10,
+      "allergens": [
+        "milk"
+      ],
+      "tags": [
+        "animalProduct"
+      ],
+      "per100g": {
+        "kcal": 292,
+        "protein": 2.5,
+        "fat": 30,
+        "carbs": 3
+      },
+      "pricePerKg": 250
+    },
+    {
+      "id": "nisasta",
+      "name": "Mısır nişastası",
+      "emoji": "📦",
+      "synonyms": [
+        "nişasta"
+      ],
+      "baseUnit": "gram",
+      "density": 0.6,
+      "packageAmount": 200,
+      "shelfLifeDays": 365,
+      "per100g": {
+        "kcal": 381,
+        "protein": 0.3,
+        "fat": 0.1,
+        "carbs": 91
+      },
+      "pricePerKg": 120
+    },
+    {
+      "id": "kakao",
+      "name": "Kakao",
+      "emoji": "🍫",
+      "baseUnit": "gram",
+      "density": 0.45,
+      "packageAmount": 100,
+      "shelfLifeDays": 365,
+      "per100g": {
+        "kcal": 228,
+        "protein": 20,
+        "fat": 14,
+        "carbs": 58
+      },
+      "pricePerKg": 600
+    },
+    {
+      "id": "kimyon",
+      "name": "Kimyon",
+      "emoji": "🌿",
+      "baseUnit": "gram",
+      "density": 0.45,
+      "packageAmount": 50,
+      "shelfLifeDays": 730,
+      "per100g": {
+        "kcal": 375,
+        "protein": 18,
+        "fat": 22,
+        "carbs": 44
+      },
+      "pricePerKg": 600,
+      "staple": true
+    },
+    {
+      "id": "kekik",
+      "name": "Kekik",
+      "emoji": "🌿",
+      "synonyms": [
+        "kuru kekik"
+      ],
+      "baseUnit": "gram",
+      "density": 0.3,
+      "packageAmount": 30,
+      "shelfLifeDays": 730,
+      "per100g": {
+        "kcal": 276,
+        "protein": 9,
+        "fat": 7,
+        "carbs": 64
+      },
+      "pricePerKg": 600,
+      "staple": true
+    },
+    {
+      "id": "pismis_pilav",
+      "name": "Pişmiş pilav",
+      "emoji": "🍚",
+      "synonyms": [
+        "pilav",
+        "dünkü pilav",
+        "kalan pilav"
+      ],
+      "baseUnit": "gram",
+      "packageAmount": 400.0,
+      "shelfLifeDays": 2,
+      "per100g": {
+        "kcal": 150,
+        "protein": 2.7,
+        "fat": 3.5,
+        "carbs": 28
+      },
+      "pricePerKg": 0,
+      "leftover": true
+    },
+    {
+      "id": "pismis_makarna",
+      "name": "Haşlanmış makarna",
+      "emoji": "🍝",
+      "synonyms": [
+        "kalan makarna",
+        "dünkü makarna"
+      ],
+      "baseUnit": "gram",
+      "packageAmount": 400.0,
+      "shelfLifeDays": 2,
+      "allergens": [
+        "gluten"
+      ],
+      "per100g": {
+        "kcal": 158,
+        "protein": 5.8,
+        "fat": 0.9,
+        "carbs": 31
+      },
+      "pricePerKg": 0,
+      "leftover": true
+    },
+    {
+      "id": "pismis_tavuk",
+      "name": "Pişmiş tavuk",
+      "emoji": "🍗",
+      "synonyms": [
+        "haşlanmış tavuk",
+        "kalan tavuk",
+        "didiklenmiş tavuk"
+      ],
+      "baseUnit": "gram",
+      "packageAmount": 300.0,
+      "shelfLifeDays": 2,
+      "tags": [
+        "meat"
+      ],
+      "per100g": {
+        "kcal": 190,
+        "protein": 29,
+        "fat": 7.5,
+        "carbs": 0
+      },
+      "pricePerKg": 0,
+      "leftover": true
+    },
+    {
+      "id": "bayat_ekmek",
+      "name": "Bayat ekmek",
+      "parent": "ekmek",
+      "emoji": "🍞",
+      "synonyms": [
+        "dünkü ekmek",
+        "kalan ekmek"
+      ],
+      "baseUnit": "gram",
+      "packageAmount": 300.0,
+      "shelfLifeDays": 2,
+      "allergens": [
+        "gluten"
+      ],
+      "per100g": {
+        "kcal": 265,
+        "protein": 9,
+        "fat": 3.2,
+        "carbs": 49
+      },
+      "pricePerKg": 0,
+      "leftover": true
+    },
+    {
+      "id": "haslanmis_patates",
+      "name": "Haşlanmış patates",
+      "emoji": "🥔",
+      "synonyms": [
+        "kalan patates"
+      ],
+      "baseUnit": "gram",
+      "packageAmount": 400.0,
+      "shelfLifeDays": 2,
+      "per100g": {
+        "kcal": 87,
+        "protein": 1.9,
+        "fat": 0.1,
+        "carbs": 20
+      },
+      "pricePerKg": 0,
+      "leftover": true
+    }
+  ]
+}

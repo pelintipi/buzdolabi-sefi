@@ -1,0 +1,195 @@
+import AVFoundation
+import Flutter
+import Speech
+import UIKit
+import Vision
+import WidgetKit
+
+@main
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+  ) -> Bool {
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "ShareInboxPlugin") {
+      ShareInboxPlugin.register(with: registrar)
+    }
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "NativeBridgePlugin") {
+      NativeBridgePlugin.register(with: registrar)
+    }
+  }
+}
+
+/// Uygulama ile eklentilerin (paylaşım, ana ekran aracı) ortak kutusu.
+enum AppGroup {
+  static var id: String { "group.\(Bundle.main.bundleIdentifier ?? "")" }
+  static var defaults: UserDefaults? { UserDefaults(suiteName: id) }
+}
+
+/// Paylaşım eklentisinin (ios/ShareExtension) ortak kutuya bıraktığı
+/// paylaşımları Flutter'a verir ve kutuyu boşaltır.
+/// Dart tarafı: lib/services/video_import.dart → ShareInbox.
+final class ShareInboxPlugin: NSObject, FlutterPlugin {
+  static func register(with registrar: FlutterPluginRegistrar) {
+    let channel = FlutterMethodChannel(
+      name: "buzdolabi_sefi/share", binaryMessenger: registrar.messenger())
+    registrar.addMethodCallDelegate(ShareInboxPlugin(), channel: channel)
+  }
+
+  func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    guard call.method == "takePending" else {
+      result(FlutterMethodNotImplemented)
+      return
+    }
+    guard let defaults = AppGroup.defaults else {
+      result([])
+      return
+    }
+    let pending = defaults.array(forKey: "pendingShares") ?? []
+    defaults.removeObject(forKey: "pendingShares")
+    result(pending)
+  }
+}
+
+/// Dart tarafı: lib/services/device_services.dart → NativeBridge.
+final class NativeBridgePlugin: NSObject, FlutterPlugin {
+  static func register(with registrar: FlutterPluginRegistrar) {
+    let channel = FlutterMethodChannel(
+      name: "buzdolabi_sefi/native", binaryMessenger: registrar.messenger())
+    registrar.addMethodCallDelegate(NativeBridgePlugin(), channel: channel)
+  }
+
+  func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    let args = call.arguments as? [String: Any] ?? [:]
+    switch call.method {
+    case "recognizeText":
+      guard let data = (args["image"] as? FlutterStandardTypedData)?.data else {
+        result(FlutterError(code: "args", message: "Görüntü yok", details: nil))
+        return
+      }
+      recognizeText(data, result: result)
+    case "transcribeVideo":
+      guard let path = args["path"] as? String else {
+        result(FlutterError(code: "args", message: "Video yolu yok", details: nil))
+        return
+      }
+      transcribe(path: path, locale: args["locale"] as? String ?? "tr-TR", result: result)
+    case "updateWidget":
+      updateWidget(args, result: result)
+    default:
+      result(FlutterMethodNotImplemented)
+    }
+  }
+
+  // MARK: - Fişten yazı (cihaz üstünde, Apple Vision)
+
+  private func recognizeText(_ data: Data, result: @escaping FlutterResult) {
+    guard let image = UIImage(data: data)?.cgImage else {
+      result(FlutterError(code: "image", message: "Görüntü okunamadı", details: nil))
+      return
+    }
+    let request = VNRecognizeTextRequest { request, error in
+      let lines = (request.results as? [VNRecognizedTextObservation] ?? [])
+        // Fiş satırları yukarıdan aşağı sıralanır.
+        .sorted { $0.boundingBox.minY > $1.boundingBox.minY }
+        .compactMap { $0.topCandidates(1).first?.string }
+      DispatchQueue.main.async {
+        if let error {
+          result(FlutterError(code: "vision", message: error.localizedDescription, details: nil))
+        } else {
+          result(lines.joined(separator: "\n"))
+        }
+      }
+    }
+    request.recognitionLevel = .accurate
+    request.usesLanguageCorrection = false
+    // Türkçe desteklenmiyorsa (eski iOS) desteklenenlerle devam edilir.
+    let wanted = ["tr-TR", "en-US"]
+    if let supported = try? request.supportedRecognitionLanguages() {
+      let usable = wanted.filter { supported.contains($0) }
+      if !usable.isEmpty { request.recognitionLanguages = usable }
+    }
+    DispatchQueue.global(qos: .userInitiated).async {
+      do {
+        try VNImageRequestHandler(cgImage: image, options: [:]).perform([request])
+      } catch {
+        DispatchQueue.main.async {
+          result(FlutterError(code: "vision", message: error.localizedDescription, details: nil))
+        }
+      }
+    }
+  }
+
+  // MARK: - Videodaki konuşma (Apple Speech, mümkünse cihazda)
+
+  private func transcribe(path: String, locale: String, result: @escaping FlutterResult) {
+    SFSpeechRecognizer.requestAuthorization { status in
+      guard status == .authorized else {
+        DispatchQueue.main.async {
+          result(FlutterError(code: "permission", message: "Konuşma tanıma izni yok", details: nil))
+        }
+        return
+      }
+      self.extractAudio(from: URL(fileURLWithPath: path)) { audioURL in
+        guard let audioURL,
+              let recognizer = SFSpeechRecognizer(locale: Locale(identifier: locale)),
+              recognizer.isAvailable else {
+          DispatchQueue.main.async {
+            result(FlutterError(code: "speech", message: "Ses çözümlenemedi", details: nil))
+          }
+          return
+        }
+        let request = SFSpeechURLRecognitionRequest(url: audioURL)
+        request.shouldReportPartialResults = false
+        if recognizer.supportsOnDeviceRecognition {
+          request.requiresOnDeviceRecognition = true
+        }
+        recognizer.recognitionTask(with: request) { res, error in
+          if let res, res.isFinal {
+            try? FileManager.default.removeItem(at: audioURL)
+            DispatchQueue.main.async { result(res.bestTranscription.formattedString) }
+          } else if let error {
+            try? FileManager.default.removeItem(at: audioURL)
+            DispatchQueue.main.async {
+              result(FlutterError(code: "speech", message: error.localizedDescription, details: nil))
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /// Videonun ses izini geçici bir m4a dosyasına çıkarır.
+  private func extractAudio(from video: URL, completion: @escaping (URL?) -> Void) {
+    let asset = AVURLAsset(url: video)
+    guard let export = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetAppleM4A) else {
+      completion(nil)
+      return
+    }
+    let out = FileManager.default.temporaryDirectory
+      .appendingPathComponent(UUID().uuidString).appendingPathExtension("m4a")
+    export.outputURL = out
+    export.outputFileType = .m4a
+    export.exportAsynchronously {
+      completion(export.status == .completed ? out : nil)
+    }
+  }
+
+  // MARK: - Ana ekran aracı
+
+  private func updateWidget(_ data: [String: Any], result: @escaping FlutterResult) {
+    guard let defaults = AppGroup.defaults,
+          let json = try? JSONSerialization.data(withJSONObject: data) else {
+      result(false)
+      return
+    }
+    defaults.set(json, forKey: "widgetData")
+    WidgetCenter.shared.reloadAllTimelines()
+    result(true)
+  }
+}
