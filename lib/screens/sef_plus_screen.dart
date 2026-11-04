@@ -122,7 +122,7 @@ class SefPlusScreen extends StatelessWidget {
               children: [
                 for (final line in const [
                   'Dolabındakilerle tarif bulma ve karşılaştırma',
-                  'TikTok\'tan paylaşarak tarif kaydetme',
+                  'TikTok, Instagram ve YouTube\'dan tarif kaydetme',
                   'Alışveriş listesi ve "Neler alabilirim?"',
                   'Fişten, barkoddan ve elle dolap doldurma',
                   'Haftalık plan',

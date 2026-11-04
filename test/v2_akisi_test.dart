@@ -359,14 +359,18 @@ void main() {
       await tester.pumpAndSettle();
 
       // ------------------------------------------------ İlerleme
-      await r.tap(tester, find.text('İlerleme'), 'İlerleme');
+      await r.tap(tester, find.text('Profil'), 'Profil');
+      await tester.pumpAndSettle();
+      await r.tap(tester, find.text('İlerlemem'), 'İlerlemem');
       await tester.pumpAndSettle();
       await r.capture(tester,
           title: 'Bugün yediklerin',
-          action: 'Alt menüden "İlerleme"ye geçtim.',
+          action: 'Profil\x27de "İlerlemem"e dokundum.',
           result:
               'Bugünkü kalori ve protein hedefe göre çubukla; son 7 günün grafiği.');
       expect(find.text('Bugün yediklerin'), findsOneWidget);
+      Navigator.of(tester.element(find.text('Bugün yediklerin'))).pop();
+      await tester.pumpAndSettle();
 
       // ------------------------------------------------ Profil
       await r.tap(tester, find.text('Profil'), 'Profil');

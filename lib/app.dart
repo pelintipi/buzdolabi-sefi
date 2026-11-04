@@ -7,8 +7,8 @@ import 'screens/import_recipe_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/pantry_screen.dart';
 import 'screens/profile_screen.dart';
-import 'screens/progress_screen.dart';
 import 'screens/shopping_screen.dart';
+import 'screens/social_screen.dart';
 import 'services/video_import.dart';
 import 'state/app_state.dart';
 import 'theme/app_theme.dart';
@@ -92,12 +92,12 @@ class _HomeShellState extends State<HomeShell> {
     }
   }
 
-  static const _pages = [
-    HomeScreen(),
-    PantryScreen(),
-    ShoppingScreen(),
-    ProgressScreen(),
-    ProfileScreen(),
+  late final _pages = [
+    const HomeScreen(),
+    const PantryScreen(),
+    SocialScreen(videoClient: widget.videoClient),
+    const ShoppingScreen(),
+    const ProfileScreen(),
   ];
 
   @override
@@ -122,8 +122,8 @@ class _NavBar extends StatelessWidget {
   static const _items = [
     (Icons.home_outlined, Icons.home_rounded, 'Ana sayfa'),
     (Icons.shopping_basket_outlined, Icons.shopping_basket_rounded, 'Dolabım'),
+    (Icons.play_circle_outline_rounded, Icons.play_circle_rounded, 'Sosyal'),
     (Icons.list_alt_outlined, Icons.list_alt_rounded, 'Liste'),
-    (Icons.emoji_events_outlined, Icons.emoji_events_rounded, 'İlerleme'),
     (Icons.account_circle_outlined, Icons.account_circle_rounded, 'Profil'),
   ];
 
@@ -164,7 +164,7 @@ class _NavBar extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Badge(
-                              isLabelVisible: i == 2 && shoppingCount > 0,
+                              isLabelVisible: i == 3 && shoppingCount > 0,
                               label: Text('$shoppingCount'),
                               backgroundColor: Palette.tomato,
                               child: Icon(

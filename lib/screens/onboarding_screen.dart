@@ -157,7 +157,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           _Question<RecipeHabit>.multi(
             emoji: '📝',
             title: 'Tariflerini nasıl saklıyorsun?',
-            why: 'Videodan kaydediyorsan TikTok\'tan tek dokunuşla eklemeyi '
+            why:
+                'Videodan kaydediyorsan sosyal medyadan tek dokunuşla eklemeyi '
                 'öne çıkarırız.',
             options: [
               for (final h in RecipeHabit.values) _Option(h, h.label, h.emoji)
@@ -503,7 +504,7 @@ class _Done extends StatelessWidget {
         ('🥦', 'Yalnızca vejetaryen tarifler'),
       if (p.eating?.diet == Diet.vegan) ('🌱', 'Yalnızca vegan tarifler'),
       if (p.savesVideos)
-        ('🎬', 'TikTok\'tan tarif kaydetme ana sayfada en üstte'),
+        ('🎬', 'Sosyal medyadan tarif kaydetme ana sayfada en önde'),
       if (p.planTime != null) (p.planTime!.emoji, p.planTime!.homeLine),
     ];
   }

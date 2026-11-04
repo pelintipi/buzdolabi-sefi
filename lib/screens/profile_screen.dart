@@ -11,6 +11,7 @@ import '../widgets/ui.dart';
 import '../services/device_services.dart';
 import 'onboarding_screen.dart';
 import 'privacy_screen.dart';
+import 'progress_screen.dart';
 import 'sef_plus_screen.dart';
 import 'recipe_detail_screen.dart';
 
@@ -104,6 +105,15 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 12),
+          ChunkyButton(
+            label: 'İlerlemem',
+            iconData: Icons.emoji_events_outlined,
+            tone: ChunkyTone.soft,
+            height: 48,
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                builder: (_) => const ProgressScreen())),
           ),
           const SizedBox(height: 16),
           group(

@@ -105,11 +105,11 @@ void main() {
           title: 'Ana sayfa',
           action: 'Uygulamayı açtım.',
           result: '"Ekle" bölümünde "TikTok\'tan" kısayolu var.');
-      expect(find.text("TikTok'tan"), findsOneWidget);
+      expect(find.text('Sosyal medya'), findsOneWidget);
 
       // ------------------------------------------- Paylaş → Buzdolabı Şefi
       // Prototipte: karta dokununca "paylaşılmış" hali açılır.
-      r.mark(tester, find.text("TikTok'tan"), "TikTok'ta Paylaş");
+      r.mark(tester, find.text('Sosyal medya'), "TikTok'ta Paylaş");
       // Eklenti linki kutuya bıraktı; kullanıcı uygulamaya döndü.
       inbox.items = [
         SharedPayload.fromRaw(text: 'Bu tarife bak! $_videoUrl'),
@@ -196,28 +196,29 @@ void main() {
       Navigator.of(tester.element(find.text('Yapılışı'))).pop();
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
-          find.textContaining('Videodan kaydettiklerin'), 300,
+          find.textContaining('Sosyal medyadan kaydettiklerin'), 300,
           scrollable: _mainScroll);
       await tester.pumpAndSettle();
       await r.capture(tester,
-          title: 'Videodan kaydettiklerin',
+          title: 'Sosyal medyadan kaydettiklerin',
           action: 'Ana sayfaya döndüm.',
           result:
-              'Kaydedilen tarif "Videodan kaydettiklerin" şeridinde; altında '
+              'Kaydedilen tarif "Sosyal medyadan kaydettiklerin" şeridinde; altında '
               'dolaba göre durumu yazıyor.');
-      expect(find.textContaining('Videodan kaydettiklerin'), findsOneWidget);
-      await tester.scrollUntilVisible(find.text("TikTok'tan"), -300,
+      expect(find.textContaining('Sosyal medyadan kaydettiklerin'),
+          findsOneWidget);
+      await tester.scrollUntilVisible(find.text('Sosyal medya'), -300,
           scrollable: _mainScroll);
       await tester.pumpAndSettle();
 
       // ------------------------------------------- Elle link yapıştırma
-      await r.tap(tester, find.text("TikTok'tan"), "TikTok'tan");
+      await r.tap(tester, find.text('Sosyal medya'), 'Sosyal medya');
       await r.capture(tester,
           title: 'Link yapıştır',
-          action: 'Ana sayfada "TikTok\'tan" kısayoluna bastım.',
-          result: 'Paylaş menüsünün 3 adımda nasıl kullanılacağı anlatılıyor; '
-              'istersen link ya da tarif metni yapıştırılabiliyor.');
-      expect(find.text('TikTok\'tan tek dokunuşla'), findsOneWidget);
+          action: 'Ana sayfada "Sosyal medya" kısayoluna bastım.',
+          result: 'TikTok, Instagram ve YouTube için Paylaş menüsü 3 adımda '
+              'anlatılıyor; istersen link ya da tarif metni yapıştırılabiliyor.');
+      expect(find.text('Sosyal medyadan tek dokunuşla'), findsOneWidget);
 
       await tester.enterText(find.byType(TextField).at(1),
           'Bu tarif çok tuttu, denemeyen kalmasın #keşfet');
@@ -233,6 +234,49 @@ void main() {
               'tarifi yazmamı istiyor.',
           ok: state.importedRecipes.length == 1);
       expect(find.text('Bu metinde tarif bulamadım'), findsOneWidget);
+
+      // ------------------------------------------- Instagram: açıklamayı yapıştır
+      await tester.enterText(find.byType(TextField).at(0),
+          'https://www.instagram.com/reel/C0abc123/');
+      await tester.enterText(
+          find.byType(TextField).at(1),
+          'Pratik krep 🥞\nMalzemeler: 2 yumurta, 1 su bardağı süt, '
+          '1 su bardağı un\nYapılışı: Hepsini çırpın. Tavada iki yüzünü pişirin.');
+      await tester.pump();
+      await r.tap(tester, find.text('Tarifi kaydet'), 'Tarifi kaydet');
+      await tester.pumpAndSettle();
+      final insta = state.importedRecipes
+          .firstWhere((x) => x.source!.url.contains('instagram'));
+      await r.capture(tester,
+          title: 'Instagram\'dan kaydedildi',
+          action: 'Instagram Reels linkini ve açıklamasını yapıştırdım.',
+          result: 'Tarif "Instagram videosundan kaydedildi" etiketiyle açıldı.',
+          ok: insta.source!.platform == 'Instagram');
+      expect(insta.source!.platform, 'Instagram');
+      ScaffoldMessenger.of(tester.element(find.byType(Scaffold).last))
+          .clearSnackBars();
+      tester
+          .state<NavigatorState>(find.byType(Navigator).first)
+          .popUntil((route) => route.isFirst);
+      await tester.pumpAndSettle();
+
+      // ------------------------------------------- Alt menü: Sosyal
+      await r.tap(tester, find.text('Sosyal'), 'Sosyal');
+      await tester.pumpAndSettle();
+      await r.capture(tester,
+          title: 'Sosyal sekmesi',
+          action: 'Alt menüden "Sosyal"e geçtim.',
+          result: 'TikTok, Instagram ve YouTube\'dan kaydedilenler tek yerde; '
+              'platforma göre süzülebiliyor.');
+      expect(find.text('Instagram (1)'), findsOneWidget);
+      expect(find.text('TikTok (1)'), findsOneWidget);
+      await r.tap(tester, find.text('Instagram (1)'), 'Instagram');
+      await tester.pumpAndSettle();
+      await r.capture(tester,
+          title: 'Yalnızca Instagram',
+          action: '"Instagram"a dokundum.',
+          result: 'Sadece Instagram\'dan kaydedilen krep listede.');
+      expect(find.text(insta.title), findsOneWidget);
     } finally {
       debugDisableShadows = true;
       r.writeHtml();

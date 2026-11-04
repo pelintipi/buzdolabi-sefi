@@ -12,7 +12,7 @@ import '../widgets/ui.dart';
 import '../widgets/video_source_card.dart';
 import 'recipe_detail_screen.dart';
 
-/// TikTok'tan paylaşılan videoyu ya da yapıştırılan linki/metni tarife çevirir,
+/// TikTok, Instagram ya da YouTube'dan paylaşılan videoyu ya da yapıştırılan linki/metni tarife çevirir,
 /// kaydeder ve tarif ekranını açar. Açıklamada tarif yoksa kullanıcıdan
 /// tarifi yapıştırmasını ister.
 class ImportRecipeScreen extends StatefulWidget {
@@ -79,7 +79,10 @@ class _ImportRecipeScreenState extends State<ImportRecipeScreen> {
       _phase = _Phase.loading;
       _hadLink = url != null;
     });
-    if (url != null && payload.isTikTok && _info?.url != url) {
+    if (url != null &&
+        payload.platform != SocialPlatform.instagram &&
+        payload.platform != SocialPlatform.other &&
+        _info?.url != url) {
       _info = await _client.fetch(url);
     }
     if (!mounted) return;
@@ -90,7 +93,7 @@ class _ImportRecipeScreenState extends State<ImportRecipeScreen> {
     final id = existing?.id ?? 'video_${DateTime.now().millisecondsSinceEpoch}';
     final source = RecipeSource(
       url: url ?? 'yapistirilan-metin',
-      platform: payload.isTikTok ? 'TikTok' : 'Video',
+      platform: payload.platform.label,
       author: _info?.author,
       thumbnailUrl: _info?.thumbnailUrl,
     );
@@ -175,7 +178,7 @@ class _ImportRecipeScreenState extends State<ImportRecipeScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Videodan tarif')),
+      appBar: AppBar(title: const Text('Sosyal medyadan tarif')),
       body: _phase == _Phase.loading
           ? Center(
               child: Column(
@@ -240,7 +243,7 @@ class _ImportRecipeScreenState extends State<ImportRecipeScreen> {
                   keyboardType: TextInputType.url,
                   onChanged: (_) => setState(() {}),
                   decoration: const InputDecoration(
-                    hintText: 'https://www.tiktok.com/@…/video/…',
+                    hintText: 'TikTok, Instagram ya da YouTube linki',
                     prefixIcon: Padding(
                         padding: EdgeInsets.all(10),
                         child: Sym('🔗', size: 24)),
@@ -318,20 +321,30 @@ class _HowToCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Sym('📲', size: 44),
-              const SizedBox(width: 10),
               Expanded(
-                child: Text('TikTok\'tan tek dokunuşla',
+                child: Text('Sosyal medyadan tek dokunuşla',
                     style: theme.textTheme.titleLarge
                         ?.copyWith(color: Colors.white)),
               ),
             ],
           ),
-          step('1', 'Tarif videosunda Paylaş\'a dokun'),
+          const SizedBox(height: 4),
+          const Row(
+            children: [
+              PlatformBadge(SocialPlatform.tiktok, onDark: true),
+              SizedBox(width: 6),
+              PlatformBadge(SocialPlatform.instagram, onDark: true),
+              SizedBox(width: 6),
+              PlatformBadge(SocialPlatform.youtube, onDark: true),
+            ],
+          ),
+          step('1', 'Videoda Paylaş\'a dokun'),
           step('2', 'Listeden Buzdolabı Şefi\'ni seç'),
           step('3', 'Tarif, dolabınla karşılaştırılmış halde burada'),
           const SizedBox(height: 10),
-          const Text('Ya da linki aşağıya yapıştır.',
+          const Text(
+              'Ya da linki aşağıya yapıştır. Instagram\'da açıklamayı da '
+              'kopyalayıp yapıştırırsan tarif tam çıkar.',
               style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 13,

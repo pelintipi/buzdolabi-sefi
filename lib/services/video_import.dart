@@ -25,13 +25,38 @@ class SharedPayload {
   static final _urlRe = RegExp(r'https?://[^\s<>"]+');
   static String? _urlIn(String s) => _urlRe.firstMatch(s)?.group(0);
 
-  bool get isTikTok {
-    final host = Uri.tryParse(url ?? '')?.host ?? '';
-    return host == 'tiktok.com' || host.endsWith('.tiktok.com');
-  }
+  SocialPlatform get platform => SocialPlatform.of(url);
+
+  bool get isTikTok => platform == SocialPlatform.tiktok;
 }
 
-/// TikTok'un herkese açık oEmbed servisinden gelen video bilgisi.
+/// Tarifin paylaşıldığı sosyal medya. Link adresinden anlaşılır.
+enum SocialPlatform {
+  tiktok('TikTok'),
+  instagram('Instagram'),
+  youtube('YouTube'),
+  other('Video');
+
+  const SocialPlatform(this.label);
+
+  final String label;
+
+  static SocialPlatform of(String? url) {
+    final host = (Uri.tryParse(url ?? '')?.host ?? '').toLowerCase();
+    bool on(String d) => host == d || host.endsWith('.$d');
+    if (on('tiktok.com')) return tiktok;
+    if (on('instagram.com') || on('instagr.am')) return instagram;
+    if (on('youtube.com') || on('youtu.be')) return youtube;
+    return other;
+  }
+
+  /// Kayıtlı tarifteki platform adından (eski kayıtlar "TikTok" ya da "Video").
+  static SocialPlatform fromLabel(String label) =>
+      values.firstWhere((p) => p.label.toLowerCase() == label.toLowerCase(),
+          orElse: () => other);
+}
+
+/// TikTok ve YouTube'un herkese açık oEmbed servisinden gelen video bilgisi.
 class VideoInfo {
   const VideoInfo(
       {required this.url, this.caption, this.author, this.thumbnailUrl});
@@ -52,8 +77,18 @@ class VideoInfoClient {
 
   final http.Client _client;
 
+  /// TikTok açıklamanın tamamını verir; YouTube yalnızca başlığı verir.
+  /// Instagram'ın servisi geliştirici anahtarı istediği için çağrılmaz;
+  /// orada açıklama kullanıcıdan alınır.
   Future<VideoInfo?> fetch(String url) async {
-    final endpoint = Uri.https('www.tiktok.com', '/oembed', {'url': url});
+    final endpoint = switch (SocialPlatform.of(url)) {
+      SocialPlatform.tiktok =>
+        Uri.https('www.tiktok.com', '/oembed', {'url': url}),
+      SocialPlatform.youtube =>
+        Uri.https('www.youtube.com', '/oembed', {'url': url, 'format': 'json'}),
+      _ => null,
+    };
+    if (endpoint == null) return null;
     try {
       final res =
           await _client.get(endpoint).timeout(const Duration(seconds: 10));

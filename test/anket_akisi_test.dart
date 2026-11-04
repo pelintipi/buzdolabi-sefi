@@ -132,7 +132,7 @@ void main() {
               p.household == Household.couple &&
               p.appliances.contains(Appliance.airfryer) &&
               p.eating == EatingStyle.protein);
-      final tiktok = tester.getTopLeft(find.text("TikTok'tan"));
+      final tiktok = tester.getTopLeft(find.text('Sosyal medya'));
       final receipt = tester.getTopLeft(find.text('Fiş, barkod'));
       expect(tiktok.dx, lessThan(receipt.dx), reason: 'TikTok ilk sırada');
       // Kaç gün pişirdiği artık ankette değil, ana sayfada yeri gelince soruluyor.

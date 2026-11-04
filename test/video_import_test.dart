@@ -108,6 +108,27 @@ void main() {
         SharedPayload.fromRaw(url: 'https://youtube.com/x').isTikTok, isFalse);
   });
 
+  test('link adresinden platform anlaşılır', () {
+    SocialPlatform of(String u) => SharedPayload.fromRaw(url: u).platform;
+    expect(
+        of('https://www.instagram.com/reel/Cabc/'), SocialPlatform.instagram);
+    expect(of('https://youtu.be/abc'), SocialPlatform.youtube);
+    expect(of('https://m.youtube.com/shorts/abc'), SocialPlatform.youtube);
+    expect(of('https://vm.tiktok.com/x'), SocialPlatform.tiktok);
+    expect(of('https://example.com/v'), SocialPlatform.other);
+    expect(SocialPlatform.fromLabel('Video'), SocialPlatform.other);
+  });
+
+  test('Instagram linki için dışarıya istek atılmaz', () async {
+    var calls = 0;
+    final client = VideoInfoClient(client: MockClient((_) async {
+      calls++;
+      return http.Response('{}', 200);
+    }));
+    expect(await client.fetch('https://www.instagram.com/reel/x/'), isNull);
+    expect(calls, 0);
+  });
+
   test('oEmbed yanıtından açıklama, hesap ve kapak okunur', () async {
     late Uri asked;
     final client = VideoInfoClient(

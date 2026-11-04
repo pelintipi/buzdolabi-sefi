@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../models/recipe.dart';
 import '../screens/creator_screen.dart';
+import '../services/video_import.dart';
 import '../state/app_state.dart';
 import 'package:provider/provider.dart';
 import '../theme/palette.dart';
@@ -164,6 +165,55 @@ class _CreatorLink extends StatelessWidget {
         label: Text('@$author\'in $count tarifi'),
         onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
             builder: (_) => CreatorScreen(author: author))),
+      ),
+    );
+  }
+}
+
+/// Platform adı küçük bir etiket olarak (logo yerine, renkli nokta ile).
+class PlatformBadge extends StatelessWidget {
+  const PlatformBadge(this.platform, {super.key, this.onDark = false});
+
+  final SocialPlatform platform;
+  final bool onDark;
+
+  static Color dotColor(SocialPlatform p) => switch (p) {
+        SocialPlatform.tiktok => const Color(0xFF1A1A17),
+        SocialPlatform.instagram => const Color(0xFFC13584),
+        SocialPlatform.youtube => const Color(0xFFD32F2F),
+        SocialPlatform.other => Palette.inkSoft,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: onDark ? const Color(0x26FFFFFF) : Palette.surface,
+        borderRadius: BorderRadius.circular(999),
+        border: onDark ? null : Border.all(color: Palette.line),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: onDark && platform == SocialPlatform.tiktok
+                  ? Colors.white
+                  : dotColor(platform),
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(platform.label,
+              style: TextStyle(
+                  fontFamily: Fonts.body,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12.5,
+                  color: onDark ? Colors.white : Palette.ink)),
+        ],
       ),
     );
   }

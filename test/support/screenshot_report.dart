@@ -38,7 +38,8 @@ Future<void> _loadFamily(String family, List<String> paths) async {
 Future<void> loadRealFonts() async {
   final fonts = '${_flutterRoot()}/bin/cache/artifacts/material_fonts';
   // Uygulamanın kendi fontları (pubspec'teki aileler testlerde otomatik yüklenmez).
-  await _loadFamily('InstrumentSerif', ['assets/fonts/InstrumentSerif-Regular.ttf']);
+  await _loadFamily(
+      'InstrumentSerif', ['assets/fonts/InstrumentSerif-Regular.ttf']);
   await _loadFamily('PlusJakarta', [
     for (final w in ['Medium', 'SemiBold', 'Bold', 'ExtraBold'])
       'assets/fonts/PlusJakartaSans-$w.ttf',

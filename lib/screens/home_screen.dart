@@ -18,6 +18,7 @@ import 'import_recipe_screen.dart';
 import 'ingredient_input_screen.dart';
 import 'leftover_screen.dart';
 import 'plan_screen.dart';
+import 'progress_screen.dart';
 import 'quick_fill_screen.dart';
 import 'recipe_detail_screen.dart';
 import 'results_screen.dart';
@@ -428,7 +429,7 @@ class _ExpiringCard extends StatelessWidget {
   }
 }
 
-/// Ekleme yolları tek sırada: malzeme, fiş/barkod, TikTok, dünden kalan.
+/// Ekleme yolları tek sırada: malzeme, fiş/barkod, sosyal medya, dünden kalan.
 class _AddActions extends StatelessWidget {
   const _AddActions();
 
@@ -438,10 +439,14 @@ class _AddActions extends StatelessWidget {
     final actions = <(IconData, String, Widget)>[
       (Icons.edit_note_rounded, 'Malzeme', const IngredientInputScreen()),
       (Icons.receipt_long_outlined, 'Fiş, barkod', const QuickFillScreen()),
-      (Icons.smart_display_outlined, 'TikTok\'tan', const ImportRecipeScreen()),
+      (
+        Icons.play_circle_outline_rounded,
+        'Sosyal medya',
+        const ImportRecipeScreen()
+      ),
       (Icons.takeout_dining_outlined, 'Dünden kalan', const LeftoverScreen()),
     ];
-    // Videodan tarif saklayanlar için TikTok öne.
+    // Videodan tarif saklayanlar için sosyal medya öne.
     if (videosFirst) actions.insert(0, actions.removeAt(2));
     return Row(
       children: [
@@ -611,6 +616,7 @@ class _WeekCard extends StatelessWidget {
       );
     }
     return SoftCard(
+      onTap: () => _go(context, const ProgressScreen()),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -642,7 +648,8 @@ class _SavedVideos extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionTitle('Videodan kaydettiklerin (${saved.length})', icon: '🎬'),
+        SectionTitle('Sosyal medyadan kaydettiklerin (${saved.length})',
+            icon: '🎬'),
         if (recipesByCreator(state).length > 1 ||
             (recipesByCreator(state).values.firstOrNull?.length ?? 0) > 1)
           Padding(

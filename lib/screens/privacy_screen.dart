@@ -64,7 +64,7 @@ class PrivacyScreen extends StatelessWidget {
             'Bunları biz göremeyiz. Uygulamayı silince ya da Profil\'deki "Tüm verilerimi sil" ile silinir.',
           ]),
           section('🌐', 'Telefondan çıkan bilgiler', const [
-            'TikTok videosu paylaştığında: videonun adresi, açıklamasını almak için TikTok\'a gönderilir.',
+            'TikTok ya da YouTube videosu paylaştığında: videonun adresi, açıklamasını ya da başlığını almak için o platforma gönderilir. Instagram\'a hiçbir şey gönderilmez.',
             'Barkod okuttuğunda: barkod numarası, ürün adını bulmak için Open Food Facts\'e gönderilir.',
             'Şef+ yapay zekalı tarif açıksa: video adresi, açıklaması ya da konuşmanın yazıya dökülmüş hali ve malzeme listemiz sunucumuza ve yapay zeka hizmetine (Anthropic) gönderilir. Kim olduğun gönderilmez; sonuç aynı videoyu paylaşan herkes için saklanır.',
             'Sesli pişirme modunda: söylediklerin Apple\'ın ses tanımasıyla yazıya çevrilir; Apple bunu cihazda ya da kendi sunucularında yapabilir.',

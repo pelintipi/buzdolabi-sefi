@@ -333,15 +333,19 @@ void main() {
       await tester.pumpAndSettle();
       await _clearSnackBars(tester);
 
-      await tester.tap(find.text('İlerleme'));
+      await tester.tap(find.text('Profil'));
       await tester.pumpAndSettle();
-      r.mark(tester, find.text('İlerleme'), 'İlerleme');
+      await tester.tap(find.text('İlerlemem'));
+      await tester.pumpAndSettle();
+      r.mark(tester, find.text('İlerleme'), 'İlerlemem');
       await r.capture(tester,
           title: 'İlerleme',
-          action: '"İlerleme" sekmesine geçtim.',
+          action: 'Profil\x27de "İlerlemem"e dokundum.',
           result:
               'Haftalık seri, toplam pişirme, beceri ağacı ve son pişirilen Menemen.');
       expect(find.textContaining('Sote'), findsWidgets);
+      Navigator.of(tester.element(find.textContaining('Sote').first)).pop();
+      await tester.pumpAndSettle();
 
       await r.tap(tester, find.text('Profil'), 'Profil');
       await r.capture(tester,
