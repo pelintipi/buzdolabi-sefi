@@ -3,12 +3,14 @@ import 'package:provider/provider.dart';
 
 import '../models/ingredient.dart';
 import '../models/recipe.dart';
+import '../services/collections.dart';
 import '../services/recipe_matcher.dart';
 import '../services/unit_converter.dart';
 import '../state/app_state.dart';
 import '../theme/palette.dart';
 import '../utils/format.dart';
 import '../widgets/profile_dialogs.dart';
+import '../widgets/recipe_image.dart';
 import '../widgets/share_card.dart';
 import '../widgets/ui.dart';
 import '../widgets/text_prompt.dart';
@@ -115,7 +117,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       appBar: AppBar(
         actions: [
           IconButton(
-            icon: const FoodIcon('🔖', size: 26),
+            icon: const Sym('🔖', size: 26),
             tooltip: 'Koleksiyona ekle',
             onPressed: () => showAddToCollection(context, recipe.id),
           ),
@@ -131,14 +133,14 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               onPressed: () => _rename(recipe),
             ),
             IconButton(
-              icon: const FoodIcon('🗑', size: 24),
+              icon: const Sym('🗑', size: 24),
               tooltip: 'Tarifi sil',
               onPressed: () => _delete(recipe),
             ),
           ],
           IconButton(
             icon: favorite
-                ? const FoodIcon('❤', size: 26)
+                ? const Sym('❤', size: 26)
                 : const Icon(Icons.favorite_border_rounded),
             tooltip: favorite ? 'Favorilerden çıkar' : 'Favorilere ekle',
             onPressed: () => state.toggleFavorite(recipe.id),
@@ -155,48 +157,43 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             ),
             const SizedBox(height: 12),
           ],
-          Container(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-            decoration: BoxDecoration(
-              color: Palette.basilSoft,
-              borderRadius: BorderRadius.circular(32),
-            ),
-            child: Column(
-              children: [
-                FoodIcon(recipe.emoji, size: 120),
-                const SizedBox(height: 6),
-                Text(recipe.title,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineMedium),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  alignment: WrapAlignment.center,
-                  children: [
-                    Pill('${recipe.minutes} dk', icon: '⏱', border: null),
-                    Pill(
-                        '${formatNumber(facts.perServing.kcal, decimals: 0)} kcal',
-                        icon: '🔥',
-                        border: null),
-                    Pill(
-                        '${formatNumber(facts.perServing.protein, decimals: 0)} g protein',
-                        icon: '💪',
-                        border: null),
-                    Pill(recipe.difficulty.label, icon: '📊', border: null),
-                    if (recipe.appliances.isEmpty)
-                      const Pill('Pişirme yok', icon: '🔪', border: null)
-                    else
-                      for (final a in recipe.appliances)
-                        Pill(a.label, icon: a.emoji, border: null),
-                    if (recipe.isImported)
-                      const Pill('Videodan', icon: '🎬', border: null)
-                    else
-                      const Pill('Editör onaylı', icon: '✅', border: null),
-                  ],
-                ),
-              ],
-            ),
+          LayoutBuilder(
+            builder: (context, c) => RecipeImage(recipe,
+                width: c.maxWidth, height: c.maxWidth * 0.68, radius: 26),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            [
+              categoryOf(recipe).label,
+              recipe.difficulty.label,
+              if (recipe.isImported) 'Videodan',
+            ].join('  ·  ').toUpperCase(),
+            style: const TextStyle(
+                fontFamily: Fonts.body,
+                fontWeight: FontWeight.w700,
+                fontSize: 11.5,
+                letterSpacing: 1.1,
+                color: Palette.tomato),
+          ),
+          const SizedBox(height: 4),
+          Text(recipe.title, style: theme.textTheme.headlineMedium),
+          const SizedBox(height: 12),
+          // Süre, kalori, protein ve alet: tek sade satır.
+          Wrap(
+            spacing: 16,
+            runSpacing: 8,
+            children: [
+              _Meta(Icons.schedule_rounded, '${recipe.minutes} dk'),
+              _Meta(Icons.local_fire_department_outlined,
+                  '${formatNumber(facts.perServing.kcal, decimals: 0)} kcal'),
+              _Meta(Icons.fitness_center_rounded,
+                  '${formatNumber(facts.perServing.protein, decimals: 0)} g protein'),
+              _Meta(
+                  Icons.kitchen_outlined,
+                  recipe.appliances.isEmpty
+                      ? 'Pişirme yok'
+                      : recipe.appliances.map((a) => a.label).join(', ')),
+            ],
           ),
           if (recipe.source != null) ...[
             const SizedBox(height: 12),
@@ -209,7 +206,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               borderColor: Palette.tomato,
               child: Row(
                 children: [
-                  const FoodIcon('⚠', size: 32),
+                  const Sym('⚠', size: 32),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -289,7 +286,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const FoodIcon('💡', size: 30),
+                    const Sym('💡', size: 30),
                     const SizedBox(width: 10),
                     Expanded(
                         child: Text(recipe.tip!,
@@ -386,7 +383,7 @@ class _FactsRow extends StatelessWidget {
                 color: color, borderRadius: BorderRadius.circular(20)),
             child: Column(
               children: [
-                FoodIcon(icon, size: 30),
+                Sym(icon, size: 30),
                 const SizedBox(height: 2),
                 Text(value,
                     style: const TextStyle(
@@ -553,7 +550,7 @@ class _SavedBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const FoodIcon('✅', size: 30),
+          const Sym('✅', size: 30),
           const SizedBox(width: 10),
           Expanded(
             child: Text(text,
@@ -607,7 +604,7 @@ class _SectionTabs extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  FoodIcon(icon, size: 26),
+                  Sym(icon, size: 26),
                   const SizedBox(height: 2),
                   Text(label,
                       maxLines: 1,
@@ -684,7 +681,7 @@ class _NutritionTable extends StatelessWidget {
             const Divider(height: 18),
             Row(
               children: [
-                FoodIcon(r.$1, size: 26),
+                Sym(r.$1, size: 26),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
@@ -730,6 +727,31 @@ class _NutritionTable extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// Tarif başlığının altındaki tek bir bilgi: ince ikon + yazı.
+class _Meta extends StatelessWidget {
+  const _Meta(this.icon, this.text);
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 18, color: Palette.inkSoft),
+        const SizedBox(width: 5),
+        Text(text,
+            style: const TextStyle(
+                fontFamily: Fonts.body,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                color: Palette.ink)),
+      ],
     );
   }
 }

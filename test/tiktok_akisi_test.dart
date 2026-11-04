@@ -104,13 +104,12 @@ void main() {
       await r.capture(tester,
           title: 'Ana sayfa',
           action: 'Uygulamayı açtım.',
-          result:
-              'Yeşil kartın altında yeni "TikTok\'tan tarif kaydet" kartı var.');
-      expect(find.text('TikTok\'tan tarif kaydet'), findsOneWidget);
+          result: '"Ekle" bölümünde "TikTok\'tan" kısayolu var.');
+      expect(find.text("TikTok'tan"), findsOneWidget);
 
       // ------------------------------------------- Paylaş → Buzdolabı Şefi
       // Prototipte: karta dokununca "paylaşılmış" hali açılır.
-      r.mark(tester, find.text("TikTok'tan tarif kaydet"), "TikTok'ta Paylaş");
+      r.mark(tester, find.text("TikTok'tan"), "TikTok'ta Paylaş");
       // Eklenti linki kutuya bıraktı; kullanıcı uygulamaya döndü.
       inbox.items = [
         SharedPayload.fromRaw(text: 'Bu tarife bak! $_videoUrl'),
@@ -207,15 +206,15 @@ void main() {
               'Kaydedilen tarif "Videodan kaydettiklerin" şeridinde; altında '
               'dolaba göre durumu yazıyor.');
       expect(find.textContaining('Videodan kaydettiklerin'), findsOneWidget);
-      await tester.scrollUntilVisible(find.text('Ekle'), -300,
+      await tester.scrollUntilVisible(find.text("TikTok'tan"), -300,
           scrollable: _mainScroll);
       await tester.pumpAndSettle();
 
       // ------------------------------------------- Elle link yapıştırma
-      await r.tap(tester, find.text('Ekle'), 'Ekle');
+      await r.tap(tester, find.text("TikTok'tan"), "TikTok'tan");
       await r.capture(tester,
           title: 'Link yapıştır',
-          action: '"TikTok\'tan tarif kaydet" kartındaki "Ekle"ye bastım.',
+          action: 'Ana sayfada "TikTok\'tan" kısayoluna bastım.',
           result: 'Paylaş menüsünün 3 adımda nasıl kullanılacağı anlatılıyor; '
               'istersen link ya da tarif metni yapıştırılabiliyor.');
       expect(find.text('TikTok\'tan tek dokunuşla'), findsOneWidget);

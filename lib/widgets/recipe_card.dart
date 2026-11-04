@@ -7,6 +7,7 @@ import '../services/recipe_matcher.dart';
 import '../state/app_state.dart';
 import '../theme/palette.dart';
 import '../utils/format.dart';
+import 'recipe_image.dart';
 import 'ui.dart';
 
 typedef MatchStatus = ({String icon, String text, Color color, Color soft});
@@ -72,15 +73,22 @@ class RecipeCard extends StatelessWidget {
     final favorite = state.isFavorite(recipe.id);
     final status = matchStatus(match, state.repo);
 
+    final n = match.facts.perServing;
+    final meta = [
+      '${recipe.minutes} dk',
+      '${formatNumber(n.kcal, decimals: 0)} kcal',
+      '${formatNumber(n.protein, decimals: 0)} g protein',
+    ].join('  ·  ');
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: SoftCard(
-        padding: const EdgeInsets.fromLTRB(14, 14, 6, 14),
+        padding: const EdgeInsets.fromLTRB(10, 10, 4, 10),
         onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
             builder: (_) => RecipeDetailScreen(recipeId: recipe.id))),
         child: Row(
           children: [
-            IconBubble(recipe.emoji, size: 68, color: status.soft),
+            RecipeImage(recipe, width: 84, radius: 16),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -88,54 +96,47 @@ class RecipeCard extends StatelessWidget {
                 children: [
                   if (highlights.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
-                      child: Wrap(
-                        spacing: 4,
-                        runSpacing: 4,
-                        children: [
-                          for (final h in highlights)
-                            Pill(h.label,
-                                icon: h.icon,
-                                dense: true,
-                                color: Palette.butter,
-                                border: null),
-                        ],
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text(
+                        highlights
+                            .map((h) => h.label)
+                            .join(' · ')
+                            .toUpperCase(),
+                        style: const TextStyle(
+                            fontFamily: Fonts.body,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 10.5,
+                            letterSpacing: 0.8,
+                            color: Palette.tomato),
                       ),
                     ),
-                  Text(recipe.title, style: theme.textTheme.titleMedium),
+                  Text(recipe.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium),
+                  const SizedBox(height: 4),
+                  Text(meta,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall),
                   const SizedBox(height: 6),
-                  // Üç değer tek satırda kalsın; dar ekranda biraz küçülür.
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Row(
-                      children: [
-                        Pill('${recipe.minutes} dk', icon: '⏱', dense: true),
-                        const SizedBox(width: 5),
-                        Pill(
-                            '${formatNumber(match.facts.perServing.protein, decimals: 0)} g',
-                            icon: '💪',
-                            dense: true),
-                        const SizedBox(width: 5),
-                        Pill(
-                            '${formatNumber(match.facts.perServing.kcal, decimals: 0)} kcal',
-                            icon: '🔥',
-                            dense: true),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
                   Row(
                     children: [
-                      FoodIcon(status.icon, size: 18),
-                      const SizedBox(width: 5),
+                      Container(
+                        width: 7,
+                        height: 7,
+                        decoration: BoxDecoration(
+                            color: status.color, shape: BoxShape.circle),
+                      ),
+                      const SizedBox(width: 6),
                       Expanded(
                         child: Text(status.text,
-                            maxLines: 2,
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 13,
+                                fontFamily: Fonts.body,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12.5,
                                 color: status.color)),
                       ),
                     ],
@@ -144,10 +145,11 @@ class RecipeCard extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: favorite
-                  ? const FoodIcon('❤', size: 26)
-                  : const Icon(Icons.favorite_border_rounded,
-                      color: Palette.lineDeep),
+              icon: Icon(
+                  favorite
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
+                  color: favorite ? Palette.tomato : Palette.lineDeep),
               tooltip: favorite ? 'Favorilerden çıkar' : 'Favorilere ekle',
               onPressed: () => state.toggleFavorite(recipe.id),
             ),

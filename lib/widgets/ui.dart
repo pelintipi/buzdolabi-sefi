@@ -156,7 +156,7 @@ class FoodIcon extends StatelessWidget {
 /// Yumuşak renkli daire içinde ikon.
 class IconBubble extends StatelessWidget {
   const IconBubble(this.emoji,
-      {super.key, this.size = 56, this.color = Palette.basilSoft});
+      {super.key, this.size = 56, this.color = Palette.sand});
 
   final String emoji;
   final double size;
@@ -170,7 +170,127 @@ class IconBubble extends StatelessWidget {
       decoration: BoxDecoration(
           color: color, borderRadius: BorderRadius.circular(size * 0.32)),
       alignment: Alignment.center,
-      child: FoodIcon(emoji, size: size * 0.66),
+      child: FoodIcon(emoji, size: size * 0.62),
+    );
+  }
+}
+
+/// Uygulamanın kendi simgeleri (zamanlayıcı, kalori, liste...) için ince çizgi
+/// ikonlar. Eskiden her yerde 3D emoji vardı; yemek ve malzeme dışındaki
+/// emojiler burada çizgi ikona çevrilir. Karşılığı olmayan (yemek) emojiler
+/// 3D ikon olarak kalır.
+const _symbols = <String, IconData>{
+  '⏱': Icons.schedule_rounded,
+  '⏲': Icons.timer_outlined,
+  '⏳': Icons.hourglass_bottom_rounded,
+  '▶': Icons.play_circle_outline_rounded,
+  '⚠': Icons.warning_amber_rounded,
+  '✅': Icons.check_circle_outline_rounded,
+  '✨': Icons.auto_awesome_outlined,
+  '❤': Icons.favorite_rounded,
+  '⭐': Icons.star_outline_rounded,
+  '🌱': Icons.eco_outlined,
+  '🌳': Icons.park_outlined,
+  '🎉': Icons.celebration_outlined,
+  '🎙': Icons.mic_none_rounded,
+  '🎬': Icons.smart_display_outlined,
+  '🏅': Icons.military_tech_outlined,
+  '🏠': Icons.home_outlined,
+  '🏆': Icons.emoji_events_outlined,
+  '💡': Icons.lightbulb_outline_rounded,
+  '💪': Icons.fitness_center_rounded,
+  '💰': Icons.savings_outlined,
+  '📊': Icons.insights_outlined,
+  '📝': Icons.edit_note_rounded,
+  '📥': Icons.download_rounded,
+  '📦': Icons.qr_code_scanner_rounded,
+  '📲': Icons.ios_share_rounded,
+  '📷': Icons.photo_camera_outlined,
+  '📋': Icons.content_paste_rounded,
+  '📱': Icons.smartphone_rounded,
+  '🔄': Icons.sync_alt_rounded,
+  '🔌': Icons.kitchen_outlined,
+  '🔒': Icons.lock_outline_rounded,
+  '🔗': Icons.link_rounded,
+  '🔥': Icons.local_fire_department_outlined,
+  '🔪': Icons.content_cut_rounded,
+  '🔔': Icons.notifications_none_rounded,
+  '🔖': Icons.bookmark_border_rounded,
+  '🗂': Icons.folder_copy_outlined,
+  '🗑': Icons.delete_outline_rounded,
+  '🗓': Icons.calendar_month_outlined,
+  '🗒': Icons.sticky_note_2_outlined,
+  '🛒': Icons.shopping_cart_outlined,
+  '🤏': Icons.opacity_rounded,
+  '🤔': Icons.help_outline_rounded,
+  '🧺': Icons.shopping_basket_outlined,
+  '🧾': Icons.receipt_long_outlined,
+  '🧑‍🍳': Icons.restaurant_menu_rounded,
+  '⚖': Icons.balance_rounded,
+  '🌐': Icons.public_rounded,
+  '🎯': Icons.track_changes_rounded,
+  '☀': Icons.wb_sunny_outlined,
+  '⚡': Icons.bolt_rounded,
+  '🪶': Icons.spa_outlined,
+  '🌀': Icons.blender_outlined,
+  '💨': Icons.air_rounded,
+  '♨': Icons.whatshot_outlined,
+  '🥄': Icons.soup_kitchen_outlined,
+  '🍤': Icons.outdoor_grill_outlined,
+  '🍳': Icons.egg_alt_outlined,
+  '🍽': Icons.restaurant_rounded,
+  '🍲': Icons.soup_kitchen_outlined,
+  '🥗': Icons.eco_outlined,
+  '🥦': Icons.grass_outlined,
+  '🥨': Icons.cookie_outlined,
+  '🍰': Icons.cake_outlined,
+  '👋': Icons.waving_hand_outlined,
+};
+
+/// Uygulama simgesi: karşılığı varsa çizgi ikon, yoksa 3D yemek ikonu.
+class Sym extends StatelessWidget {
+  const Sym(this.emoji, {super.key, this.size = 24, this.color});
+
+  final String emoji;
+  final double size;
+
+  /// Verilmezse koyu yeşil.
+  final Color? color;
+
+  static IconData? iconFor(String emoji) => _symbols[emoji.replaceAll('️', '')];
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = iconFor(emoji);
+    if (icon == null) return FoodIcon(emoji, size: size);
+    // Çizgi ikonlar emojiden iri görünür; aynı kutuya biraz küçük çizilir.
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Icon(icon, size: size * 0.82, color: color ?? Palette.basil),
+    );
+  }
+}
+
+/// Nötr zeminli yuvarlak kare içinde uygulama simgesi.
+class SymBubble extends StatelessWidget {
+  const SymBubble(this.emoji,
+      {super.key, this.size = 56, this.color = Palette.sand, this.iconColor});
+
+  final String emoji;
+  final double size;
+  final Color color;
+  final Color? iconColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+          color: color, borderRadius: BorderRadius.circular(size * 0.32)),
+      alignment: Alignment.center,
+      child: Sym(emoji, size: size * 0.52, color: iconColor),
     );
   }
 }
@@ -253,7 +373,7 @@ class _ChunkyButtonState extends State<ChunkyButton> {
         ] else if (widget.icon != null) ...[
           Opacity(
             opacity: enabled ? 1 : 0.5,
-            child: FoodIcon(widget.icon!, size: small ? 20 : 26),
+            child: Sym(widget.icon!, size: small ? 20 : 24, color: fg),
           ),
           SizedBox(width: small ? 6 : 10),
         ],
@@ -388,7 +508,7 @@ class Pill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            FoodIcon(icon!, size: dense ? 15 : 18),
+            Sym(icon!, size: dense ? 15 : 18, color: Palette.inkSoft),
             SizedBox(width: dense ? 4 : 5),
           ],
           Text(text,
@@ -418,8 +538,8 @@ class SectionTitle extends StatelessWidget {
       child: Row(
         children: [
           if (icon != null) ...[
-            FoodIcon(icon!, size: 30),
-            const SizedBox(width: 8),
+            Sym(icon!, size: 24),
+            const SizedBox(width: 10),
           ],
           Expanded(
               child: Text(text, style: Theme.of(context).textTheme.titleLarge)),

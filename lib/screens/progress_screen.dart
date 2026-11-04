@@ -7,6 +7,7 @@ import '../models/recipe.dart';
 import '../state/app_state.dart';
 import '../theme/palette.dart';
 import '../utils/format.dart';
+import '../widgets/recipe_image.dart';
 import '../widgets/ui.dart';
 
 /// Beceri seviyeleri: bir tekniği kaç kez pişirdiğine göre.
@@ -43,7 +44,7 @@ class ProgressScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const FoodIcon('🔥', size: 80),
+                const Sym('🔥', size: 80),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -92,7 +93,7 @@ class ProgressScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       child: Row(
                         children: [
-                          IconBubble(t.emoji,
+                          SymBubble(t.emoji,
                               size: 48,
                               color: count > 0
                                   ? Palette.basilSoft
@@ -139,7 +140,7 @@ class ProgressScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(12),
                     child: Row(
                       children: [
-                        IconBubble(recipe.emoji, size: 48),
+                        RecipeImage(recipe, width: 48, radius: 13),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -178,7 +179,7 @@ class _StatCard extends StatelessWidget {
     return SoftCard(
       child: Column(
         children: [
-          FoodIcon(icon, size: 44),
+          Sym(icon, size: 44),
           const SizedBox(height: 4),
           Text(value, style: Theme.of(context).textTheme.headlineSmall),
           Text(label,
@@ -221,7 +222,7 @@ class _TodayCard extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 10),
           child: Row(
             children: [
-              FoodIcon(icon, size: 26),
+              Sym(icon, size: 26),
               const SizedBox(width: 8),
               Expanded(
                 child: Column(

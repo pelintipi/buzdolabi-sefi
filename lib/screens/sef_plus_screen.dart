@@ -57,7 +57,7 @@ class SefPlusScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    FoodIcon('🎉', size: 44),
+                    Sym('🎉', size: 44),
                     SizedBox(width: 10),
                     Expanded(
                       child: Text('İlk sürümde hepsi ücretsiz',
@@ -92,7 +92,7 @@ class SefPlusScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(14),
                 child: Row(
                   children: [
-                    IconBubble(f.emoji, size: 52, color: Palette.butterSoft),
+                    SymBubble(f.emoji, size: 52, color: Palette.butterSoft),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(

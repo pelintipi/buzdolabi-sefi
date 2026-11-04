@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../models/ingredient.dart';
 import '../models/pantry_item.dart';
+import '../services/device_services.dart';
 import '../services/quantity_parser.dart';
 import '../services/recipe_matcher.dart';
 import '../state/app_state.dart';
@@ -63,8 +64,59 @@ class _IngredientInputScreenState extends State<IngredientInputScreen> {
 
   AppState get _state => context.read<AppState>();
 
+  SpeechService? _speech;
+  bool _listening = false;
+
+  /// Sesle ekleme: "üç yumurta, iki domates, biraz peynir" demek yeter.
+  Future<void> _toggleMic() async {
+    if (_listening) {
+      setState(() => _listening = false);
+      await _speech?.stopListening();
+      return;
+    }
+    _speech ??= DeviceServices.of(context).speech;
+    setState(() => _listening = true);
+    final ok = await _speech!.listen((words, isFinal) {
+      if (!mounted) return;
+      _controller.text = words;
+      _onTextChanged(words);
+      if (isFinal) {
+        _submitText();
+        setState(() => _listening = false);
+      }
+    }, onDone: () {
+      if (mounted) setState(() => _listening = false);
+    });
+    if (!ok && mounted) {
+      setState(() => _listening = false);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Mikrofona ya da ses tanımaya izin verilmedi.')));
+    }
+  }
+
+  /// Pişirdiğin tariflerde en sık geçen, şu an dolapta olmayan malzemeler.
+  List<Ingredient> _frequent(AppState state) {
+    final inPantry = {for (final p in state.pantry) p.ingredientId};
+    final counts = <String, int>{};
+    for (final log in state.logs) {
+      final r = state.tryRecipe(log.recipeId);
+      if (r == null) continue;
+      for (final it in r.items) {
+        if (it.optional || inPantry.contains(it.ingredientId)) continue;
+        counts.update(it.ingredientId, (n) => n + 1, ifAbsent: () => 1);
+      }
+    }
+    final ids = counts.keys.toList()
+      ..sort((a, b) => counts[b]!.compareTo(counts[a]!));
+    return [
+      for (final id in ids)
+        if (state.repo.tryById(id) case final ing? when !ing.isStaple) ing
+    ].take(8).toList();
+  }
+
   @override
   void dispose() {
+    _speech?.stopListening();
     _controller.dispose();
     super.dispose();
   }
@@ -173,6 +225,7 @@ class _IngredientInputScreenState extends State<IngredientInputScreen> {
     final state = context.watch<AppState>();
     final theme = Theme.of(context);
     final quick = [for (final id in _quickIds) state.repo.byId(id)];
+    final frequent = _frequent(state);
     final canCommit = _drafts.isNotEmpty ||
         _controller.text.trim().isNotEmpty ||
         (widget.openResultsAfter && state.pantry.isNotEmpty);
@@ -197,14 +250,24 @@ class _IngredientInputScreenState extends State<IngredientInputScreen> {
               hintText: 'Örn: 3 yumurta, yarım biber, biraz peynir',
               suffixIcon: Padding(
                 padding: const EdgeInsets.only(right: 8),
-                child: IconButton.filled(
-                  style: IconButton.styleFrom(
-                      backgroundColor: Palette.basil,
-                      foregroundColor: Colors.white),
-                  icon: const Icon(Icons.add_rounded),
-                  tooltip: 'Ekle',
-                  onPressed: _submitText,
-                ),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  IconButton(
+                    icon: Icon(_listening
+                        ? Icons.stop_circle_outlined
+                        : Icons.mic_none_rounded),
+                    color: _listening ? Palette.tomato : Palette.basil,
+                    tooltip: _listening ? 'Dinlemeyi bitir' : 'Sesle ekle',
+                    onPressed: _toggleMic,
+                  ),
+                  IconButton.filled(
+                    style: IconButton.styleFrom(
+                        backgroundColor: Palette.basil,
+                        foregroundColor: Colors.white),
+                    icon: const Icon(Icons.add_rounded),
+                    tooltip: 'Ekle',
+                    onPressed: _submitText,
+                  ),
+                ]),
               ),
             ),
           ),
@@ -254,6 +317,31 @@ class _IngredientInputScreenState extends State<IngredientInputScreen> {
                   onRemove: () => setState(() => _drafts.remove(d)),
                 ),
               ),
+          ],
+          if (_listening)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text('Dinliyorum… "üç yumurta, iki domates" gibi söyle.',
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: Palette.tomato)),
+            ),
+          if (frequent.isNotEmpty) ...[
+            const SizedBox(height: 18),
+            const SectionTitle('Sık kullandıkların', icon: '⏱'),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final ing in frequent)
+                  FilterChip(
+                    avatar: FoodIcon(ing.emoji, size: 22),
+                    label: Text(ing.name),
+                    selected: _has(ing.id),
+                    showCheckmark: false,
+                    onSelected: (_) => _toggleQuick(ing),
+                  ),
+              ],
+            ),
           ],
           const SizedBox(height: 18),
           const SectionTitle('Hızlı ekle', icon: '🛒'),

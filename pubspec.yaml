@@ -40,9 +40,15 @@ flutter:
     - assets/icons/
     # Tarif ve malzeme kataloğu (lib/data/catalog.dart okur)
     - assets/data/
+    # Tarif fotoğrafları (lib/widgets/recipe_image.dart)
+    - assets/photos/
 
   # Fontlar: SIL Open Font License (assets/fonts/*-OFL.txt)
   fonts:
+    # Büyük başlıklar (dergi hissi). Tek ağırlık.
+    - family: InstrumentSerif
+      fonts:
+        - asset: assets/fonts/InstrumentSerif-Regular.ttf
     - family: PlusJakarta
       fonts:
         - asset: assets/fonts/PlusJakartaSans-Medium.ttf

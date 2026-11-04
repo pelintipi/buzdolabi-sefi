@@ -1,0 +1,5 @@
+Tarif fotoğrafları buraya: <tarif kimliği>.jpg (ya da .png / .webp)
+Örnek: menemen.jpg, mercimek_corbasi.jpg
+Kimlikler assets/data/recipes.json içindeki "id" alanıdır.
+Önerilen boyut: 1200 x 900 piksel, 300 KB altı. Fotoğrafı olmayan tarifte
+uygulama sakin renkli bir yer tutucu gösterir.

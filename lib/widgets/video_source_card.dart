@@ -113,7 +113,7 @@ class VideoSourceCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const FoodIcon('💡', size: 24),
+                const Sym('💡', size: 24),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -160,7 +160,7 @@ class _CreatorLink extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: TextButton.icon(
-        icon: const FoodIcon('🎬', size: 20),
+        icon: const Sym('🎬', size: 20),
         label: Text('@$author\'in $count tarifi'),
         onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
             builder: (_) => CreatorScreen(author: author))),

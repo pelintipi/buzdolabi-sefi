@@ -5,6 +5,7 @@ import '../state/app_state.dart';
 import '../theme/palette.dart';
 import '../utils/format.dart';
 import '../widgets/recipe_card.dart';
+import '../widgets/recipe_image.dart';
 import '../widgets/ui.dart';
 import 'recipe_detail_screen.dart';
 
@@ -39,7 +40,7 @@ class PlanScreen extends StatelessWidget {
                   borderColor: Palette.basil,
                   child: Row(
                     children: [
-                      const FoodIcon('🗓', size: 48),
+                      const Sym('🗓', size: 48),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -92,8 +93,7 @@ class PlanScreen extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            IconBubble(n.recipe.emoji,
-                                size: 52, color: status.soft),
+                            RecipeImage(n.recipe, width: 52, radius: 14),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Column(
@@ -177,7 +177,7 @@ class _EmptyPlan extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const FoodIcon('🗓', size: 110),
+          const Sym('🗓', size: 110),
           const SizedBox(height: 12),
           Text('Haftanı planlayalım', style: theme.textTheme.headlineSmall),
           const SizedBox(height: 6),

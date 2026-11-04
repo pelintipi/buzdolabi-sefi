@@ -67,7 +67,7 @@ void main() {
       await r.capture(tester,
           title: 'Hoş geldin',
           action: 'Uygulamayı ilk kez açtım.',
-          result: 'Ana sayfadan önce kısa anket: "7 kısa soru, yarım dakika". '
+          result: 'Ana sayfadan önce kısa anket: "4 kısa soru, 20 saniye". '
               'İstemeyen "Şimdilik geç" diyebiliyor.');
       expect(find.text('Hoş geldin!'), findsOneWidget);
 
@@ -86,15 +86,13 @@ void main() {
       await r.tap(tester, find.text('Devam (2)'), 'Devam');
       await tester.pumpAndSettle();
 
-      // -------------------------------------------------------- 2-3
-      await pick('5-6 gün', '2 · Haftada kaç gün?',
-          'Tek seçimli: dokununca işaretlenip kendiliğinden sonraki soruya geçiyor.');
-      await pick(Household.couple.label, '3 · Kimin için?',
+      // -------------------------------------------------------- 2 · Kimin için
+      await pick(Household.couple.label, '2 · Kimin için?',
           'Tarifler 2 kişilik açılacak.');
 
-      // -------------------------------------------------------- 4 · Aletler
+      // -------------------------------------------------------- 3 · Aletler
       await r.capture(tester,
-          title: '4 · Nelerle pişiriyorsun?',
+          title: '3 · Nelerle pişiriyorsun?',
           action: 'Aletler sorusuna geldim.',
           result:
               'Hiçbiri kendiliğinden işaretli değil; en az birini seçene kadar '
@@ -105,35 +103,20 @@ void main() {
       await tester.tap(find.text(Appliance.airfryer.label));
       await tester.pumpAndSettle();
       await r.capture(tester,
-          title: '4 · Aletleri seçtim',
+          title: '3 · Aletleri seçtim',
           action: 'Ocak ve Airfryer\'ı seçtim (fırınım yok).',
           result: 'Fırın gerektiren tarifler gösterilmeyecek.');
       await r.tap(tester, find.text('Devam (2)'), 'Devam');
       await tester.pumpAndSettle();
 
-      // -------------------------------------------------------- 5 · Beslenme
-      await pick(EatingStyle.protein.label, '5 · Nasıl besleniyorsun?',
+      // -------------------------------------------------------- 4 · Beslenme
+      await pick(EatingStyle.protein.label, '4 · Nasıl besleniyorsun?',
           'Sonuçlar "En çok protein" sırasıyla açılacak.');
-
-      // -------------------------------------------------------- 6 · Saklama
-      await tester.tap(find.text(RecipeHabit.social.label));
-      await tester.pumpAndSettle();
-      await r.capture(tester,
-          title: '6 · Tariflerini nasıl saklıyorsun?',
-          action: '"TikTok / Instagram\'da kaydediyorum"u seçtim.',
-          result: 'TikTok\'tan kaydetme kartı ana sayfada en üste çıkacak.');
-      await r.tap(tester, find.text('Devam (1)'), 'Devam');
-      await tester.pumpAndSettle();
-
-      // -------------------------------------------------------- 7 · Zaman
-      await pick(PlanTime.evening.label, '7 · Ne zaman düşünürsün?',
-          'Ana sayfanın karşılama cümlesi buna göre değişecek.');
 
       await r.capture(tester,
           title: 'Hazırsın',
-          action: 'Son soruyu yanıtladım.',
+          action: 'Dördüncü ve son soruyu yanıtladım.',
           result: 'Cevapların uygulamada neyi değiştirdiği tek tek yazıyor.');
-      expect(find.text('Haftalık hedefin: 5 pişirme'), findsOneWidget);
       expect(find.text('Tarifler 2 kişilik açılacak'), findsOneWidget);
 
       // -------------------------------------------------------- Ana sayfa
@@ -143,27 +126,30 @@ void main() {
       await r.capture(tester,
           title: 'Sana göre ana sayfa',
           action: '"Mutfağa geç"e bastım.',
-          result: '"Eve varmadan ne pişireceğin belli olsun", TikTok kartı en '
-              'üstte, yeşil kartta "Bozulmak üzere olanları önce kullanan '
-              'tarifler", seri hedefi 0/5.',
+          result: '"Ekle" bölümünde TikTok ilk sırada (videodan tarif '
+              'kaydetmek amaçlarımdan biri).',
           ok: p.onboarded &&
-              p.cookDaysPerWeek == 5 &&
               p.household == Household.couple &&
               p.appliances.contains(Appliance.airfryer) &&
-              p.eating == EatingStyle.protein &&
-              p.planTime == PlanTime.evening);
-      expect(find.text(PlanTime.evening.homeLine), findsOneWidget);
-      final videoCard =
-          tester.getTopLeft(find.text('TikTok\'tan tarif kaydet'));
-      final hero = tester.getTopLeft(find.text('Ne pişirsem?'));
-      expect(videoCard.dy, lessThan(hero.dy), reason: 'video kartı üstte');
-      // Seri kartı sayfanın altında; kaydırıp bak, sonra başa dön.
+              p.eating == EatingStyle.protein);
+      final tiktok = tester.getTopLeft(find.text("TikTok'tan"));
+      final receipt = tester.getTopLeft(find.text('Fiş, barkod'));
+      expect(tiktok.dx, lessThan(receipt.dx), reason: 'TikTok ilk sırada');
+      // Kaç gün pişirdiği artık ankette değil, ana sayfada yeri gelince soruluyor.
       final scroll = find
           .byWidgetPredicate(
               (w) => w is Scrollable && w.axisDirection == AxisDirection.down)
           .first;
-      await tester.scrollUntilVisible(find.text('Bu hafta 0/5 pişirme'), 300,
+      await tester.scrollUntilVisible(
+          find.text('Haftada kaç gün pişirirsin?'), 300,
           scrollable: scroll);
+      await tester.pumpAndSettle();
+      await r.capture(tester,
+          title: 'Haftalık hedef',
+          action: 'Ana sayfanın altına kaydırdım.',
+          result: 'Ankette sorulmayan "kaç gün" sorusu burada tek dokunuşla.');
+      await r.tap(tester, find.text('5-6 gün'), '5-6 gün');
+      await tester.pumpAndSettle();
       expect(find.text('Bu hafta 0/5 pişirme'), findsOneWidget);
       await tester.scrollUntilVisible(find.text('Ne pişirsem?'), -300,
           scrollable: scroll);

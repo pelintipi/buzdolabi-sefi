@@ -38,7 +38,7 @@ class CreatorScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              const IconBubble('🎬', size: 64, color: Palette.tomatoSoft),
+              const SymBubble('🎬', size: 64, color: Palette.tomatoSoft),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

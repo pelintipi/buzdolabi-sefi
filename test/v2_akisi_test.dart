@@ -180,14 +180,13 @@ void main() {
       ));
 
       // ------------------------------------------------ Ana sayfa
-      await tester.scrollUntilVisible(find.text('Dolabı doldur'), 200,
+      await tester.scrollUntilVisible(find.text('Mevsiminde'), 200,
           scrollable: _mainScroll);
       await r.capture(tester,
           title: 'Ana sayfa: hızlı girişler',
           action: 'Uygulamayı açıp biraz kaydırdım.',
-          result:
-              'Yeşil kartın altında dört yeni kutu: Haftalık plan, Dünden kalan, '
-              'Mevsiminde, Dolabı doldur.');
+          result: '"Ekle" bölümünde Malzeme, Fiş-barkod, TikTok, Dünden kalan; '
+              '"Planla"da Haftalık plan, Mevsiminde, Koleksiyonlar.');
 
       // ------------------------------------------------ Haftalık plan
       await r.tap(tester, find.text('Haftalık plan'), 'Haftalık plan');
@@ -248,7 +247,7 @@ void main() {
       await tester.pumpAndSettle();
       await r.capture(tester,
           title: 'Kasım mevsimi',
-          action: '"Mevsiminde" kutusuna dokundum.',
+          action: '"Mevsiminde" satırına dokundum.',
           result:
               'Pırasa, ıspanak, karnabahar, brokoli, havuç… Dolabında olanlar '
               'yeşil. Altında bunlarla yapılan tarifler.');
@@ -257,11 +256,11 @@ void main() {
       await tester.pumpAndSettle();
 
       // ------------------------------------------------ Fiş
-      await r.tap(tester, find.text('Dolabı doldur'), 'Dolabı doldur');
+      await r.tap(tester, find.text('Fiş, barkod'), 'Fiş, barkod');
       await tester.pumpAndSettle();
       await r.capture(tester,
           title: 'Dolabı hızlı doldur',
-          action: '"Dolabı doldur"a dokundum.',
+          action: '"Fiş, barkod"a dokundum.',
           result: 'Fiş fotoğrafı, e-fiş metni ya da barkod.');
       await r.tap(
           tester, find.text('Fiş metnini yapıştır'), 'Fiş metnini yapıştır');

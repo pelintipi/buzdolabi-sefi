@@ -1,44 +1,49 @@
 import 'package:flutter/material.dart';
 
-/// "Sıcak mutfak" paleti: krem zemin, şeftali ve kum tonlu kartlar, koyu
-/// orman yeşili butonlar. Domates ve bal tonları yalnızca durum bildirir
-/// ("Yok", "Az", uyarılar). Adlar eski paletle aynı kaldı, tüm ekranlar
-/// buradan beslenir.
+/// Sakin, "yemek dergisi" paleti: kâğıt beyazı zemin, ince çizgili beyaz
+/// kartlar, koyu orman yeşili ana renk ve az miktarda kiremit vurgu.
+/// Renkli bloklar yerine boşluk ve tipografiyle hiyerarşi kurulur.
+/// (Adlar eski paletle aynı kaldı; tüm ekranlar buradan beslenir.)
 abstract final class Palette {
   /// Ana renk: koyu orman yeşili (butonlar, seçili öğeler, "Var").
   static const basil = Color(0xFF1F3B2D);
   static const basilDeep = Color(0xFF13261C);
-  static const basilSoft = Color(0xFFE3EBE1);
+  static const basilSoft = Color(0xFFE9EEE7);
 
-  /// Uyarı: kiremit ("Yok", bozulacaklar).
-  static const tomato = Color(0xFFC9553A);
-  static const tomatoDeep = Color(0xFFA2402A);
-  static const tomatoSoft = Color(0xFFF8E7DC);
+  /// Vurgu ve uyarı: kiremit ("Yok", bozulacaklar, tek vurgu öğesi).
+  static const tomato = Color(0xFFB4532F);
+  static const tomatoDeep = Color(0xFF8F3E21);
+  static const tomatoSoft = Color(0xFFF6ECE6);
 
-  /// Vurgu: bal ("Az", rozetler, en iyi değer).
-  static const butter = Color(0xFFE5B65E);
-  static const butterDeep = Color(0xFFB58A35);
-  static const butterSoft = Color(0xFFF6EDDF);
+  /// Durum: aşı boyası ("Az", en iyi değer).
+  static const butter = Color(0xFFC99A3C);
+  static const butterDeep = Color(0xFF946E22);
+  static const butterSoft = Color(0xFFF6F0E3);
 
-  static const ink = Color(0xFF1D2520);
-  static const inkSoft = Color(0xFF656B66);
-  static const line = Color(0xFFEDE4DB);
-  static const lineDeep = Color(0xFFDCCFC3);
+  static const ink = Color(0xFF1A1A17);
+  static const inkSoft = Color(0xFF6E6C66);
+  static const line = Color(0xFFE9E5DE);
+  static const lineDeep = Color(0xFFD8D2C8);
 
-  /// Sayfa zemini: sıcak krem.
-  static const ground = Color(0xFFFBF7F3);
+  /// Sayfa zemini: kâğıt beyazı.
+  static const ground = Color(0xFFF8F6F2);
 
-  /// Kart zemini: hafif sıcak beyaz.
-  static const surface = Color(0xFFFFFCF9);
+  /// Kart zemini: beyaz.
+  static const surface = Color(0xFFFFFFFF);
 
-  /// Tasarımdaki kart tonları.
-  static const peach = Color(0xFFF8EADF);
-  static const sand = Color(0xFFF3EBE5);
-  static const blush = Color(0xFFF2E9E6);
+  /// Nötr dolgu (simge zemini, etiketler, ikincil butonlar).
+  static const sand = Color(0xFFF1EEE8);
+
+  /// Eski adlar: artık renkli blok yok, hepsi nötr.
+  static const peach = sand;
+  static const blush = sand;
 }
 
 abstract final class Fonts {
-  /// Başlıklar ve butonlar.
+  /// Büyük başlıklar: zarif serif (tek ağırlık).
+  static const serif = 'InstrumentSerif';
+
+  /// Başlıklar, butonlar.
   static const display = 'PlusJakarta';
 
   /// Metinler.

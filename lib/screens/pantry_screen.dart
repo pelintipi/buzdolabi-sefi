@@ -56,7 +56,7 @@ class PantryScreen extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const FoodIcon('🧺', size: 130),
+                    const Sym('🧺', size: 130),
                     const SizedBox(height: 12),
                     Text('Dolabın boş görünüyor.',
                         style: theme.textTheme.titleLarge),
@@ -277,7 +277,7 @@ class _PantryEditSheetState extends State<_PantryEditSheet> {
             onTap: _pickDate,
             child: Row(
               children: [
-                const FoodIcon('⏳', size: 30),
+                const Sym('⏳', size: 30),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -290,6 +290,36 @@ class _PantryEditSheetState extends State<_PantryEditSheet> {
                 const Icon(Icons.edit_calendar_rounded, color: Palette.basil),
               ],
             ),
+          ),
+          const SizedBox(height: 10),
+          // Takvim açmadan tek dokunuşla son kullanma tarihi.
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final (label, days) in const [
+                ('Yarın', 1),
+                ('3 gün', 3),
+                ('1 hafta', 7),
+                ('2 hafta', 14),
+                ('1 ay', 30),
+              ])
+                ChoiceChip(
+                  label: Text(label),
+                  selected: _expiresAt != null &&
+                      daysUntil(_expiresAt!, DateTime.now()) == days,
+                  showCheckmark: false,
+                  onSelected: (_) => setState(() {
+                    final today = DateUtils.dateOnly(DateTime.now());
+                    _expiresAt = today.add(Duration(days: days));
+                  }),
+                ),
+              if (_expiresAt != null)
+                ActionChip(
+                  label: const Text('Tarihi kaldır'),
+                  onPressed: () => setState(() => _expiresAt = null),
+                ),
+            ],
           ),
           const SizedBox(height: 18),
           Row(

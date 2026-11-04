@@ -110,7 +110,7 @@ class ShareCard extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              FoodIcon(icon, size: 20),
+              Sym(icon, size: 20),
               const SizedBox(width: 4),
               Text(text,
                   style: const TextStyle(
@@ -130,9 +130,8 @@ class ShareCard extends StatelessWidget {
           color: Palette.basil, borderRadius: BorderRadius.circular(28)),
       child: Stack(
         children: [
-          const Positioned(
-              right: -10, top: 30, child: FoodIcon('🍅', size: 70)),
-          const Positioned(right: 58, top: 22, child: FoodIcon('🌿', size: 40)),
+          const Positioned(right: -10, top: 30, child: Sym('🍅', size: 70)),
+          const Positioned(right: 58, top: 22, child: Sym('🌿', size: 40)),
           Padding(
             padding: const EdgeInsets.fromLTRB(22, 26, 22, 22),
             child: Column(
@@ -190,7 +189,7 @@ class ShareCard extends StatelessWidget {
                 const SizedBox(height: 16),
                 const Row(
                   children: [
-                    FoodIcon('🧑‍🍳', size: 26),
+                    Sym('🧑‍🍳', size: 26),
                     SizedBox(width: 6),
                     Text('Buzdolabı Şefi',
                         style: TextStyle(

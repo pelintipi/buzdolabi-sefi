@@ -7,6 +7,7 @@ import '../services/recipe_matcher.dart';
 import '../state/app_state.dart';
 import '../theme/palette.dart';
 import '../widgets/recipe_card.dart';
+import '../widgets/recipe_image.dart';
 import '../widgets/ui.dart';
 import 'ingredient_input_screen.dart';
 import 'recipe_detail_screen.dart';
@@ -108,7 +109,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: Column(
                 children: [
-                  const FoodIcon('🤔', size: 72),
+                  const Sym('🤔', size: 72),
                   const SizedBox(height: 8),
                   Text(
                     _filters.isEmpty
@@ -143,7 +144,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
               data: theme.copyWith(dividerColor: Colors.transparent),
               child: ExpansionTile(
                 tilePadding: EdgeInsets.zero,
-                leading: const FoodIcon('🛒', size: 30),
+                leading: const Sym('🛒', size: 30),
                 title: Text('Biraz alışverişle (${far.length})',
                     style: theme.textTheme.titleLarge),
                 initiallyExpanded: nothingClose,
@@ -209,7 +210,7 @@ class _CompareCard extends StatelessWidget {
           width: 62,
           child: Column(
             children: [
-              FoodIcon(icon, size: 24),
+              Sym(icon, size: 24),
               Text(label, style: theme.textTheme.labelSmall),
             ],
           ),
@@ -222,7 +223,7 @@ class _CompareCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const FoodIcon('📊', size: 28),
+              const Sym('📊', size: 28),
               const SizedBox(width: 8),
               Expanded(
                   child: Text('Seçeneklerini karşılaştır',
@@ -247,7 +248,7 @@ class _CompareCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 7),
                 child: Row(
                   children: [
-                    FoodIcon(m.recipe.emoji, size: 32),
+                    RecipeImage(m.recipe, width: 32, radius: 9),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Column(
@@ -301,7 +302,7 @@ class _SortBar extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: ChoiceChip(
-                avatar: FoodIcon(m.icon, size: 20),
+                avatar: Sym(m.icon, size: 20),
                 label: Text(m.label),
                 selected: m == value,
                 selectedColor: Palette.basil,
@@ -375,7 +376,7 @@ class _Summary extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              FoodIcon(icon, size: 40),
+              Sym(icon, size: 40),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -451,7 +452,7 @@ class _FilterBar extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(right: 8),
           child: FilterChip(
-            avatar: FoodIcon(icon, size: 22),
+            avatar: Sym(icon, size: 22),
             label: Text(label),
             selected: selected,
             selectedColor: Palette.basilSoft,

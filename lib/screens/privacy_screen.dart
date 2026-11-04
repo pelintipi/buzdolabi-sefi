@@ -24,7 +24,7 @@ class PrivacyScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    FoodIcon(icon, size: 28),
+                    Sym(icon, size: 28),
                     const SizedBox(width: 8),
                     Expanded(
                         child: Text(title, style: theme.textTheme.titleMedium)),

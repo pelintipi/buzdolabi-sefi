@@ -6,6 +6,7 @@ import '../models/recipe.dart';
 import '../models/user_profile.dart';
 import '../state/app_state.dart';
 import '../theme/palette.dart';
+import '../widgets/recipe_image.dart';
 import '../widgets/ui.dart';
 import '../services/device_services.dart';
 import 'onboarding_screen.dart';
@@ -54,7 +55,7 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    FoodIcon(icon, size: 30),
+                    Sym(icon, size: 30),
                     const SizedBox(width: 8),
                     Text(title, style: theme.textTheme.titleLarge),
                   ],
@@ -74,7 +75,7 @@ class ProfileScreen extends StatelessWidget {
     Widget choice(String icon, String label, bool selected,
             ValueChanged<bool> onChanged) =>
         FilterChip(
-          avatar: FoodIcon(icon, size: 22),
+          avatar: Sym(icon, size: 22),
           label: Text(label),
           selected: selected,
           side: BorderSide(
@@ -89,7 +90,7 @@ class ProfileScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              const IconBubble('🧑‍🍳', size: 72, color: Palette.butterSoft),
+              const SymBubble('🧑‍🍳', size: 72, color: Palette.butterSoft),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -331,7 +332,7 @@ class ProfileScreen extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(vertical: 6),
                             child: Row(
                               children: [
-                                IconBubble(r.emoji, size: 44),
+                                RecipeImage(r, width: 44, radius: 12),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(r.title,

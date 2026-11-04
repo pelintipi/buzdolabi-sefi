@@ -59,7 +59,7 @@ class QuickFillScreen extends StatelessWidget {
             onTap: onTap,
             child: Row(
               children: [
-                IconBubble(emoji, size: 60, color: Palette.butterSoft),
+                SymBubble(emoji, size: 60, color: Palette.butterSoft),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -322,7 +322,7 @@ class _NoCamera extends StatelessWidget {
         child: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            FoodIcon('📦', size: 72),
+            Sym('📦', size: 72),
             SizedBox(height: 8),
             Text('Kamera burada açılamıyor',
                 style: TextStyle(fontWeight: FontWeight.w800)),

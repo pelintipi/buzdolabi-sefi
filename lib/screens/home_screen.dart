@@ -1,26 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/recipe.dart';
 import '../models/user_profile.dart';
-import '../services/collections.dart';
-
+import '../services/recipe_matcher.dart';
 import '../state/app_state.dart';
 import '../theme/palette.dart';
 import '../utils/format.dart';
-import '../widgets/ui.dart';
 import '../widgets/recipe_card.dart';
+import '../widgets/recipe_image.dart';
+import '../widgets/ui.dart';
 import '../widgets/video_source_card.dart';
-import 'cooking_mode_screen.dart';
 import 'collections_screen.dart';
+import 'cooking_mode_screen.dart';
 import 'creator_screen.dart';
+import 'import_recipe_screen.dart';
+import 'ingredient_input_screen.dart';
 import 'leftover_screen.dart';
 import 'plan_screen.dart';
 import 'quick_fill_screen.dart';
-import 'season_screen.dart';
-import 'import_recipe_screen.dart';
 import 'recipe_detail_screen.dart';
 import 'results_screen.dart';
+import 'season_screen.dart';
 
+const _weekdayNames = [
+  'Pazartesi',
+  'Salı',
+  'Çarşamba',
+  'Perşembe',
+  'Cuma',
+  'Cumartesi',
+  'Pazar'
+];
+
+void _go(BuildContext context, Widget page) =>
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
+
+/// Ana sayfa. Tek bir asıl soru var: "şu an ne pişirebilirim?" Cevabı en
+/// üstte, görselli kartlarla; ekleme ve planlama araçları altta, sade.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -28,166 +45,81 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     final theme = Theme.of(context);
-    final active = state.activeCooking;
-    final expiring = state.expiringItems;
     final now = DateTime.now();
-    final goal = state.weeklyGoal;
+    final active = state.activeCooking;
 
     return Scaffold(
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(14, 16, 14, 24),
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
           children: [
-            const Row(
+            // ------------------------------------------------ Başlık
+            Row(
               children: [
-                Text('Merhaba',
-                    style: TextStyle(
-                        fontFamily: Fonts.display,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 40,
-                        height: 1.1,
-                        letterSpacing: -1,
-                        color: Palette.ink)),
-                SizedBox(width: 10),
-                FoodIcon('👋', size: 44),
+                Expanded(
+                  child: Text(
+                    '${_weekdayNames[now.weekday - 1]}, ${now.day} ${monthNames[now.month - 1]}'
+                        .toUpperCase(),
+                    style: const TextStyle(
+                        fontFamily: Fonts.body,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11.5,
+                        letterSpacing: 1.2,
+                        color: Palette.inkSoft),
+                  ),
+                ),
+                _StreakChip(done: state.cooksThisWeek, goal: state.weeklyGoal),
               ],
             ),
+            const SizedBox(height: 6),
+            Text('Merhaba', style: theme.textTheme.displaySmall),
+            const SizedBox(height: 4),
             Text(
                 state.profile.planTime?.homeLine ??
-                    'Bugün dolabında ne var, birlikte bakalım.',
+                    _subtitle(state.profile.goals, state.pantry.isEmpty),
                 style: theme.textTheme.bodyLarge
-                    ?.copyWith(fontSize: 18, color: Palette.ink)),
-            const SizedBox(height: 22),
-            // Videodan tarif saklayanlar için TikTok kartı en üstte.
-            if (state.profile.savesVideos) ...[
-              const _VideoImportCard(),
-              const SizedBox(height: 12),
-            ],
-            const _Hero(),
-            const SizedBox(height: 12),
-            if (!state.profile.savesVideos) ...[
-              const _VideoImportCard(),
-              const SizedBox(height: 16),
-            ],
-            const _QuickTiles(),
-            const SizedBox(height: 16),
-            const _CollectionsStrip(),
-            const SizedBox(height: 16),
-            if (state.importedRecipes.isNotEmpty) ...[
-              const _SavedVideos(),
-              const SizedBox(height: 16),
-            ],
-            if (active != null) ...[
-              SoftCard(
-                child: Row(
-                  children: [
-                    IconBubble(state.recipeById(active.recipeId).emoji,
-                        size: 56, color: Palette.tomatoSoft),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Kaldığın yerden devam et',
-                              style: theme.textTheme.titleMedium),
-                          Text(
-                              '${state.recipeById(active.recipeId).title} · Adım ${active.step + 1}',
-                              style: theme.textTheme.bodySmall),
-                        ],
-                      ),
-                    ),
-                    ChunkyButton(
-                      label: 'Devam',
-                      tone: ChunkyTone.accent,
-                      expand: false,
-                      height: 42,
-                      onPressed: () =>
-                          Navigator.of(context).push(MaterialPageRoute<void>(
-                        builder: (_) => CookingModeScreen(
-                          recipeId: active.recipeId,
-                          servings: active.servings,
-                          initialStep: active.step,
-                        ),
-                      )),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-            if (expiring.isNotEmpty) ...[
-              SoftCard(
-                color: Palette.butterSoft,
-                borderColor: Palette.butter,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const FoodIcon('⏳', size: 30),
-                        const SizedBox(width: 8),
-                        Text('Yakında bozulacaklar',
-                            style: theme.textTheme.titleMedium),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    for (final item in expiring.take(4))
-                      Builder(builder: (_) {
-                        final ing = state.repo.byId(item.ingredientId);
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Row(
-                            children: [
-                              FoodIcon(ing.emoji, size: 32),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(ing.name,
-                                    style: theme.textTheme.bodyLarge),
-                              ),
-                              Pill(expiryText(item.expiresAt, now),
-                                  color: Palette.tomatoSoft,
-                                  fg: Palette.tomatoDeep,
-                                  border: null),
-                            ],
-                          ),
-                        );
-                      }),
-                    const SizedBox(height: 6),
-                    ChunkyButton(
-                      label: 'Bunları değerlendiren tarifler',
-                      tone: ChunkyTone.soft,
-                      height: 48,
-                      onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                              builder: (_) => const ResultsScreen())),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-            SoftCard(
-              child: Row(
-                children: [
-                  const FoodIcon('🔥', size: 56),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('${state.weeklyStreak} haftalık seri',
-                            style: theme.textTheme.titleLarge),
-                        Text('Bu hafta ${state.cooksThisWeek}/$goal pişirme',
-                            style: theme.textTheme.bodySmall),
-                        const SizedBox(height: 10),
-                        WeeklySlots(
-                            done: state.cooksThisWeek, goal: goal, size: 36),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                    ?.copyWith(color: Palette.inkSoft)),
+            const SizedBox(height: 18),
+            ChunkyButton(
+              label: 'Ne pişirsem?',
+              iconData: Icons.search_rounded,
+              height: 58,
+              onPressed: () => openWhatToCook(context),
             ),
+
+            if (active != null) ...[
+              const SizedBox(height: 14),
+              _ContinueCard(active: active),
+            ],
+
+            // ------------------------------------------------ Şu an yapabileceklerin
+            const SizedBox(height: 26),
+            const _ReadyNow(),
+
+            if (state.expiringItems.isNotEmpty) ...[
+              const SizedBox(height: 18),
+              const _ExpiringCard(),
+            ],
+
+            // ------------------------------------------------ Ekle
+            const SizedBox(height: 26),
+            const _HomeHeading('Ekle'),
+            const SizedBox(height: 10),
+            const _AddActions(),
+
+            // ------------------------------------------------ Planla
+            const SizedBox(height: 26),
+            const _HomeHeading('Planla'),
+            const SizedBox(height: 10),
+            const _PlanList(),
+
+            if (state.importedRecipes.isNotEmpty) ...[
+              const SizedBox(height: 26),
+              const _SavedVideos(),
+            ],
+
+            const SizedBox(height: 26),
+            _WeekCard(state: state),
           ],
         ),
       ),
@@ -195,137 +127,117 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-/// Karşılama kartı: sıcak mutfak tezgâhı sahnesi, başlık ve "Ne pişirsem?".
-class _Hero extends StatelessWidget {
-  const _Hero();
+/// Bölüm başlığı: serif, sağda isteğe bağlı bağlantı.
+class _HomeHeading extends StatelessWidget {
+  const _HomeHeading(this.text, {this.action, this.onAction});
+
+  final String text;
+  final String? action;
+  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
-    final empty = state.pantry.isEmpty;
-    return Container(
-      // En az bu kadar; büyük yazı ayarında içerik kadar uzar, taşmaz.
-      constraints: const BoxConstraints(minHeight: 292),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFF3EEE9), Color(0xFFE8DFD6)],
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(
+          child: Text(text,
+              style: const TextStyle(
+                  fontFamily: Fonts.serif,
+                  fontSize: 26,
+                  height: 1.1,
+                  color: Palette.ink)),
         ),
-        boxShadow: const [
-          BoxShadow(
-              color: Color(0x143A2A1E), blurRadius: 22, offset: Offset(0, 8)),
+        if (action != null)
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onAction,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 3),
+              child: Text(action!,
+                  style: const TextStyle(
+                      fontFamily: Fonts.body,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      color: Palette.basil)),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _StreakChip extends StatelessWidget {
+  const _StreakChip({required this.done, required this.goal});
+
+  final int done;
+  final int goal;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(8, 5, 10, 5),
+      decoration: BoxDecoration(
+        color: Palette.surface,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Palette.line),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.local_fire_department_outlined,
+              size: 16, color: Palette.tomato),
+          const SizedBox(width: 4),
+          Text('$done/$goal bu hafta',
+              style: const TextStyle(
+                  fontFamily: Fonts.body,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                  color: Palette.ink)),
         ],
       ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
+    );
+  }
+}
+
+class _ContinueCard extends StatelessWidget {
+  const _ContinueCard({required this.active});
+
+  final ActiveCooking active;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.read<AppState>();
+    final theme = Theme.of(context);
+    final recipe = state.recipeById(active.recipeId);
+    return SoftCard(
+      padding: const EdgeInsets.all(10),
+      child: Row(
         children: [
-          // Pencereden gelen yumuşak ışık.
-          const Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(0.55, -0.9),
-                  radius: 0.95,
-                  colors: [Color(0xB3FFFFFF), Color(0x00FFFFFF)],
-                ),
-              ),
-            ),
-          ),
-          // Sağ kenarda buzdolabı kapağı.
-          Positioned(
-            right: 0,
-            top: 0,
-            bottom: 0,
-            width: 22,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [
-                  const Color(0xFFD9D9D6),
-                  const Color(0xFFBFC1BF).withValues(alpha: 0.9),
-                ]),
-              ),
-            ),
-          ),
-          // Ahşap tezgâh.
-          Positioned(
-            right: -30,
-            bottom: -18,
-            child: Transform.rotate(
-              angle: -0.05,
-              child: Container(
-                width: 250,
-                height: 74,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0xFFD2A579), Color(0xFFA9774C)],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // Kâsede sebzeler, tezgâhta havuç, soğan ve kavanoz.
-          const Positioned(
-              right: 58, bottom: 70, child: FoodIcon('🥗', size: 112)),
-          const Positioned(
-              right: 92, bottom: 132, child: FoodIcon('🍅', size: 46)),
-          const Positioned(
-              right: 64, bottom: 140, child: FoodIcon('🫑', size: 44)),
-          const Positioned(
-              right: 118, bottom: 146, child: FoodIcon('🌿', size: 40)),
-          const Positioned(
-              right: 26, bottom: 44, child: FoodIcon('🫙', size: 58)),
-          const Positioned(
-              right: 66, bottom: 10, child: FoodIcon('🧅', size: 48)),
-          const Positioned(
-              right: 104, bottom: 8, child: FoodIcon('🥕', size: 50)),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(22, 26, 22, 24),
+          RecipeImage(recipe, width: 56, radius: 14),
+          const SizedBox(width: 12),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(
-                  width: 250,
-                  child: Text(
-                    'Dolabındakilerle ne pişirebilirsin?',
-                    style: TextStyle(
-                      fontFamily: Fonts.display,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 27,
-                      height: 1.12,
-                      letterSpacing: -0.4,
-                      color: Palette.ink,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: 190,
-                  child: Text(
-                    _subtitle(state.profile.goals, empty),
-                    style: const TextStyle(
-                      fontFamily: Fonts.body,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 14.5,
-                      height: 1.35,
-                      color: Palette.ink,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 60),
-                ChunkyButton(
-                  label: 'Ne pişirsem?',
-                  iconData: Icons.search_rounded,
-                  expand: false,
-                  height: 56,
-                  onPressed: () => openWhatToCook(context),
-                ),
+                Text('Kaldığın yerden devam et',
+                    style: theme.textTheme.titleMedium),
+                Text('${recipe.title} · Adım ${active.step + 1}',
+                    style: theme.textTheme.bodySmall),
               ],
             ),
+          ),
+          ChunkyButton(
+            label: 'Devam',
+            expand: false,
+            height: 42,
+            onPressed: () => _go(
+                context,
+                CookingModeScreen(
+                  recipeId: active.recipeId,
+                  servings: active.servings,
+                  initialStep: active.step,
+                )),
           ),
         ],
       ),
@@ -333,52 +245,385 @@ class _Hero extends StatelessWidget {
   }
 }
 
-/// "TikTok'tan tarif kaydet" girişi.
-class _VideoImportCard extends StatelessWidget {
-  const _VideoImportCard();
+/// "Şu an yapabileceklerin": dolaptakilerle eksiksiz yapılabilen tarifler;
+/// yoksa tek eksikle yapılabilenler; dolap boşsa ekleme çağrısı.
+class _ReadyNow extends StatelessWidget {
+  const _ReadyNow();
 
   @override
   Widget build(BuildContext context) {
-    void open() => Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => const ImportRecipeScreen()));
-    return SoftCard(
-      color: Palette.peach,
-      borderColor: Colors.transparent,
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-      onTap: open,
-      child: Row(
-        children: [
-          const FoodIcon('🎬', size: 62),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('TikTok\'tan tarif kaydet',
+    final state = context.watch<AppState>();
+    final theme = Theme.of(context);
+    if (state.pantry.isEmpty) {
+      return SoftCard(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Dolabında ne var?',
+                style: TextStyle(
+                    fontFamily: Fonts.serif, fontSize: 26, color: Palette.ink)),
+            const SizedBox(height: 6),
+            Text(
+                'Birkaç malzeme yaz, yapabileceğin tarifleri burada sıralayayım.',
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(color: Palette.inkSoft)),
+            const SizedBox(height: 14),
+            ChunkyButton(
+              label: 'Malzeme ekle',
+              iconData: Icons.add_rounded,
+              tone: ChunkyTone.soft,
+              expand: false,
+              height: 46,
+              onPressed: () => _go(
+                  context, const IngredientInputScreen(openResultsAfter: true)),
+            ),
+          ],
+        ),
+      );
+    }
+    final matches = state.matches(const QuickFilters());
+    final ready = [
+      for (final m in matches)
+        if (m.problems.isEmpty) m
+    ];
+    final list = ready.isNotEmpty
+        ? ready
+        : [
+            for (final m in matches)
+              if (m.group == MatchGroup.almost) m
+          ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _HomeHeading(
+          ready.isNotEmpty
+              ? 'Şu an yapabileceklerin'
+              : 'Bir malzemeyle yapabileceklerin',
+          action: 'Tümü',
+          onAction: () => _go(context, const ResultsScreen()),
+        ),
+        const SizedBox(height: 4),
+        Text(
+            ready.isNotEmpty
+                ? '${ready.length} tarif dolabındakilerle hazır'
+                : 'Eksiksiz bir tarif yok; şunlara tek malzeme lazım',
+            style: theme.textTheme.bodySmall),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 228,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            clipBehavior: Clip.none,
+            itemCount: list.length.clamp(0, 10),
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, i) => _RecipeTile(match: list[i]),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Ana sayfadaki görselli tarif kartı.
+class _RecipeTile extends StatelessWidget {
+  const _RecipeTile({required this.match});
+
+  final RecipeMatch match;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.read<AppState>();
+    final Recipe r = match.recipe;
+    final n = match.facts.perServing;
+    final status = matchStatus(match, state.repo);
+    return Semantics(
+      button: true,
+      label: '${r.title}, ${r.minutes} dakika',
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: () => _go(context, RecipeDetailScreen(recipeId: r.id)),
+        child: SizedBox(
+          width: 196,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              RecipeImage(r, width: 196, height: 148, radius: 20),
+              const SizedBox(height: 10),
+              Text(r.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 2),
+              Text(
+                  '${r.minutes} dk  ·  ${formatNumber(n.kcal, decimals: 0)} kcal  ·  ${formatNumber(n.protein, decimals: 0)} g protein',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall),
+              if (match.problems.isNotEmpty)
+                Text(status.text,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                        fontFamily: Fonts.display,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 17.5,
-                        letterSpacing: -0.4,
-                        color: Palette.ink)),
-                SizedBox(height: 2),
-                Text('Paylaş\'a dokun, bizi seç',
+                        fontFamily: Fonts.body,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12.5,
+                        color: status.color)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ExpiringCard extends StatelessWidget {
+  const _ExpiringCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
+    final now = DateTime.now();
+    final items = state.expiringItems;
+    final names = [
+      for (final p in items.take(3))
+        '${state.repo.byId(p.ingredientId).name} (${expiryText(p.expiresAt, now).toLowerCase()})'
+    ].join(', ');
+    return SoftCard(
+      color: Palette.tomatoSoft,
+      borderColor: Colors.transparent,
+      padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
+      child: Row(
+        children: [
+          const Icon(Icons.schedule_rounded, color: Palette.tomato, size: 24),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Yakında bozulacaklar',
                     style: TextStyle(
                         fontFamily: Fonts.body,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14.5,
+                        color: Palette.tomatoDeep)),
+                Text(names,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontFamily: Fonts.body,
                         fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                        color: Palette.inkSoft)),
+                        fontSize: 13,
+                        color: Palette.ink)),
               ],
             ),
           ),
-          ChunkyButton(
-            label: 'Ekle',
-            expand: false,
-            height: 46,
-            onPressed: open,
+          TextButton(
+            onPressed: () => _go(context, const ResultsScreen()),
+            child: const Text('Değerlendir'),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Ekleme yolları tek sırada: malzeme, fiş/barkod, TikTok, dünden kalan.
+class _AddActions extends StatelessWidget {
+  const _AddActions();
+
+  @override
+  Widget build(BuildContext context) {
+    final videosFirst = context.watch<AppState>().profile.savesVideos;
+    final actions = <(IconData, String, Widget)>[
+      (Icons.edit_note_rounded, 'Malzeme', const IngredientInputScreen()),
+      (Icons.receipt_long_outlined, 'Fiş, barkod', const QuickFillScreen()),
+      (Icons.smart_display_outlined, 'TikTok\'tan', const ImportRecipeScreen()),
+      (Icons.takeout_dining_outlined, 'Dünden kalan', const LeftoverScreen()),
+    ];
+    // Videodan tarif saklayanlar için TikTok öne.
+    if (videosFirst) actions.insert(0, actions.removeAt(2));
+    return Row(
+      children: [
+        for (var i = 0; i < actions.length; i++) ...[
+          if (i > 0) const SizedBox(width: 10),
+          Expanded(
+            child: Semantics(
+              button: true,
+              label: actions[i].$2,
+              child: GestureDetector(
+                onTap: () => _go(context, actions[i].$3),
+                child: Column(
+                  children: [
+                    Container(
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: Palette.surface,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Palette.line),
+                      ),
+                      alignment: Alignment.center,
+                      child:
+                          Icon(actions[i].$1, color: Palette.basil, size: 28),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(actions[i].$2,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontFamily: Fonts.body,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 11.5,
+                            color: Palette.ink)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Planlama ve keşif: tek kartta satırlar.
+class _PlanList extends StatelessWidget {
+  const _PlanList();
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
+    final now = DateTime.now();
+    final seasonal = inSeasonNow(state, now);
+    final rows = <(IconData, String, String, Widget)>[
+      (
+        Icons.calendar_month_outlined,
+        'Haftalık plan',
+        state.planIds.isEmpty
+            ? '${state.planLength} akşamlık plan çıkar'
+            : '${state.planIds.length} akşam planlı',
+        const PlanScreen()
+      ),
+      (
+        Icons.eco_outlined,
+        'Mevsiminde',
+        '${monthNames[now.month - 1]}: ${seasonal.take(3).map((i) => i.name).join(', ')}',
+        const SeasonScreen()
+      ),
+      (
+        Icons.bookmark_border_rounded,
+        'Koleksiyonlar',
+        'Yaptıklarım, favoriler, hazır listeler',
+        const CollectionsScreen()
+      ),
+    ];
+    return SoftCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          for (var i = 0; i < rows.length; i++) ...[
+            if (i > 0) const Divider(height: 1, indent: 66),
+            InkWell(
+              onTap: () => _go(context, rows[i].$4),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                          color: Palette.sand,
+                          borderRadius: BorderRadius.circular(12)),
+                      child: Icon(rows[i].$1, color: Palette.basil, size: 21),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(rows[i].$2,
+                              style: const TextStyle(
+                                  fontFamily: Fonts.body,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                  color: Palette.ink)),
+                          Text(rows[i].$3,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodySmall),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right_rounded,
+                        color: Palette.lineDeep),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _WeekCard extends StatelessWidget {
+  const _WeekCard({required this.state});
+
+  final AppState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final goal = state.weeklyGoal;
+    // Anket kısaldı: kaç gün pişirdiği burada, yeri gelince sorulur.
+    if (state.profile.cookDaysPerWeek == null) {
+      return SoftCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Haftada kaç gün pişirirsin?',
+                style: TextStyle(
+                    fontFamily: Fonts.serif, fontSize: 24, color: Palette.ink)),
+            Text('Haftalık hedefini buna göre koyalım.',
+                style: theme.textTheme.bodySmall),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final (days, label) in const [
+                  (2, '1-2 gün'),
+                  (3, '3-4 gün'),
+                  (5, '5-6 gün'),
+                  (7, 'Her gün'),
+                ])
+                  ActionChip(
+                    label: Text(label),
+                    onPressed: () => state.updateProfile(
+                        state.profile.copyWith(cookDaysPerWeek: days)),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+    return SoftCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+              state.weeklyStreak > 0
+                  ? '${state.weeklyStreak} haftalık seri'
+                  : 'Haftalık hedef',
+              style: const TextStyle(
+                  fontFamily: Fonts.serif, fontSize: 24, color: Palette.ink)),
+          Text('Bu hafta ${state.cooksThisWeek}/$goal pişirme',
+              style: theme.textTheme.bodySmall),
+          const SizedBox(height: 12),
+          WeeklySlots(done: state.cooksThisWeek, goal: goal, size: 36),
         ],
       ),
     );
@@ -408,7 +653,7 @@ class _SavedVideos extends StatelessWidget {
               children: [
                 for (final e in recipesByCreator(state).entries.take(6))
                   ActionChip(
-                    avatar: const FoodIcon('🎬', size: 18),
+                    avatar: const Sym('🎬', size: 18),
                     label: Text('@${e.key} (${e.value.length})'),
                     onPressed: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
@@ -448,7 +693,7 @@ class _SavedVideos extends StatelessWidget {
                           const Positioned(
                               left: 6,
                               bottom: 6,
-                              child: IconBubble('▶',
+                              child: SymBubble('▶',
                                   size: 32, color: Colors.white)),
                         ],
                       ),
@@ -494,209 +739,4 @@ String _subtitle(Set<Goal> goals, bool emptyPantry) {
   return emptyPantry
       ? 'Malzemeleri yaz, uygun tarifleri saniyeler içinde bulalım.'
       : 'Dolabına göre en uygun tarifler hazır.';
-}
-
-/// Dört hızlı giriş: haftalık plan, dünden kalan, mevsim, dolabı doldur.
-class _QuickTiles extends StatelessWidget {
-  const _QuickTiles();
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
-    final now = DateTime.now();
-    final seasonal = inSeasonNow(state, now);
-    void go(Widget page) => Navigator.of(context)
-        .push(MaterialPageRoute<void>(builder: (_) => page));
-
-    Widget tile(String emoji, String title, String sub, Color color,
-            VoidCallback onTap) =>
-        Expanded(
-          child: SoftCard(
-            color: color,
-            borderColor: Colors.transparent,
-            padding: const EdgeInsets.fromLTRB(10, 12, 2, 12),
-            onTap: onTap,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 64),
-              child: Row(
-                children: [
-                  FoodIcon(emoji, size: 42),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                fontFamily: Fonts.display,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                                height: 1.15,
-                                letterSpacing: -0.3,
-                                color: Palette.ink)),
-                        const SizedBox(height: 2),
-                        Text(sub,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                fontFamily: Fonts.body,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12.5,
-                                height: 1.25,
-                                color: Palette.inkSoft)),
-                      ],
-                    ),
-                  ),
-                  const Icon(Icons.chevron_right_rounded,
-                      color: Palette.inkSoft, size: 20),
-                ],
-              ),
-            ),
-          ),
-        );
-
-    const gap = SizedBox(width: 12);
-    return Column(
-      children: [
-        Row(
-          children: [
-            tile(
-                '📝',
-                'Haftalık plan',
-                state.planIds.isEmpty
-                    ? '${state.planLength} akşam'
-                    : '${state.planIds.length} akşam hazır',
-                Palette.peach,
-                () => go(const PlanScreen())),
-            gap,
-            tile(
-                '🧅',
-                'Dünden kalan',
-                state.leftovers.isEmpty
-                    ? 'Pilav, makarna…'
-                    : state.repo.byId(state.leftovers.first.ingredientId).name,
-                Palette.blush,
-                () => go(const LeftoverScreen())),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            tile(
-                seasonal.isEmpty ? '🥕' : seasonal.first.emoji,
-                'Mevsiminde',
-                '${monthNames[now.month - 1]}: ${seasonal.take(2).map((i) => i.name).join(', ')}',
-                Palette.peach,
-                () => go(const SeasonScreen())),
-            gap,
-            tile('🫙', 'Dolabı doldur', 'Fiş, barkod', Palette.blush,
-                () => go(const QuickFillScreen())),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-/// Ana sayfadaki koleksiyon şeridi: Yaptıklarım, Favoriler, kendi
-/// koleksiyonların ve birkaç hazır koleksiyon.
-class _CollectionsStrip extends StatelessWidget {
-  const _CollectionsStrip();
-
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<AppState>();
-    void go(Widget page) => Navigator.of(context)
-        .push(MaterialPageRoute<void>(builder: (_) => page));
-    const featured = [
-      'yuksek_protein',
-      'hafif',
-      'kategori_tatli',
-      'kategori_atistirmalik'
-    ];
-
-    final items = <(String, String, String, VoidCallback)>[
-      (
-        '🧑‍🍳',
-        'Yaptıklarım',
-        '${state.cookedSummaries.length} tarif',
-        () => go(const CookedHistoryScreen())
-      ),
-      (
-        '❤',
-        'Favoriler',
-        '${state.favorites.length} tarif',
-        () => go(const CollectionDetailScreen.favorites())
-      ),
-      for (final c in state.collections)
-        (
-          c.emoji,
-          c.name,
-          '${c.recipeIds.length} tarif',
-          () => go(CollectionDetailScreen.user(c.id))
-        ),
-      for (final s in [
-        for (final id in featured)
-          smartCollections.firstWhere((s) => s.id == id)
-      ])
-        (
-          s.emoji,
-          s.title,
-          '${state.recipesInSmart(s).length} tarif',
-          () => go(CollectionDetailScreen.smart(s.id))
-        ),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SectionTitle('Koleksiyonlar',
-            icon: '🔖',
-            trailing: TextButton(
-                onPressed: () => go(const CollectionsScreen()),
-                child: const Text('Tümü'))),
-        SizedBox(
-          height: 96,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            clipBehavior: Clip.none,
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 10),
-            itemBuilder: (_, i) {
-              final (emoji, title, sub, onTap) = items[i];
-              return SizedBox(
-                width: 136,
-                child: SoftCard(
-                  padding: const EdgeInsets.fromLTRB(10, 10, 8, 8),
-                  onTap: onTap,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      FoodIcon(emoji, size: 30),
-                      const Spacer(),
-                      Text(title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              fontFamily: Fonts.display,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 14.5)),
-                      Text(sub,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 11.5,
-                              color: Palette.inkSoft)),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
 }

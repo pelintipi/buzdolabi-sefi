@@ -10,6 +10,7 @@ import '../state/app_state.dart';
 import '../theme/palette.dart';
 import '../utils/format.dart';
 import '../widgets/recipe_card.dart';
+import '../widgets/recipe_image.dart';
 import '../widgets/ui.dart';
 import 'recipe_detail_screen.dart';
 
@@ -48,7 +49,7 @@ class CollectionsScreen extends StatelessWidget {
             onTap: () => _open(context, const CookedHistoryScreen()),
             child: Row(
               children: [
-                const FoodIcon('🧑‍🍳', size: 56),
+                const Sym('🧑‍🍳', size: 56),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -66,7 +67,7 @@ class CollectionsScreen extends StatelessWidget {
                 for (final c in cooked.take(3))
                   Padding(
                     padding: const EdgeInsets.only(left: 2),
-                    child: FoodIcon(c.recipe.emoji, size: 30),
+                    child: RecipeImage(c.recipe, width: 30, radius: 10),
                   ),
                 const Icon(Icons.chevron_right_rounded, color: Palette.inkSoft),
               ],
@@ -183,7 +184,7 @@ class _CollectionTile extends StatelessWidget {
         onTap: onTap,
         child: Row(
           children: [
-            IconBubble(emoji,
+            SymBubble(emoji,
                 size: 50,
                 color: color == Palette.surface ? Palette.basilSoft : color),
             const SizedBox(width: 12),
@@ -289,7 +290,7 @@ class CollectionDetailScreen extends StatelessWidget {
               onPressed: () => createCollection(context, editing: user),
             ),
             IconButton(
-              icon: const FoodIcon('🗑', size: 24),
+              icon: const Sym('🗑', size: 24),
               tooltip: 'Koleksiyonu sil',
               onPressed: () => _confirmDelete(context, user),
             ),
@@ -301,7 +302,7 @@ class CollectionDetailScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              IconBubble(emoji, size: 64, color: Palette.butterSoft),
+              SymBubble(emoji, size: 64, color: Palette.butterSoft),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -415,7 +416,8 @@ class CookedHistoryScreen extends StatelessWidget {
                                 width: 96,
                                 child: Column(
                                   children: [
-                                    FoodIcon(c.recipe.emoji, size: 40),
+                                    RecipeImage(c.recipe,
+                                        width: 40, radius: 10),
                                     Text(c.recipe.title,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -455,9 +457,12 @@ class CookedHistoryScreen extends StatelessWidget {
                               child: c.photoPath != null && !kIsWeb
                                   ? Image.file(File(c.photoPath!),
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) =>
-                                          IconBubble(c.recipe.emoji, size: 56))
-                                  : IconBubble(c.recipe.emoji, size: 56),
+                                      errorBuilder: (_, __, ___) => RecipeImage(
+                                          c.recipe,
+                                          width: 56,
+                                          radius: 16))
+                                  : RecipeImage(c.recipe,
+                                      width: 56, radius: 16),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -522,7 +527,7 @@ Future<void> showAddToCollection(BuildContext context, String recipeId) {
               CheckboxListTile(
                 value: state.isFavorite(recipeId),
                 onChanged: (_) => state.toggleFavorite(recipeId),
-                secondary: const FoodIcon('❤', size: 30),
+                secondary: const Sym('❤', size: 30),
                 title: const Text('Favoriler',
                     style: TextStyle(fontWeight: FontWeight.w800)),
               ),
@@ -530,7 +535,7 @@ Future<void> showAddToCollection(BuildContext context, String recipeId) {
                 CheckboxListTile(
                   value: c.recipeIds.contains(recipeId),
                   onChanged: (_) => state.toggleInCollection(c.id, recipeId),
-                  secondary: FoodIcon(c.emoji, size: 30),
+                  secondary: Sym(c.emoji, size: 30),
                   title: Text(c.name,
                       style: const TextStyle(fontWeight: FontWeight.w800)),
                   subtitle: Text('${c.recipeIds.length} tarif'),
@@ -621,7 +626,7 @@ class _CollectionDialogState extends State<_CollectionDialog> {
                           color: e == _emoji ? Palette.basil : Palette.line,
                           width: 2),
                     ),
-                    child: FoodIcon(e, size: 28),
+                    child: Sym(e, size: 28),
                   ),
                 ),
             ],

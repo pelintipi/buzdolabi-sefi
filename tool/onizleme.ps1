@@ -23,12 +23,13 @@ New-Item -ItemType Directory -Force "$cikti\img", "$cikti\fonts" | Out-Null
 Copy-Item -Recurse "$PSScriptRoot\onizleme\props" "$cikti\props"
 Copy-Item "$proje\assets\fonts\*.ttf" "$cikti\fonts\"
 
-# Ana akış + ek akışlar (önek, klasör). Sıra şablondaki /*PROTO2..5*/ ile aynı.
+# Ana akış + ek akışlar (önek, klasör). Sıra şablondaki /*PROTO2..6*/ ile aynı.
 $akislar = @(
   @('t', 'degisiklik_raporlari\2026-11-04_tiktok-kaydet'),
   @('a', 'degisiklik_raporlari\2026-11-04_anket-ve-tarif-sekmeleri'),
   @('v', 'degisiklik_raporlari\2026-11-04_v2-ozellikler'),
-  @('k', 'degisiklik_raporlari\2026-11-04_koleksiyonlar')
+  @('k', 'degisiklik_raporlari\2026-11-04_koleksiyonlar'),
+  @('h', 'degisiklik_raporlari\2026-11-04_ana-sayfa')
 )
 Copy-Item "$proje\test_raporu\*.png" "$cikti\img\"
 foreach ($a in $akislar) {

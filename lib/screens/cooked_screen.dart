@@ -15,6 +15,7 @@ import '../theme/palette.dart';
 import '../utils/format.dart';
 import '../widgets/profile_dialogs.dart';
 import '../widgets/share_card.dart';
+import '../widgets/recipe_image.dart';
 import '../widgets/ui.dart';
 
 enum _DeductMode { all, half, custom }
@@ -150,7 +151,7 @@ class _CookedScreenState extends State<CookedScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            FoodIcon(_recipe.emoji, size: 32),
+            RecipeImage(_recipe, width: 32, radius: 9),
             const SizedBox(width: 8),
             Flexible(
                 child: Text(_recipe.title, overflow: TextOverflow.ellipsis)),
@@ -167,7 +168,7 @@ class _CookedScreenState extends State<CookedScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
       children: [
-        const Center(child: FoodIcon('🎉', size: 110)),
+        const Center(child: Sym('🎉', size: 110)),
         Center(
             child:
                 Text('Afiyet olsun!', style: theme.textTheme.headlineMedium)),
@@ -251,7 +252,7 @@ class _CookedScreenState extends State<CookedScreen> {
                     padding: const EdgeInsets.all(4),
                     child: Opacity(
                       opacity: (_rating ?? 0) >= i ? 1 : 0.25,
-                      child: const FoodIcon('⭐', size: 48),
+                      child: const Sym('⭐', size: 48),
                     ),
                   ),
                 ),
@@ -280,7 +281,7 @@ class _CookedScreenState extends State<CookedScreen> {
           ),
           child: Column(
             children: [
-              const FoodIcon('🔥', size: 120),
+              const Sym('🔥', size: 120),
               Text(
                 o.weeklyStreak > 0
                     ? '${o.weeklyStreak} haftalık seri!'
@@ -310,7 +311,7 @@ class _CookedScreenState extends State<CookedScreen> {
             child: SoftCard(
               child: Row(
                 children: [
-                  const IconBubble('🌱', size: 52),
+                  const SymBubble('🌱', size: 52),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -327,7 +328,7 @@ class _CookedScreenState extends State<CookedScreen> {
             child: SoftCard(
               child: Row(
                 children: [
-                  IconBubble(t.emoji, size: 52),
+                  SymBubble(t.emoji, size: 52),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text('Beceri: ${t.label} +1',
@@ -361,7 +362,7 @@ extension on _CookedScreenState {
         children: [
           Row(
             children: [
-              const FoodIcon('🍽', size: 32),
+              const Sym('🍽', size: 32),
               const SizedBox(width: 8),
               Expanded(
                   child: Text('Senin tabağın',

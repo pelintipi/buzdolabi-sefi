@@ -7,7 +7,7 @@ import '../state/app_state.dart';
 import '../theme/palette.dart';
 import '../widgets/ui.dart';
 
-/// Açılış anketi: karşılama, 7 kısa soru ve "senin için ayarladıklarım" özeti.
+/// Açılış anketi: karşılama, 4 kısa soru (Profil'den açılınca 7) ve "senin için ayarladıklarım" özeti.
 /// Her cevap uygulamada bir şeyi değiştirir (soru altında neyi değiştirdiği
 /// yazar). Her soru geçilebilir; cevaplar Profil'den sonra da değiştirilebilir.
 class OnboardingScreen extends StatefulWidget {
@@ -40,7 +40,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   late Set<Appliance> _appliances =
       _p.appliancesAsked ? {..._p.appliances} : {};
 
-  static const _questionCount = 7;
+  /// İlk açılışta yalnızca 4 temel soru sorulur; kalanlar (kaç gün, tarif
+  /// saklama, plan saati) ana sayfada yeri gelince ya da Profil'den sorulur.
+  bool get _full => widget.onDone != null;
+
   static const _days = [
     _Option(2, '1-2 gün', '🌱'),
     _Option(3, '3-4 gün', '🍳'),
@@ -94,9 +97,94 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     widget.onDone?.call();
   }
 
+  List<Widget> _questions() => [
+        _Question<Goal>.multi(
+          emoji: '🧑‍🍳',
+          title: 'Seni buraya ne getirdi?',
+          why: 'Birden çok seçebilirsin. Ana sayfayı buna göre düzenleriz.',
+          options: [for (final g in Goal.values) _Option(g, g.label, g.emoji)],
+          selected: _p.goals,
+          onToggle: (v) =>
+              setState(() => _p = _p.copyWith(goals: _toggle(_p.goals, v))),
+          onNext: _next,
+        ),
+        if (_full)
+          _Question<int>.single(
+            emoji: '📊',
+            title: 'Haftada kaç gün yemek yapıyorsun?',
+            why:
+                'Haftalık hedefini buna göre koyarız; seriyi tutmak zorlaşmasın.',
+            options: _days,
+            selected: _p.cookDaysPerWeek,
+            onPick: (v) => _pickAndNext(_p.copyWith(cookDaysPerWeek: v)),
+          ),
+        _Question<Household>.single(
+          emoji: '🍽',
+          title: 'Kimin için yemek yapıyorsun?',
+          why:
+              'Tarifler bu kadar kişilik açılır, miktarlar ona göre hesaplanır.',
+          options: [
+            for (final h in Household.values) _Option(h, h.label, h.emoji)
+          ],
+          selected: _p.household,
+          onPick: (v) => _pickAndNext(_p.copyWith(household: v)),
+        ),
+        _Question<Appliance>.multi(
+          emoji: '🔥',
+          title: 'Nelerle pişiriyorsun?',
+          why: 'Olmayan bir aletle yapılan tarifleri sana göstermeyiz.',
+          options: [
+            for (final a in Appliance.values) _Option(a, a.label, a.emoji)
+          ],
+          selected: _appliances,
+          onToggle: (v) =>
+              setState(() => _appliances = _toggle(_appliances, v)),
+          onNext: _next,
+          minSelected: 1,
+        ),
+        _Question<EatingStyle>.single(
+          emoji: '🥗',
+          title: 'Nasıl besleniyorsun?',
+          why: 'Sonuçları buna göre sıralarız; vejetaryen ve vegan seçersen '
+              'uymayan tarifler hiç çıkmaz.',
+          options: [
+            for (final e in EatingStyle.values) _Option(e, e.label, e.emoji)
+          ],
+          selected: _p.eating,
+          onPick: (v) => _pickAndNext(_p.copyWith(eating: v)),
+        ),
+        if (_full)
+          _Question<RecipeHabit>.multi(
+            emoji: '📝',
+            title: 'Tariflerini nasıl saklıyorsun?',
+            why: 'Videodan kaydediyorsan TikTok\'tan tek dokunuşla eklemeyi '
+                'öne çıkarırız.',
+            options: [
+              for (final h in RecipeHabit.values) _Option(h, h.label, h.emoji)
+            ],
+            selected: _p.habits,
+            onToggle: (v) =>
+                setState(() => _p = _p.copyWith(habits: _toggle(_p.habits, v))),
+            onNext: _next,
+          ),
+        if (_full)
+          _Question<PlanTime>.single(
+            emoji: '⏱',
+            title: 'Yemeği genelde ne zaman düşünürsün?',
+            why: 'Ana sayfayı o ana göre hazırlarız.',
+            options: [
+              for (final t in PlanTime.values) _Option(t, t.label, t.emoji)
+            ],
+            selected: _p.planTime,
+            onPick: (v) => _pickAndNext(_p.copyWith(planTime: v)),
+          ),
+      ];
+
   @override
   Widget build(BuildContext context) {
-    final inQuestions = _page >= 1 && _page <= _questionCount;
+    final questions = _questions();
+    final count = questions.length;
+    final inQuestions = _page >= 1 && _page <= count;
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -112,7 +200,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       onPressed: () => _go(_page - 1),
                     ),
                     Expanded(
-                      child: ChunkyProgress(value: _page / _questionCount),
+                      child: ChunkyProgress(value: _page / count),
                     ),
                     TextButton(onPressed: _next, child: const Text('Geç')),
                   ],
@@ -123,96 +211,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 controller: _pages,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
-                  _Welcome(onStart: _next, onSkip: _finish),
-                  _Question<Goal>.multi(
-                    emoji: '🧑‍🍳',
-                    title: 'Seni buraya ne getirdi?',
-                    why:
-                        'Birden çok seçebilirsin. Ana sayfayı buna göre düzenleriz.',
-                    options: [
-                      for (final g in Goal.values) _Option(g, g.label, g.emoji)
-                    ],
-                    selected: _p.goals,
-                    onToggle: (v) => setState(
-                        () => _p = _p.copyWith(goals: _toggle(_p.goals, v))),
-                    onNext: _next,
-                  ),
-                  _Question<int>.single(
-                    emoji: '📊',
-                    title: 'Haftada kaç gün yemek yapıyorsun?',
-                    why:
-                        'Haftalık hedefini buna göre koyarız; seriyi tutmak zorlaşmasın.',
-                    options: _days,
-                    selected: _p.cookDaysPerWeek,
-                    onPick: (v) =>
-                        _pickAndNext(_p.copyWith(cookDaysPerWeek: v)),
-                  ),
-                  _Question<Household>.single(
-                    emoji: '🍽',
-                    title: 'Kimin için yemek yapıyorsun?',
-                    why:
-                        'Tarifler bu kadar kişilik açılır, miktarlar ona göre hesaplanır.',
-                    options: [
-                      for (final h in Household.values)
-                        _Option(h, h.label, h.emoji)
-                    ],
-                    selected: _p.household,
-                    onPick: (v) => _pickAndNext(_p.copyWith(household: v)),
-                  ),
-                  _Question<Appliance>.multi(
-                    emoji: '🔥',
-                    title: 'Nelerle pişiriyorsun?',
-                    why:
-                        'Olmayan bir aletle yapılan tarifleri sana göstermeyiz.',
-                    options: [
-                      for (final a in Appliance.values)
-                        _Option(a, a.label, a.emoji)
-                    ],
-                    selected: _appliances,
-                    onToggle: (v) =>
-                        setState(() => _appliances = _toggle(_appliances, v)),
-                    onNext: _next,
-                    minSelected: 1,
-                  ),
-                  _Question<EatingStyle>.single(
-                    emoji: '🥗',
-                    title: 'Nasıl besleniyorsun?',
-                    why:
-                        'Sonuçları buna göre sıralarız; vejetaryen ve vegan seçersen '
-                        'uymayan tarifler hiç çıkmaz.',
-                    options: [
-                      for (final e in EatingStyle.values)
-                        _Option(e, e.label, e.emoji)
-                    ],
-                    selected: _p.eating,
-                    onPick: (v) => _pickAndNext(_p.copyWith(eating: v)),
-                  ),
-                  _Question<RecipeHabit>.multi(
-                    emoji: '📝',
-                    title: 'Tariflerini nasıl saklıyorsun?',
-                    why:
-                        'Videodan kaydediyorsan TikTok\'tan tek dokunuşla eklemeyi '
-                        'öne çıkarırız.',
-                    options: [
-                      for (final h in RecipeHabit.values)
-                        _Option(h, h.label, h.emoji)
-                    ],
-                    selected: _p.habits,
-                    onToggle: (v) => setState(
-                        () => _p = _p.copyWith(habits: _toggle(_p.habits, v))),
-                    onNext: _next,
-                  ),
-                  _Question<PlanTime>.single(
-                    emoji: '⏱',
-                    title: 'Yemeği genelde ne zaman düşünürsün?',
-                    why: 'Ana sayfayı o ana göre hazırlarız.',
-                    options: [
-                      for (final t in PlanTime.values)
-                        _Option(t, t.label, t.emoji)
-                    ],
-                    selected: _p.planTime,
-                    onPick: (v) => _pickAndNext(_p.copyWith(planTime: v)),
-                  ),
+                  _Welcome(count: count, onStart: _next, onSkip: _finish),
+                  ...questions,
                   _Done(profile: _result, onDone: _finish),
                 ],
               ),
@@ -225,7 +225,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 }
 
 class _Welcome extends StatelessWidget {
-  const _Welcome({required this.onStart, required this.onSkip});
+  const _Welcome(
+      {required this.count, required this.onStart, required this.onSkip});
+
+  final int count;
 
   final VoidCallback onStart;
   final VoidCallback onSkip;
@@ -245,34 +248,36 @@ class _Welcome extends StatelessWidget {
               color: Palette.basil,
               borderRadius: BorderRadius.circular(36),
             ),
-            child: const Column(
+            child: Column(
               children: [
-                Row(
+                const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     FoodIcon('🥚', size: 52),
-                    FoodIcon('🧑‍🍳', size: 96),
+                    SizedBox(width: 6),
+                    FoodIcon('🥕', size: 72),
+                    SizedBox(width: 6),
                     FoodIcon('🍅', size: 56),
                   ],
                 ),
-                SizedBox(height: 12),
-                Text('Hoş geldin!',
+                const SizedBox(height: 16),
+                const Text('Hoş geldin!',
                     style: TextStyle(
-                        fontFamily: Fonts.display,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 34,
+                        fontFamily: Fonts.serif,
+                        fontSize: 46,
                         height: 1.05,
                         color: Colors.white)),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   'Seni biraz tanıyalım, tarifleri sana göre ayarlayalım. '
-                  '7 kısa soru, yarım dakika.',
+                  '$count kısa soru, ${count <= 4 ? '20 saniye' : 'yarım dakika'}.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                      height: 1.4,
-                      color: Color(0xFFD6EEDF)),
+                  style: const TextStyle(
+                      fontFamily: Fonts.body,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15.5,
+                      height: 1.45,
+                      color: Color(0xFFD6E2DA)),
                 ),
               ],
             ),
@@ -362,7 +367,7 @@ class _Question<T> extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       children: [
-        Center(child: IconBubble(emoji, size: 88, color: Palette.butterSoft)),
+        Center(child: SymBubble(emoji, size: 88, color: Palette.butterSoft)),
         const SizedBox(height: 12),
         Text(title,
             textAlign: TextAlign.center, style: theme.textTheme.headlineSmall),
@@ -443,7 +448,7 @@ class _OptionTile extends StatelessWidget {
             ),
             child: Row(
               children: [
-                FoodIcon(emoji, size: 36),
+                Sym(emoji, size: 34),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(label,
@@ -485,10 +490,8 @@ class _Done extends StatelessWidget {
   List<(String, String)> get _lines {
     final p = profile;
     return [
-      (
-        '🏆',
-        'Haftalık hedefin: ${p.cookDaysPerWeek ?? AppState.cooksPerWeekForStreak} pişirme'
-      ),
+      if (p.cookDaysPerWeek != null)
+        ('🏆', 'Haftalık hedefin: ${p.cookDaysPerWeek} pişirme'),
       if (p.household != null)
         ('🍽', 'Tarifler ${p.household!.servings} kişilik açılacak'),
       if (p.appliances.isNotEmpty)
@@ -511,7 +514,7 @@ class _Done extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
       children: [
-        const Center(child: FoodIcon('🎉', size: 96)),
+        const Center(child: Sym('🎉', size: 96)),
         const SizedBox(height: 8),
         Text('Hazırsın!',
             textAlign: TextAlign.center, style: theme.textTheme.headlineMedium),
@@ -530,7 +533,7 @@ class _Done extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Row(
                     children: [
-                      FoodIcon(_lines[i].$1, size: 30),
+                      Sym(_lines[i].$1, size: 30),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(_lines[i].$2,

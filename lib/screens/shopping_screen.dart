@@ -47,7 +47,7 @@ class ShoppingScreen extends StatelessWidget {
             SoftCard(
               child: Row(
                 children: [
-                  const FoodIcon('📝', size: 56),
+                  const Sym('📝', size: 56),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
@@ -276,7 +276,7 @@ class _SharedPantryCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const FoodIcon('🏠', size: 40),
+              const Sym('🏠', size: 40),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(PremiumFeature.sharedPantry.label,

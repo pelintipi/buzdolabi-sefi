@@ -32,6 +32,16 @@ TextStyle _display(double size, {FontWeight weight = FontWeight.w700}) =>
       color: Palette.ink,
     );
 
+/// Büyük başlıklar: serif, tek ağırlık (kalınlık taklit edilmesin diye w400).
+TextStyle _serif(double size) => TextStyle(
+      fontFamily: Fonts.serif,
+      fontSize: size,
+      fontWeight: FontWeight.w400,
+      height: 1.08,
+      letterSpacing: -0.3,
+      color: Palette.ink,
+    );
+
 ThemeData buildAppTheme() {
   final scheme = ColorScheme.fromSeed(
     seedColor: Palette.basil,
@@ -66,11 +76,12 @@ ThemeData buildAppTheme() {
   final text = base.textTheme
       .apply(bodyColor: Palette.ink, displayColor: Palette.ink)
       .copyWith(
-        displayMedium: _display(44, weight: FontWeight.w800),
-        headlineMedium: _display(30, weight: FontWeight.w800),
-        headlineSmall: _display(26, weight: FontWeight.w800),
-        titleLarge: _display(22),
-        titleMedium: _display(18),
+        displaySmall: _serif(42),
+        displayMedium: _serif(48),
+        headlineMedium: _serif(34),
+        headlineSmall: _serif(30),
+        titleLarge: _display(20, weight: FontWeight.w700),
+        titleMedium: _display(16.5, weight: FontWeight.w700),
         titleSmall: _display(16, weight: FontWeight.w600),
         bodyLarge: _body(17, FontWeight.w500),
         bodyMedium: _body(15, FontWeight.w500),
@@ -95,7 +106,7 @@ ThemeData buildAppTheme() {
       scrolledUnderElevation: 0,
       centerTitle: false,
       foregroundColor: Palette.ink,
-      titleTextStyle: _display(26, weight: FontWeight.w800),
+      titleTextStyle: _serif(30),
     ),
     cardTheme: CardThemeData(
       color: Palette.surface,
@@ -171,7 +182,7 @@ ThemeData buildAppTheme() {
       backgroundColor: Palette.surface,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-      titleTextStyle: _display(24, weight: FontWeight.w800),
+      titleTextStyle: _serif(28),
     ),
     bottomSheetTheme: const BottomSheetThemeData(
       backgroundColor: Palette.surface,

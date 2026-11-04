@@ -12,6 +12,7 @@ import 'services/ingredient_repository.dart';
 import 'services/storage_service.dart';
 import 'state/app_state.dart';
 import 'state/digest.dart';
+import 'widgets/recipe_image.dart';
 
 /// Çökme raporları için (boşsa kapalı):
 ///   --dart-define=SENTRY_DSN=https://...@....ingest.sentry.io/...
@@ -29,6 +30,7 @@ Future<void> main() async {
   final bundledRecipes = await rootBundle.loadString(Catalog.recipesAsset);
   final catalog = await RemoteCatalog.cachedNewerThan(bundledRecipes) ??
       await Catalog.load(rootBundle);
+  await RecipePhotos.init();
   for (final p in catalog.problems) {
     debugPrint('Katalog: $p');
   }

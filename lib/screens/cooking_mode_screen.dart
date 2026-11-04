@@ -12,6 +12,7 @@ import '../services/voice_commands.dart';
 import '../state/app_state.dart';
 import '../theme/palette.dart';
 import '../utils/format.dart';
+import '../widgets/recipe_image.dart';
 import '../widgets/ui.dart';
 import 'cooked_screen.dart';
 
@@ -94,7 +95,7 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        icon: const FoodIcon('⏲', size: 64),
+        icon: const Sym('⏲', size: 64),
         title: Text('${t.label} hazır!'),
         actions: [
           FilledButton(
@@ -275,7 +276,7 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
         ),
         title: Row(
           children: [
-            FoodIcon(_recipe.emoji, size: 32),
+            RecipeImage(_recipe, width: 32, radius: 9),
             const SizedBox(width: 8),
             Flexible(
                 child: Text(_recipe.title, overflow: TextOverflow.ellipsis)),
@@ -307,7 +308,7 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
               ),
               child: Row(
                 children: [
-                  const FoodIcon('🎙', size: 26),
+                  const Sym('🎙', size: 26),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -366,7 +367,7 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const FoodIcon('⏱', size: 24),
+                          const Sym('⏱', size: 24),
                           const SizedBox(width: 6),
                           Text(
                               '${t.label} ${formatTimer(t.endsAt.difference(now))}',
@@ -500,7 +501,7 @@ class _DonePage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const FoodIcon('🎉', size: 140),
+          const Sym('🎉', size: 140),
           const SizedBox(height: 12),
           Text('Afiyet olsun!',
               style: Theme.of(context).textTheme.headlineMedium),

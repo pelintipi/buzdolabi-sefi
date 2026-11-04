@@ -76,7 +76,7 @@ void main() {
         ),
       ));
 
-      await tester.scrollUntilVisible(find.text('Tümü'), 200,
+      await tester.scrollUntilVisible(find.text('Koleksiyonlar'), 200,
           scrollable: _mainScroll);
       await tester.pumpAndSettle();
       await Scrollable.ensureVisible(tester.element(find.text('Koleksiyonlar')),
@@ -86,15 +86,15 @@ void main() {
           title: 'Ana sayfada koleksiyonlar',
           action: 'Ana sayfada biraz kaydırdım.',
           result:
-              'Yeni "Koleksiyonlar" şeridi: Yaptıklarım, Favoriler, Yüksek protein, '
-              'Hafif, Tatlı, Atıştırmalık.');
-      expect(find.text('Yaptıklarım'), findsOneWidget);
+              '"Planla" listesinde "Koleksiyonlar" satırı: yaptıkların, favoriler, hazır listeler.');
+      expect(
+          find.text('Yaptıklarım, favoriler, hazır listeler'), findsOneWidget);
 
-      await r.tap(tester, find.text('Tümü'), 'Tümü');
+      await r.tap(tester, find.text('Koleksiyonlar'), 'Koleksiyonlar');
       await tester.pumpAndSettle();
       await r.capture(tester,
           title: 'Koleksiyonlar',
-          action: '"Tümü"ye bastım.',
+          action: '"Koleksiyonlar"a bastım.',
           result:
               'Üstte pişirdikçe dolan "Yaptıklarım", altında kendi koleksiyonların '
               '(şimdilik Favoriler), en altta hazır koleksiyonlar.');
@@ -145,7 +145,7 @@ void main() {
       await tester.tap(find.descendant(
           of: find.byType(AlertDialog),
           matching:
-              find.byWidgetPredicate((w) => w is FoodIcon && w.emoji == '🎉')));
+              find.byWidgetPredicate((w) => w is Sym && w.emoji == '🎉')));
       await tester.pumpAndSettle();
       await r.capture(tester,
           title: 'Yeni koleksiyon',
@@ -169,9 +169,9 @@ void main() {
       Navigator.of(tester.element(find.text('Karnıyarık').first)).pop();
       await tester.pumpAndSettle();
 
-      await tester.scrollUntilVisible(find.text('Tümü'), 200,
+      await tester.scrollUntilVisible(find.text('Koleksiyonlar'), 200,
           scrollable: _mainScroll);
-      await r.tap(tester, find.text('Tümü'), 'Tümü');
+      await r.tap(tester, find.text('Koleksiyonlar'), 'Koleksiyonlar');
       await tester.pumpAndSettle();
       await r.tap(tester, find.text('Misafir menüsü'), 'Misafir menüsü');
       await tester.pumpAndSettle();

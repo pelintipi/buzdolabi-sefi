@@ -8,7 +8,7 @@ import 'ui.dart';
 Widget _choice(String icon, String label, bool selected,
         ValueChanged<bool> onChanged) =>
     FilterChip(
-      avatar: FoodIcon(icon, size: 22),
+      avatar: Sym(icon, size: 22),
       label: Text(label),
       selected: selected,
       side:
@@ -33,7 +33,7 @@ class _AllergyDialogState extends State<AllergyDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      icon: const FoodIcon('⚠', size: 64),
+      icon: const Sym('⚠', size: 64),
       title: const Text('Alerjin var mı?'),
       content: SingleChildScrollView(
         child: Column(
@@ -95,7 +95,7 @@ class _AppliancesDialogState extends State<AppliancesDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      icon: const FoodIcon('🔌', size: 64),
+      icon: const Sym('🔌', size: 64),
       title: const Text('Mutfağında neler var?'),
       content: Column(
         mainAxisSize: MainAxisSize.min,

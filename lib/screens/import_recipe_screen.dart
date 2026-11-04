@@ -181,7 +181,7 @@ class _ImportRecipeScreenState extends State<ImportRecipeScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const FoodIcon('🎬', size: 96),
+                  const Sym('🎬', size: 96),
                   const SizedBox(height: 12),
                   Text('Videodaki tarif okunuyor…',
                       style: theme.textTheme.titleLarge),
@@ -206,7 +206,7 @@ class _ImportRecipeScreenState extends State<ImportRecipeScreen> {
                       children: [
                         Row(
                           children: [
-                            const FoodIcon('🎙', size: 34),
+                            const Sym('🎙', size: 34),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text('Tarif sesli mi anlatılıyor?',
@@ -243,7 +243,7 @@ class _ImportRecipeScreenState extends State<ImportRecipeScreen> {
                     hintText: 'https://www.tiktok.com/@…/video/…',
                     prefixIcon: Padding(
                         padding: EdgeInsets.all(10),
-                        child: FoodIcon('🔗', size: 24)),
+                        child: Sym('🔗', size: 24)),
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -318,7 +318,7 @@ class _HowToCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const FoodIcon('📲', size: 44),
+              const Sym('📲', size: 44),
               const SizedBox(width: 10),
               Expanded(
                 child: Text('TikTok\'tan tek dokunuşla',
