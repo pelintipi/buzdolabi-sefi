@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../models/recipe.dart';
 import '../services/collections.dart';
+import 'ui.dart';
 
 /// Tarif fotoğrafları: `assets/photos/<tarif kimliği>.jpg` (ya da .png/.webp).
 /// Uygulama açılırken hangi fotoğrafların olduğu bir kez okunur; fotoğrafı
@@ -51,7 +52,7 @@ IconData _iconFor(RecipeCategory c) => switch (c) {
     };
 
 /// Tarifin görseli: fotoğrafı varsa fotoğraf, yoksa türüne göre tonlu zemin
-/// üzerinde yemek türünün çizgi ikonu.
+/// üzerinde yemeğin 3D ikonu (ikonu yoksa türün çizgi ikonu).
 class RecipeImage extends StatelessWidget {
   const RecipeImage(this.recipe,
       {super.key, this.width = 72, this.height, this.radius = 18});
@@ -78,8 +79,11 @@ class RecipeImage extends StatelessWidget {
             : DecoratedBox(
                 decoration: BoxDecoration(color: _tint(categoryOf(recipe))),
                 child: Center(
-                  child: Icon(_iconFor(categoryOf(recipe)),
-                      size: shortest * 0.34, color: const Color(0x591A1A17)),
+                  child: iconAssetFor(recipe.emoji) != null
+                      ? FoodIcon(recipe.emoji, size: shortest * 0.62)
+                      : Icon(_iconFor(categoryOf(recipe)),
+                          size: shortest * 0.34,
+                          color: const Color(0x591A1A17)),
                 ),
               ),
       ),
