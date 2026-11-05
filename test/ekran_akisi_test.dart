@@ -1,4 +1,4 @@
-// Kullanıcı gibi tıklayarak uygulamayı baştan sona dener ve her adımın ekran
+﻿// Kullanıcı gibi tıklayarak uygulamayı baştan sona dener ve her adımın ekran
 // görüntüsünü alır. Çalıştırınca test_raporu/ altında rapor.html ve
 // oynatılabilir prototip için prototip.json oluşur:
 //   flutter test test/ekran_akisi_test.dart
@@ -124,7 +124,7 @@ void main() {
           action: 'Aşağı kaydırdım.',
           result:
               '"Sadece … alırsan" önerisi, sıralama seçenekleri ve yapılabilen tariflerin '
-              'kartlarında "En hızlı / En proteinli / En hafif" rozetleri var.');
+              'kartlarında "En hızlı / En dengeli / En proteinli" gibi rozetler var; rozet yalnızca hak edene veriliyor.');
 
       await r.tap(tester, sortChip, 'En çok protein');
       await tester.pumpAndSettle();

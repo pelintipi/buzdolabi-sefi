@@ -3,7 +3,11 @@ import 'dart:math' as math;
 import '../models/ingredient.dart';
 import '../models/recipe.dart';
 import '../models/user_profile.dart';
+import 'collections.dart';
 import 'ingredient_repository.dart';
+import 'nutrition_review.dart';
+
+export 'nutrition_review.dart';
 import 'unit_converter.dart';
 
 /// Dolabın eşleştirme için gram cinsinden anlık görüntüsü.
@@ -44,6 +48,7 @@ class RecipeFacts {
     required this.allergens,
     required this.isVegetarian,
     required this.isVegan,
+    required this.review,
   });
 
   final Nutrition perServing;
@@ -53,6 +58,9 @@ class RecipeFacts {
   final Set<Allergen> allergens;
   final bool isVegetarian;
   final bool isVegan;
+
+  /// Porsiyonun protein, karbonhidrat ve yağ dengesine göre değerlendirmesi.
+  final NutritionReview review;
 }
 
 enum ItemState { enough, short, missing, substituted, staple }
@@ -64,7 +72,9 @@ class ItemCheck {
     required this.availableGrams,
     required this.state,
     this.substitute,
-  });
+    bool? blocks,
+  }) : blocks =
+            blocks ?? (state == ItemState.short || state == ItemState.missing);
 
   final RecipeItem item;
   final double requiredGrams;
@@ -72,10 +82,14 @@ class ItemCheck {
   final ItemState state;
   final Substitute? substitute;
 
+  /// Tarifi yapmayı engelliyor mu? Az ama en az bir porsiyona yetiyorsa
+  /// engellemez (daha az porsiyon çıkar).
+  final bool blocks;
+
   double get sufficiency =>
       requiredGrams <= 0 ? 1.0 : math.min(availableGrams / requiredGrams, 1.0);
 
-  bool get isProblem => state == ItemState.short || state == ItemState.missing;
+  bool get isProblem => blocks;
 
   /// Pişirince dolaptan düşülecek malzeme (alternatif kullanıldıysa o).
   String get usedIngredientId => substitute?.ingredientId ?? item.ingredientId;
@@ -177,6 +191,7 @@ class QuickFilters {
 enum SortMode {
   recommended('Önerilen', '✨'),
   fastest('En hızlı', '⚡'),
+  balanced('En dengeli', '⚖'),
   protein('En çok protein', '💪'),
   light('En hafif', '🪶');
 
@@ -189,6 +204,7 @@ enum SortMode {
 /// Yapılabilir seçenekler arasında öne çıkanlar (kartlardaki rozetler için).
 enum Highlight {
   fastest('En hızlı', '⚡'),
+  balanced('En dengeli', '⚖'),
   protein('En proteinli', '💪'),
   light('En hafif', '🪶');
 
@@ -199,6 +215,8 @@ enum Highlight {
 }
 
 /// [options] içinde her ölçütte birinci olan tarif. Tek seçenek varsa rozet yok.
+/// Besinle ilgili rozetler yalnızca hak edene verilir: 5 g proteinli bir
+/// tarif, diğerlerinden fazla olsa bile "En proteinli" olmaz.
 Map<String, Set<Highlight>> highlightsFor(List<RecipeMatch> options) {
   if (options.length < 2) return const {};
   final result = <String, Set<Highlight>>{};
@@ -209,14 +227,17 @@ Map<String, Set<Highlight>> highlightsFor(List<RecipeMatch> options) {
 
   mark(pick((a, b) => a.recipe.minutes.compareTo(b.recipe.minutes)),
       Highlight.fastest);
-  mark(
-      pick((a, b) =>
-          b.facts.perServing.protein.compareTo(a.facts.perServing.protein)),
-      Highlight.protein);
-  mark(
-      pick(
-          (a, b) => a.facts.perServing.kcal.compareTo(b.facts.perServing.kcal)),
-      Highlight.light);
+  final balanced = pick((a, b) =>
+      b.facts.review.balanceScore.compareTo(a.facts.review.balanceScore));
+  if (balanced.facts.review.tone == ReviewTone.good) {
+    mark(balanced, Highlight.balanced);
+  }
+  final protein = pick((a, b) =>
+      b.facts.perServing.protein.compareTo(a.facts.perServing.protein));
+  if (protein.facts.review.isProteinSource) mark(protein, Highlight.protein);
+  final light = pick(
+      (a, b) => a.facts.perServing.kcal.compareTo(b.facts.perServing.kcal));
+  if (light.facts.review.isLight) mark(light, Highlight.light);
   return result;
 }
 
@@ -231,6 +252,9 @@ List<RecipeMatch> sortOptions(List<RecipeMatch> options, SortMode mode) {
     case SortMode.protein:
       list.sort((a, b) =>
           b.facts.perServing.protein.compareTo(a.facts.perServing.protein));
+    case SortMode.balanced:
+      list.sort((a, b) =>
+          b.facts.review.balanceScore.compareTo(a.facts.review.balanceScore));
     case SortMode.light:
       list.sort(
           (a, b) => a.facts.perServing.kcal.compareTo(b.facts.perServing.kcal));
@@ -278,6 +302,8 @@ class RecipeMatcher {
       isVegetarian:
           !tags.contains(FoodTag.meat) && !tags.contains(FoodTag.fish),
       isVegan: tags.isEmpty,
+      review: NutritionReview.of(nutrition.scale(1 / r.servings),
+          category: categoryOf(r)),
     );
   }
 
@@ -339,7 +365,13 @@ class RecipeMatcher {
           requiredGrams: needed,
           availableGrams: available,
           state: state,
-          substitute: substitute);
+          substitute: substitute,
+          // Tarifin kendi porsiyonunda bir porsiyonluk malzeme varsa az
+          // olması tarifi engellemez (daha az porsiyon çıkar). Kişi sayısı
+          // elle seçildiyse o kadarı için yetmesi gerekir.
+          blocks: state == ItemState.missing ||
+              (state == ItemState.short &&
+                  (servings != null || available < needed / s * 0.999)));
       checks.add(check);
 
       if (item.optional) continue;
@@ -360,7 +392,9 @@ class RecipeMatcher {
     // "yapılabilir" sayılmaz (domatessiz domates çorbası olmaz).
     final hasRealMain = checks.any((c) =>
         c.item.isMain &&
-        (c.state == ItemState.enough || c.state == ItemState.staple));
+        (c.state == ItemState.enough ||
+            c.state == ItemState.staple ||
+            (c.state == ItemState.short && !c.blocks)));
     final group = problemCount == 0
         ? (usedSubstitute
             ? (hasRealMain ? MatchGroup.substitute : MatchGroup.far)

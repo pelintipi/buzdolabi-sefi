@@ -37,7 +37,7 @@ void main() {
 
   test('JSON kataloğu hatasız okunur', () {
     expect(testCatalog.problems, isEmpty);
-    expect(recipeCatalog, hasLength(107));
+    expect(recipeCatalog, hasLength(109));
     expect(ingredientCatalog, hasLength(82));
   });
 
@@ -123,14 +123,61 @@ void main() {
     }
   });
 
-  test('miktar yetersizse "hemen yapabilirsin" demez', () {
-    // Menemen 3 yumurta istiyor, dolapta 2 var.
+  test('miktar az ama bir porsiyona yetiyorsa daha az porsiyonla yapılır', () {
+    // Menemen 2 kişilik, 3 yumurta istiyor; dolapta 2 var → 1 porsiyon.
     final m = matcher.evaluate(recipe('menemen'),
         pantry({'yumurta': 2, 'domates': 3, 'sivri_biber': 3}));
+    expect(m.group, MatchGroup.ready);
+    expect(m.problems, isEmpty);
+    expect(m.checks.firstWhere((c) => c.item.ingredientId == 'yumurta').state,
+        ItemState.short);
+    expect(m.maxServings, 1.0);
+  });
+
+  test('bir porsiyona bile yetmiyorsa "hemen yapabilirsin" demez', () {
+    // 1 yumurta, 1 porsiyon için gereken 1,5 yumurtadan az.
+    final m = matcher.evaluate(recipe('menemen'),
+        pantry({'yumurta': 1, 'domates': 3, 'sivri_biber': 3}));
     expect(m.group, MatchGroup.almost);
     expect(m.blocking!.item.ingredientId, 'yumurta');
     expect(m.blocking!.state, ItemState.short);
-    expect(m.maxServings, 1.0);
+  });
+
+  test('kıyma ve pirinçle köfte ve pilav tarifleri çıkar', () {
+    final results = matcher.rank(
+        recipeCatalog,
+        pantry({'kiyma': 250, 'pirinc': 500}),
+        allAppliances,
+        const QuickFilters());
+    MatchGroup groupOf(String id) =>
+        results.firstWhere((m) => m.recipe.id == id).group;
+    // Kıymalı pilav: tereyağı yerine sıvı yağ.
+    expect(groupOf('kiymali_pilav'), isNot(MatchGroup.far));
+    expect(groupOf('pilav_ustu_kofte'), isNot(MatchGroup.far));
+    // 250 g kıyma 4 kişilik köftenin 2 porsiyonuna yeter; ekmek yerine un.
+    final kofte = results.firstWhere((m) => m.recipe.id == 'tava_kofte');
+    expect(kofte.group, MatchGroup.substitute);
+    expect(kofte.maxServings, 2.0);
+  });
+
+  test('diyetisyen değerlendirmesi: patates karbonhidrat, köfte protein', () {
+    final patates = matcher.factsOf(recipe('airfryer_patates')).review;
+    expect(patates.verdict, 'Karbonhidrat ağırlıklı');
+    expect(patates.isProteinSource, isFalse);
+    expect(patates.tips, isNotEmpty);
+    final tavuk = matcher.factsOf(recipe('airfryer_tavuk')).review;
+    expect(tavuk.isHighProtein, isTrue);
+    expect(tavuk.proteinPct + tavuk.carbPct + tavuk.fatPct, 100);
+    expect(tavuk.balanceScore, greaterThan(patates.balanceScore));
+  });
+
+  test('5 g proteinli tarif en yüksek olsa bile "En proteinli" olmaz', () {
+    final options = [
+      for (final id in ['airfryer_patates', 'firinda_karnabahar'])
+        matcher.evaluate(recipe(id), pantry({'patates': 5, 'karnabahar': 2}))
+    ];
+    final h = highlightsFor(options).values.expand((s) => s).toSet();
+    expect(h, isNot(contains(Highlight.protein)));
   });
 
   test('miktar yeterliyse hazır', () {
@@ -292,7 +339,8 @@ void main() {
         lessThanOrEqualTo(byTime.last.recipe.minutes));
 
     final h = highlightsFor(options);
-    expect(h.values.expand((s) => s).toSet(), Highlight.values.toSet());
+    expect(h.values.expand((s) => s).toSet(),
+        containsAll([Highlight.fastest, Highlight.protein]));
     expect(h[byProtein.first.recipe.id], contains(Highlight.protein));
   });
 

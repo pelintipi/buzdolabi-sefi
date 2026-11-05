@@ -188,13 +188,14 @@ void main() {
       await r.capture(tester,
           title: 'Tarif · Besin değeri',
           action: '"Besin değeri" sekmesine dokundum.',
-          result: 'Enerji, protein, karbonhidrat, yağ: 1 porsiyon ve 2 kişilik '
-              'toplam, günlük ihtiyaca oranı çubukla.');
-      expect(find.text('Karbonhidrat'), findsOneWidget);
+          result: '"Diyetisyen gözüyle": enerjinin protein, karbonhidrat ve '
+              'yağa dağılımı, kısa hüküm ve öğünü dengeleme önerileri; altında '
+              '1 porsiyon ve toplam besin tablosu.');
+      expect(find.text('DİYETİSYEN GÖZÜYLE'), findsOneWidget);
 
       // -------------------------------------------------------- Neler alabilirim?
       r.mark(tester, find.byTooltip('Geri'), 'Geri');
-      Navigator.of(tester.element(find.text('Karbonhidrat'))).pop();
+      Navigator.of(tester.element(find.text('DİYETİSYEN GÖZÜYLE'))).pop();
       await tester.pumpAndSettle();
       await r.tap(tester, find.text('Liste'), 'Liste');
       await tester.pumpAndSettle();

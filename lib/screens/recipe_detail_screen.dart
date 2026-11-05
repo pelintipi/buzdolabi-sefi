@@ -10,6 +10,7 @@ import '../state/app_state.dart';
 import '../theme/palette.dart';
 import '../utils/format.dart';
 import '../widgets/profile_dialogs.dart';
+import '../widgets/recipe_card.dart' show reviewColor;
 import '../widgets/recipe_image.dart';
 import '../widgets/share_card.dart';
 import '../widgets/ui.dart';
@@ -188,6 +189,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   '${formatNumber(facts.perServing.kcal, decimals: 0)} kcal'),
               _Meta(Icons.fitness_center_rounded,
                   '${formatNumber(facts.perServing.protein, decimals: 0)} g protein'),
+              _Meta(Icons.balance_rounded, facts.review.verdict),
               _Meta(
                   Icons.kitchen_outlined,
                   recipe.appliances.isEmpty
@@ -299,6 +301,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           if (_tab == _Tab.nutrition) ...[
             const SectionTitle('Besin değeri', icon: '📊'),
             _FactsRow(facts: facts),
+            const SizedBox(height: 12),
+            _DietitianCard(review: facts.review),
             const SizedBox(height: 12),
             _NutritionTable(facts: facts, servings: _servings),
             const SizedBox(height: 10),
@@ -633,6 +637,120 @@ class _SectionTabs extends StatelessWidget {
           tab(_Tab.ingredients, '🧺', 'Malzemeler'),
           tab(_Tab.steps, '🍳', 'Adımlar ($stepCount)'),
           tab(_Tab.nutrition, '📊', 'Besin değeri'),
+        ],
+      ),
+    );
+  }
+}
+
+/// "Diyetisyen gözüyle": enerjinin protein, karbonhidrat ve yağa dağılımı,
+/// kısa hüküm ve öğünü dengeleme önerileri.
+class _DietitianCard extends StatelessWidget {
+  const _DietitianCard({required this.review});
+
+  final NutritionReview review;
+
+  static const _protein = Palette.basil;
+  static const _carb = Palette.butter;
+  static const _fat = Color(0xFF6E8B3D);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final parts = [
+      ('Protein', review.proteinPct, _protein, '%10-35'),
+      ('Karbonhidrat', review.carbPct, _carb, '%45-65'),
+      ('Yağ', review.fatPct, _fat, '%20-35'),
+    ];
+    return SoftCard(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('DİYETİSYEN GÖZÜYLE',
+              style: theme.textTheme.labelSmall
+                  ?.copyWith(letterSpacing: 1.2, color: Palette.inkSoft)),
+          const SizedBox(height: 4),
+          Text(review.verdict,
+              style: theme.textTheme.titleLarge
+                  ?.copyWith(color: reviewColor(review.tone))),
+          const SizedBox(height: 4),
+          Text(review.summary, style: theme.textTheme.bodyMedium),
+          const SizedBox(height: 12),
+          Semantics(
+            label: 'Enerjinin yüzde ${review.proteinPct}\'i proteinden, '
+                'yüzde ${review.carbPct}\'i karbonhidrattan, '
+                'yüzde ${review.fatPct}\'i yağdan geliyor',
+            child: ExcludeSemantics(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: SizedBox(
+                  height: 12,
+                  child: Row(
+                    children: [
+                      for (final p in parts)
+                        if (p.$2 > 0)
+                          Expanded(flex: p.$2, child: Container(color: p.$3)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          ExcludeSemantics(
+            child: Row(
+              children: [
+                for (final p in parts)
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                              color: p.$3, shape: BoxShape.circle),
+                        ),
+                        const SizedBox(width: 5),
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('${p.$1} %${p.$2}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 12.5)),
+                              Text('önerilen ${p.$4}',
+                                  style: theme.textTheme.labelSmall
+                                      ?.copyWith(color: Palette.inkSoft)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          if (review.tips.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            for (final t in review.tips)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(top: 2),
+                      child: Icon(Icons.lightbulb_outline_rounded,
+                          size: 17, color: Palette.butterDeep),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(t, style: theme.textTheme.bodySmall)),
+                  ],
+                ),
+              ),
+          ],
         ],
       ),
     );

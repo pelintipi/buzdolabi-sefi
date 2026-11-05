@@ -4216,19 +4216,25 @@
           "ingredient": "sogan",
           "amount": 1,
           "measure": "adet",
-          "role": "side"
+          "role": "optional"
         },
         {
           "ingredient": "ekmek",
           "amount": 2,
           "measure": "dilim",
-          "role": "side"
+          "role": "side",
+          "substitutes": [
+            {
+              "ingredient": "un",
+              "note": "Ekmek yoksa 2 yemek kaşığı un ya da galeta unu kullan."
+            }
+          ]
         },
         {
           "ingredient": "yumurta",
           "amount": 1,
           "measure": "adet",
-          "role": "side"
+          "role": "optional"
         },
         {
           "ingredient": "domates",
@@ -4304,13 +4310,19 @@
           "ingredient": "sogan",
           "amount": 1,
           "measure": "adet",
-          "role": "side"
+          "role": "optional"
         },
         {
           "ingredient": "ekmek",
           "amount": 2,
           "measure": "dilim",
-          "role": "side"
+          "role": "side",
+          "substitutes": [
+            {
+              "ingredient": "un",
+              "note": "Ekmek yoksa 2 yemek kaşığı un ya da galeta unu kullan."
+            }
+          ]
         },
         {
           "ingredient": "yumurta",
@@ -8386,6 +8398,210 @@
           "text": "Tereyağında pul biberi yakıp gezdirin."
         }
       ],
+      "category": "anaYemek"
+    },
+    {
+      "id": "kiymali_pilav",
+      "title": "Kıymalı Pilav",
+      "emoji": "🍚",
+      "minutes": 40,
+      "difficulty": "kolay",
+      "servings": 4,
+      "appliances": [
+        "ocak"
+      ],
+      "techniques": [
+        "sote",
+        "haslama"
+      ],
+      "tags": [
+        "tek_kap"
+      ],
+      "items": [
+        {
+          "ingredient": "pirinc",
+          "amount": 1.5,
+          "measure": "suBardagi",
+          "role": "main"
+        },
+        {
+          "ingredient": "kiyma",
+          "amount": 250,
+          "measure": "gram",
+          "role": "main"
+        },
+        {
+          "ingredient": "sogan",
+          "amount": 1,
+          "measure": "adet",
+          "role": "optional"
+        },
+        {
+          "ingredient": "tereyagi",
+          "amount": 1,
+          "measure": "yemekKasigi",
+          "role": "side",
+          "substitutes": [
+            {
+              "ingredient": "sivi_yag",
+              "note": "Tereyağı yoksa sıvı yağ kullanabilirsin."
+            }
+          ]
+        },
+        {
+          "ingredient": "salca",
+          "amount": 1,
+          "measure": "yemekKasigi",
+          "role": "side"
+        },
+        {
+          "ingredient": "karabiber",
+          "amount": 0.5,
+          "measure": "cayKasigi",
+          "role": "side"
+        },
+        {
+          "ingredient": "tuz",
+          "amount": 1,
+          "measure": "cayKasigi",
+          "role": "side"
+        }
+      ],
+      "steps": [
+        {
+          "text": "Pirinci ılık tuzlu suda beklet, sonra suyu berrak akana kadar yıka.",
+          "timerMinutes": 15,
+          "timerLabel": "Islatma"
+        },
+        {
+          "text": "Tereyağında varsa ince doğranmış soğanı, sonra kıymayı suyunu çekene kadar kavur.",
+          "timerMinutes": 8,
+          "timerLabel": "Kavurma"
+        },
+        {
+          "text": "Salçayı ekleyip 1 dakika çevir, süzülmüş pirinci ekle ve 2 dakika daha kavur."
+        },
+        {
+          "text": "2,5 su bardağı sıcak su, tuz ve karabiberi ekle. Kaynayınca kısık ateşte suyunu çekene kadar pişir.",
+          "timerMinutes": 15,
+          "timerLabel": "Pilav"
+        },
+        {
+          "text": "Ocağı kapat, 10 dakika demlendir. Yanına yoğurt ya da salata iyi gider.",
+          "timerMinutes": 10,
+          "timerLabel": "Demlenme"
+        }
+      ],
+      "tip": "Kıyma pilava protein katar; yanına bir kase yoğurt eklersen öğün daha dengeli olur.",
+      "category": "anaYemek"
+    },
+    {
+      "id": "pilav_ustu_kofte",
+      "title": "Pilav Üstü Köfte",
+      "emoji": "🥩",
+      "minutes": 45,
+      "difficulty": "kolay",
+      "servings": 4,
+      "appliances": [
+        "ocak"
+      ],
+      "techniques": [
+        "kizartma",
+        "haslama"
+      ],
+      "tags": [],
+      "items": [
+        {
+          "ingredient": "kiyma",
+          "amount": 400,
+          "measure": "gram",
+          "role": "main"
+        },
+        {
+          "ingredient": "pirinc",
+          "amount": 1.5,
+          "measure": "suBardagi",
+          "role": "main"
+        },
+        {
+          "ingredient": "sogan",
+          "amount": 1,
+          "measure": "adet",
+          "role": "optional"
+        },
+        {
+          "ingredient": "ekmek",
+          "amount": 1,
+          "measure": "dilim",
+          "role": "side",
+          "substitutes": [
+            {
+              "ingredient": "un",
+              "note": "Ekmek yoksa 1 yemek kaşığı un ya da galeta unu kullan."
+            }
+          ]
+        },
+        {
+          "ingredient": "tereyagi",
+          "amount": 1,
+          "measure": "yemekKasigi",
+          "role": "side",
+          "substitutes": [
+            {
+              "ingredient": "sivi_yag",
+              "note": "Tereyağı yoksa sıvı yağ kullanabilirsin."
+            }
+          ]
+        },
+        {
+          "ingredient": "kimyon",
+          "amount": 1,
+          "measure": "cayKasigi",
+          "role": "side"
+        },
+        {
+          "ingredient": "karabiber",
+          "amount": 0.5,
+          "measure": "cayKasigi",
+          "role": "side"
+        },
+        {
+          "ingredient": "tuz",
+          "amount": 1,
+          "measure": "cayKasigi",
+          "role": "side"
+        },
+        {
+          "ingredient": "sivi_yag",
+          "amount": 1,
+          "measure": "yemekKasigi",
+          "role": "side"
+        }
+      ],
+      "steps": [
+        {
+          "text": "Pirinci ılık tuzlu suda beklet, sonra suyu berrak akana kadar yıka.",
+          "timerMinutes": 15,
+          "timerLabel": "Islatma"
+        },
+        {
+          "text": "Kıymayı varsa rendelenmiş soğan, ufalanmış ekmek, kimyon, tuz ve karabiberle yoğur; küçük köfteler yap."
+        },
+        {
+          "text": "Tereyağında pirinci kavur, 2,5 su bardağı sıcak su ve tuz ekle. Kısık ateşte suyunu çekene kadar pişir.",
+          "timerMinutes": 15,
+          "timerLabel": "Pilav"
+        },
+        {
+          "text": "Pilav pişerken köfteleri az yağlı tavada iki yüzü kızarana kadar pişir.",
+          "timerMinutes": 10,
+          "timerLabel": "Köfte"
+        },
+        {
+          "text": "Pilavı tabağa al, köfteleri üstüne diz. Yanına közlenmiş biber ya da salata ekleyebilirsin."
+        }
+      ],
+      "tip": "Köfteyi az yağda pişirmek yağ oranını düşürür; pilavı küçük, köfteyi bol tut.",
       "category": "anaYemek"
     }
   ]

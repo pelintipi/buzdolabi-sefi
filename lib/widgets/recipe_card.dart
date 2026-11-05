@@ -10,6 +10,13 @@ import '../utils/format.dart';
 import 'recipe_image.dart';
 import 'ui.dart';
 
+/// Diyetisyen değerlendirmesinin rengi.
+Color reviewColor(ReviewTone t) => switch (t) {
+      ReviewTone.good => Palette.basil,
+      ReviewTone.ok => Palette.inkSoft,
+      ReviewTone.caution => const Color(0xFF8A6500),
+    };
+
 typedef MatchStatus = ({String icon, String text, Color color, Color soft});
 
 MatchStatus matchStatus(RecipeMatch m, IngredientRepository repo) {
@@ -17,7 +24,9 @@ MatchStatus matchStatus(RecipeMatch m, IngredientRepository repo) {
     case MatchGroup.ready:
       return (
         icon: '✅',
-        text: 'Hemen yapabilirsin',
+        text: m.maxServings < m.recipe.servings
+            ? 'Hemen yapabilirsin · ${formatNumber(m.maxServings)} porsiyon çıkar'
+            : 'Hemen yapabilirsin',
         color: Palette.basilDeep,
         soft: Palette.basilSoft,
       );
@@ -55,7 +64,7 @@ MatchStatus matchStatus(RecipeMatch m, IngredientRepository repo) {
   }
 }
 
-/// Kartta yalnızca 3 ana bilgi: süre, protein, eşleşme durumu.
+/// Kartta süre, kalori, protein, diyetisyen hükmü ve eşleşme durumu.
 class RecipeCard extends StatelessWidget {
   const RecipeCard(
       {super.key, required this.match, this.highlights = const {}});
@@ -119,7 +128,16 @@ class RecipeCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 3),
+                  Text(n.kcal > 0 ? match.facts.review.verdict : '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontFamily: Fonts.body,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12.5,
+                          color: reviewColor(match.facts.review.tone))),
+                  const SizedBox(height: 4),
                   Row(
                     children: [
                       Container(

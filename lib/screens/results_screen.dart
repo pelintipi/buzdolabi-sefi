@@ -259,20 +259,31 @@ class _CompareCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                   fontWeight: FontWeight.w800, fontSize: 14)),
-                          if (m.group == MatchGroup.almost)
-                            const Text('1 eksik',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 12,
-                                    color: Palette.tomatoDeep)),
+                          Text(
+                              [
+                                m.facts.review.verdict,
+                                if (m.group == MatchGroup.almost) '1 eksik',
+                              ].join(' · '),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                  color: m.group == MatchGroup.almost
+                                      ? Palette.tomatoDeep
+                                      : reviewColor(m.facts.review.tone))),
                         ],
                       ),
                     ),
                     cell('${m.recipe.minutes}', m.recipe.minutes == minMinutes),
-                    cell('${m.facts.perServing.protein.round()} g',
-                        m.facts.perServing.protein.round() == maxProtein),
-                    cell('${m.facts.perServing.kcal.round()}',
-                        m.facts.perServing.kcal.round() == minKcal),
+                    // Sarı vurgu yalnızca gerçekten iyi değere: 5 g protein
+                    // en yüksek olsa bile vurgulanmaz.
+                    cell(
+                        '${m.facts.perServing.protein.round()} g',
+                        m.facts.perServing.protein.round() == maxProtein &&
+                            m.facts.review.isProteinSource),
+                    cell(
+                        '${m.facts.perServing.kcal.round()}',
+                        m.facts.perServing.kcal.round() == minKcal &&
+                            m.facts.review.isLight),
                   ],
                 ),
               ),
