@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -188,6 +190,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final inQuestions = _page >= 1 && _page <= count;
     return Scaffold(
       body: SafeArea(
+        top: _page != 0,
         child: Column(
           children: [
             if (inQuestions)
@@ -225,7 +228,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
-class _Welcome extends StatelessWidget {
+/// Karşılama: üstte yeşil zeminde süzülen malzemeler ve başlık, altta
+/// uygulamanın üç ana işi ve "Başlayalım".
+class _Welcome extends StatefulWidget {
   const _Welcome(
       {required this.count, required this.onStart, required this.onSkip});
 
@@ -235,66 +240,200 @@ class _Welcome extends StatelessWidget {
   final VoidCallback onSkip;
 
   @override
+  State<_Welcome> createState() => _WelcomeState();
+}
+
+class _WelcomeState extends State<_Welcome>
+    with SingleTickerProviderStateMixin {
+  late final _float =
+      AnimationController(vsync: this, duration: const Duration(seconds: 5));
+
+  /// (emoji, yatay konum 0-1, dikey konum 0-1, boyut, eğim, faz)
+  static const _foods = [
+    ('🥕', 0.06, 0.08, 60.0, -0.35, 0.0),
+    ('🍅', 0.80, 0.05, 62.0, 0.20, 0.3),
+    ('🥚', 0.90, 0.50, 46.0, 0.30, 0.6),
+    ('🧀', 0.02, 0.55, 50.0, -0.15, 0.8),
+    ('🥑', 0.18, 0.92, 48.0, 0.25, 0.2),
+    ('🍋', 0.70, 0.94, 44.0, -0.30, 0.5),
+    ('🍄', 0.46, 0.00, 38.0, 0.10, 0.9),
+    ('🌿', 0.96, 0.86, 36.0, 0.40, 0.4),
+  ];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // "Hareketi azalt" açıksa malzemeler yerinde durur; açık değilse
+    // yaklaşık 20 saniye süzülüp durur (pil ve dikkat dağıtmasın).
+    if (MediaQuery.of(context).disableAnimations) {
+      _float.stop();
+    } else if (!_started) {
+      _started = true;
+      _float.repeat(count: 4);
+    }
+  }
+
+  bool _started = false;
+
+  @override
+  void dispose() {
+    _float.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
-      child: Column(
-        children: [
-          const Spacer(),
-          Container(
+    final top = MediaQuery.of(context).padding.top;
+    return Column(
+      children: [
+        Expanded(
+          child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(22, 26, 22, 26),
-            decoration: BoxDecoration(
-              color: Palette.basil,
-              borderRadius: BorderRadius.circular(36),
+            color: Palette.basil,
+            padding: EdgeInsets.only(top: top + 8, bottom: 36),
+            child: LayoutBuilder(builder: (context, c) {
+              return Stack(
+                children: [
+                  for (final f in _foods)
+                    AnimatedBuilder(
+                      animation: _float,
+                      builder: (context, child) {
+                        final t = (_float.value + f.$6) * 2 * math.pi;
+                        return Positioned(
+                          left: f.$2 * (c.maxWidth - f.$4),
+                          top: f.$3 * (c.maxHeight - f.$4 - 12) +
+                              6 +
+                              6 * math.sin(t),
+                          child: Transform.rotate(
+                              angle: f.$5 + 0.06 * math.sin(t + 1),
+                              child: child),
+                        );
+                      },
+                      child:
+                          ExcludeSemantics(child: FoodIcon(f.$1, size: f.$4)),
+                    ),
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: const Text('BUZDOLABI ŞEFİ',
+                                style: TextStyle(
+                                    fontFamily: Fonts.display,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 11.5,
+                                    letterSpacing: 1.6,
+                                    color: Color(0xFFD6E2DA))),
+                          ),
+                          const SizedBox(height: 14),
+                          const Text('Hoş geldin!',
+                              style: TextStyle(
+                                  fontFamily: Fonts.serif,
+                                  fontSize: 54,
+                                  height: 1.0,
+                                  color: Colors.white)),
+                          const SizedBox(height: 10),
+                          const Text(
+                            'Dolabında ne varsa söyle,\nondan ne pişer biz bulalım.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontFamily: Fonts.body,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                                height: 1.45,
+                                color: Color(0xFFD6E2DA)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ),
+        ),
+        Transform.translate(
+          offset: const Offset(0, -28),
+          child: Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Palette.ground,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
             ),
+            padding: const EdgeInsets.fromLTRB(24, 26, 24, 0),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    FoodIcon('🥚', size: 52),
-                    SizedBox(width: 6),
-                    FoodIcon('🥕', size: 72),
-                    SizedBox(width: 6),
-                    FoodIcon('🍅', size: 56),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                const Text('Hoş geldin!',
-                    style: TextStyle(
-                        fontFamily: Fonts.serif,
-                        fontSize: 46,
-                        height: 1.05,
-                        color: Colors.white)),
+                const _Perk(IconBubble('🥘', size: 46), 'Dolabındakiyle tarif',
+                    'Elindeki malzemelerle ne pişirebileceğini gösterir.'),
+                const _Perk(SymBubble('🎬', size: 46), 'Sosyal medyadan kaydet',
+                    'TikTok, Instagram, YouTube tarifleri tek dokunuşla.'),
+                const _Perk(IconBubble('🛒', size: 46), 'Eksikler listede',
+                    'Eksik malzemeler alışveriş listene kendiliğinden düşer.'),
+                const SizedBox(height: 8),
+                ChunkyButton(
+                    label: 'Başlayalım',
+                    iconData: Icons.arrow_forward_rounded,
+                    tone: ChunkyTone.primary,
+                    onPressed: widget.onStart),
                 const SizedBox(height: 8),
                 Text(
-                  'Seni biraz tanıyalım, tarifleri sana göre ayarlayalım. '
-                  '$count kısa soru, ${count <= 4 ? '20 saniye' : 'yarım dakika'}.',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      fontFamily: Fonts.body,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 15.5,
-                      height: 1.45,
-                      color: Color(0xFFD6E2DA)),
+                  '${widget.count} kısa soru · '
+                  '${widget.count <= 4 ? '20 saniye' : 'yarım dakika'}',
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: Palette.inkSoft),
+                ),
+                TextButton(
+                  onPressed: widget.onSkip,
+                  child: Text('Şimdilik geç',
+                      style: theme.textTheme.titleSmall
+                          ?.copyWith(color: Palette.inkSoft)),
                 ),
               ],
             ),
           ),
-          const Spacer(),
-          ChunkyButton(
-              label: 'Başlayalım',
-              icon: '✨',
-              tone: ChunkyTone.butter,
-              onPressed: onStart),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: onSkip,
-            child: Text('Şimdilik geç',
-                style: theme.textTheme.titleMedium
-                    ?.copyWith(color: Palette.inkSoft)),
+        ),
+      ],
+    );
+  }
+}
+
+/// Karşılamadaki tek satırlık özellik.
+class _Perk extends StatelessWidget {
+  const _Perk(this.leading, this.title, this.text);
+
+  final Widget leading;
+  final String title;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          leading,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: theme.textTheme.titleMedium),
+                Text(text,
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: Palette.inkSoft)),
+              ],
+            ),
           ),
         ],
       ),
