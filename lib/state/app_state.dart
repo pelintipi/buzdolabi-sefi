@@ -257,6 +257,14 @@ class AppState extends ChangeNotifier {
     _changed();
   }
 
+  /// Yalnızca yerel test sunucusunda: dolabı ve pişirme geçmişini (haftalık
+  /// sayaç, seri, ilerleme) boşaltır; uygulama ilk kez açılmış gibi olur.
+  void resetForTesting() {
+    _pantry = [];
+    _logs = [];
+    _changed();
+  }
+
   bool _isExpiring(PantryItem p, DateTime now) =>
       p.expiresAt != null && daysUntil(p.expiresAt!, now) <= expiringDays;
 

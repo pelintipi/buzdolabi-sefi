@@ -19,7 +19,7 @@ import 'widgets/recipe_image.dart';
 const _sentryDsn = String.fromEnvironment('SENTRY_DSN');
 
 /// Yerel test sunucusunda (tool/uygulamayi_ac.ps1) her açılışta açılış anketi
-/// sıfırdan çıkar ve dolaptaki malzemeler silinir; böylece her yenilemede
+/// sıfırdan çıkar, dolap ve pişirme geçmişi (haftalık sayaç) silinir; her yenilemede
 /// uygulama ilk kez açılmış gibi denenebilir. TestFlight/App Store sürümünde
 /// bu ayar yoktur, kullanıcının verileri korunur.
 const _surveyEveryLaunch = bool.fromEnvironment('ANKET_HER_ACILISTA');
@@ -44,7 +44,7 @@ Future<void> main() async {
   await state.load();
   if (_surveyEveryLaunch) {
     state.updateProfile(state.profile.withoutSurvey());
-    state.restorePantry(const []);
+    state.resetForTesting();
   }
 
   // Arka planda: yeni katalog (bir sonraki açılışta devreye girer), ana ekran
