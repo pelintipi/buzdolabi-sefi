@@ -141,6 +141,7 @@ class QuickFilters {
     this.economic = false,
     this.onePot = false,
     this.breakfast = false,
+    this.kind,
   });
 
   static const highProteinGrams = 20.0;
@@ -153,7 +154,11 @@ class QuickFilters {
   final bool onePot;
   final bool breakfast;
 
+  /// Yalnızca yemekler, atıştırmalıklar ya da tatlılar; null ise hepsi.
+  final DishKind? kind;
+
   bool get isEmpty =>
+      kind == null &&
       !quick &&
       !highProtein &&
       !vegetarian &&
@@ -176,9 +181,21 @@ class QuickFilters {
         economic: economic ?? this.economic,
         onePot: onePot ?? this.onePot,
         breakfast: breakfast ?? this.breakfast,
+        kind: kind,
+      );
+
+  QuickFilters withKind(DishKind? kind) => QuickFilters(
+        quick: quick,
+        highProtein: highProtein,
+        vegetarian: vegetarian,
+        economic: economic,
+        onePot: onePot,
+        breakfast: breakfast,
+        kind: kind,
       );
 
   bool accepts(Recipe r, RecipeFacts f) =>
+      (kind == null || kindOf(r) == kind) &&
       (!quick || r.minutes <= 15) &&
       (!highProtein || f.perServing.protein >= highProteinGrams) &&
       (!vegetarian || f.isVegetarian) &&

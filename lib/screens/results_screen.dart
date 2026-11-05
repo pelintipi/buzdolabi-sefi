@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/pantry_item.dart';
 import '../models/user_profile.dart';
+import '../services/collections.dart' show DishKind, kindOf;
 import '../services/recipe_matcher.dart';
 import '../state/app_state.dart';
 import '../theme/palette.dart';
@@ -42,7 +43,32 @@ class _ResultsScreenState extends State<ResultsScreen> {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     final theme = Theme.of(context);
-    final matches = state.matches(_filters);
+    final all = state.matches(_filters);
+    // Tür filtresi seçili değilse tatlı ve atıştırmalıklar yemeklerle
+    // karışmaz; aşağıda kendi bölümlerinde gösterilir.
+    final split = _filters.kind == null;
+    final matches = split
+        ? [
+            for (final m in all)
+              if (kindOf(m.recipe) == DishKind.meal) m
+          ]
+        : all;
+    List<RecipeMatch> extras(DishKind k) {
+      if (!split) return const [];
+      const order = [
+        MatchGroup.ready,
+        MatchGroup.substitute,
+        MatchGroup.almost
+      ];
+      return [
+        for (final g in order)
+          for (final m in all)
+            if (m.group == g && kindOf(m.recipe) == k) m
+      ];
+    }
+
+    final snacks = extras(DishKind.snack);
+    final desserts = extras(DishKind.dessert);
     List<RecipeMatch> group(MatchGroup g) => [
           for (final m in matches)
             if (m.group == g) m
@@ -53,6 +79,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
     final far = group(MatchGroup.far);
     final suggestions = state.matcher.unlockSuggestions(matches);
     final nothingClose = ready.isEmpty && substitute.isEmpty && almost.isEmpty;
+    final nothingAtAll = nothingClose && snacks.isEmpty && desserts.isEmpty;
     // Karşılaştırma ve rozetler önce şu an yapılabilenler arasında yapılır;
     // yapılabilen 2'den azsa tek malzemesi eksik olanlar da katılır.
     final makeable = [...ready, ...substitute];
@@ -88,6 +115,11 @@ class _ResultsScreenState extends State<ResultsScreen> {
             filtered: !_filters.isEmpty,
           ),
           const SizedBox(height: 14),
+          _KindBar(
+            value: _filters.kind,
+            onChanged: (k) => setState(() => _filters = _filters.withKind(k)),
+          ),
+          const SizedBox(height: 10),
           _FilterBar(
             filters: _filters,
             onChanged: (f) => setState(() => _filters = f),
@@ -104,7 +136,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
             const SizedBox(height: 14),
             _SortBar(value: _sort, onChanged: (s) => setState(() => _sort = s)),
           ],
-          if (nothingClose)
+          if (nothingAtAll)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: Column(
@@ -114,7 +146,12 @@ class _ResultsScreenState extends State<ResultsScreen> {
                   Text(
                     _filters.isEmpty
                         ? 'Şu an tam eşleşen tarif yok. Dolabına birkaç malzeme daha ekle.'
-                        : 'Bu filtrelerle eşleşen tarif yok. Filtreleri gevşetmeyi dene.',
+                        : _filters.kind != null &&
+                                _filters.withKind(null).isEmpty
+                            ? 'Bu malzemelerle şu an yapabileceğin '
+                                '${_filters.kind!.label.toLowerCase()} yok. '
+                                'Bir iki malzeme eklersen açılır.'
+                            : 'Bu filtrelerle eşleşen tarif yok. Filtreleri gevşetmeyi dene.',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyLarge,
                   ),
@@ -139,6 +176,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
             ..._section('Az kaldı', '🤏', almost, highlights),
           ] else
             ..._section('${_sort.label} önce', _sort.icon, sorted, highlights),
+          ..._extraSection(DishKind.snack, snacks),
+          ..._extraSection(DishKind.dessert, desserts),
           if (far.isNotEmpty)
             Theme(
               data: theme.copyWith(dividerColor: Colors.transparent),
@@ -165,6 +204,72 @@ class _ResultsScreenState extends State<ResultsScreen> {
       for (final m in items)
         RecipeCard(match: m, highlights: highlights[m.recipe.id] ?? const {}),
     ];
+  }
+
+  /// Atıştırmalık ve tatlılar: yapılabilenler önce, ilk 4'ü gösterilir;
+  /// fazlası tür filtresiyle açılır.
+  List<Widget> _extraSection(DishKind kind, List<RecipeMatch> items) {
+    if (items.isEmpty) return const [];
+    final ready = items.where((m) => m.group != MatchGroup.almost).length;
+    final note = ready == items.length
+        ? 'hepsi hazır'
+        : ready == 0
+            ? '1 malzeme eksik'
+            : '$ready hazır';
+    return [
+      const SizedBox(height: 18),
+      SectionTitle('${kind.label} (${items.length})',
+          icon: kind.icon,
+          trailing: TextButton(
+            onPressed: () => setState(() => _filters = _filters.withKind(kind)),
+            child: Text(items.length > 4 ? 'Tümü' : note),
+          )),
+      for (final m in items.take(4)) RecipeCard(match: m),
+    ];
+  }
+}
+
+/// Yemek / atıştırmalık / tatlı ayrımı.
+class _KindBar extends StatelessWidget {
+  const _KindBar({required this.value, required this.onChanged});
+
+  final DishKind? value;
+  final ValueChanged<DishKind?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget chip(String icon, String label, DishKind? kind) {
+      final on = value == kind;
+      return Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: ChoiceChip(
+          avatar: Sym(icon, size: 20, color: on ? Colors.white : null),
+          label: Text(label),
+          selected: on,
+          showCheckmark: false,
+          visualDensity: VisualDensity.compact,
+          selectedColor: Palette.basil,
+          labelStyle: TextStyle(
+              fontFamily: Fonts.body,
+              fontWeight: FontWeight.w800,
+              fontSize: 14,
+              color: on ? Colors.white : Palette.ink),
+          side: BorderSide(color: on ? Palette.basil : Palette.line, width: 2),
+          onSelected: (_) => onChanged(kind),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      clipBehavior: Clip.none,
+      child: Row(
+        children: [
+          chip('✨', 'Hepsi', null),
+          for (final k in DishKind.values) chip(k.icon, k.short, k),
+        ],
+      ),
+    );
   }
 }
 

@@ -28,6 +28,27 @@ RecipeCategory guessCategory(Recipe r) {
 
 RecipeCategory categoryOf(Recipe r) => r.category ?? guessCategory(r);
 
+/// Sonuç ekranındaki üç ana grup: tatlılar ve atıştırmalıklar yemeklerle
+/// karışmasın diye ayrı bölümlerde gösterilir.
+enum DishKind {
+  meal('Yemekler', 'Yemek', '🍽'),
+  snack('Atıştırmalıklar', 'Atıştırmalık', '🍟'),
+  dessert('Tatlılar', 'Tatlı', '🍰');
+
+  const DishKind(this.label, this.short, this.icon);
+  final String label;
+
+  /// Filtre düğmesindeki kısa ad.
+  final String short;
+  final String icon;
+}
+
+DishKind kindOf(Recipe r) => switch (categoryOf(r)) {
+      RecipeCategory.tatli => DishKind.dessert,
+      RecipeCategory.atistirmalik => DishKind.snack,
+      _ => DishKind.meal,
+    };
+
 /// Kendiliğinden dolan koleksiyon: yemek türü ya da ölçülebilir bir özellik.
 /// "Sağlıklı / sağlıksız" gibi yargı içeren etiket kullanılmaz; değerler
 /// tahminidir.
