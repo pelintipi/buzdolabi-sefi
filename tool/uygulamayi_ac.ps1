@@ -20,6 +20,7 @@ Write-Output '  İlk açılışta Windows güvenlik duvarı izin sorarsa "Özel 
 Write-Output ''
 
 # --release: telefonda hızlı çalışsın diye. 0.0.0.0: ağdaki cihazlar da erişsin.
-# ANKET_HER_ACILISTA: test için açılış anketi her yenilemede yeniden çıkar.
+# ANKET_HER_ACILISTA: test için her yenilemede açılış anketi yeniden çıkar ve
+# dolaptaki malzemeler silinir (yalnızca bu yerel test sunucusunda).
 flutter run -d web-server --release --web-hostname 0.0.0.0 --web-port $port `
   --dart-define=ANKET_HER_ACILISTA=true
