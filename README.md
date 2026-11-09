@@ -229,3 +229,4 @@ O gelene kadar liste mesajla paylaşılıp içe alınıyor.
 - Apple Developer'da: üç uygulama kimliğine (uygulama, `.ShareExtension`,
   `.HomeWidget`) App Groups yetkisi ve `group.<paket kimliği>` grubu. Otomatik
   imzalama oluşturmazsa elle.
+
