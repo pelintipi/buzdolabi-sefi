@@ -1,5 +1,24 @@
+import 'package:flutter/material.dart';
+
 import 'ingredient.dart';
 import 'recipe.dart';
+
+/// Uygulama görünümü: varsayılan telefon ayarı.
+enum UiTheme {
+  system('Sistem'),
+  light('Açık'),
+  dark('Koyu');
+
+  const UiTheme(this.label);
+
+  final String label;
+
+  ThemeMode get mode => switch (this) {
+        UiTheme.system => ThemeMode.system,
+        UiTheme.light => ThemeMode.light,
+        UiTheme.dark => ThemeMode.dark,
+      };
+}
 
 enum Diet {
   none('Yok'),
@@ -107,6 +126,8 @@ class UserProfile {
     this.remindersOn = false,
     this.dailyKcal = 2000,
     this.dailyProtein = 50,
+    this.uiTheme = UiTheme.system,
+    this.seenNavTour = false,
   });
 
   final Set<Allergen> allergies;
@@ -136,17 +157,22 @@ class UserProfile {
   final double dailyKcal;
   final double dailyProtein;
 
+  /// Açık / koyu / sistem. Varsayılan: telefon ayarı.
+  final UiTheme uiTheme;
+
+  /// Alt menü turu bir kez gösterildi.
+  final bool seenNavTour;
+
   /// Anket cevapları boşaltılmış hali (aletler de "sorulmadı"); alerjiler,
-  /// evde olmayan temel malzemeler, hatırlatma ve günlük hedefler korunur.
+  /// evde olmayan temel malzemeler, hatırlatma, tema, tur ve günlük hedefler korunur.
   /// Yerel test sunucusu anketi her açılışta sıfırdan göstermek için kullanır.
   UserProfile withoutSurvey() => UserProfile(
-        allergies: allergies,
         diet: diet,
-        missingStaples: missingStaples,
-        allergyAsked: allergyAsked,
         remindersOn: remindersOn,
         dailyKcal: dailyKcal,
         dailyProtein: dailyProtein,
+        uiTheme: uiTheme,
+        seenNavTour: seenNavTour,
       );
 
   /// Videodan tarif kaydetmeye yatkın mı? (TikTok kartı öne çıkar)
@@ -172,6 +198,8 @@ class UserProfile {
     bool? remindersOn,
     double? dailyKcal,
     double? dailyProtein,
+    UiTheme? uiTheme,
+    bool? seenNavTour,
   }) =>
       UserProfile(
         allergies: allergies ?? this.allergies,
@@ -190,6 +218,8 @@ class UserProfile {
         remindersOn: remindersOn ?? this.remindersOn,
         dailyKcal: dailyKcal ?? this.dailyKcal,
         dailyProtein: dailyProtein ?? this.dailyProtein,
+        uiTheme: uiTheme ?? this.uiTheme,
+        seenNavTour: seenNavTour ?? this.seenNavTour,
       );
 
   Map<String, dynamic> toJson() => {
@@ -209,6 +239,8 @@ class UserProfile {
         'remindersOn': remindersOn,
         'dailyKcal': dailyKcal,
         'dailyProtein': dailyProtein,
+        'uiTheme': uiTheme.name,
+        'seenNavTour': seenNavTour,
       };
 
   static T? _enum<T extends Enum>(List<T> values, Object? name) {
@@ -250,5 +282,7 @@ class UserProfile {
         remindersOn: j['remindersOn'] as bool? ?? false,
         dailyKcal: (j['dailyKcal'] as num?)?.toDouble() ?? 2000,
         dailyProtein: (j['dailyProtein'] as num?)?.toDouble() ?? 50,
+        uiTheme: _enum(UiTheme.values, j['uiTheme']) ?? UiTheme.system,
+        seenNavTour: j['seenNavTour'] as bool? ?? false,
       );
 }

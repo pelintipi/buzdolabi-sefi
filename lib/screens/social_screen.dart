@@ -223,7 +223,7 @@ class _HowTo extends StatelessWidget {
                 width: 26,
                 height: 26,
                 alignment: Alignment.center,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                     color: Palette.sand, shape: BoxShape.circle),
                 child: Text(n,
                     style: const TextStyle(
@@ -242,7 +242,7 @@ class _HowTo extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(compact ? 'Nasıl kaydedilir?' : 'Henüz kaydettiğin tarif yok',
-              style: const TextStyle(
+              style: TextStyle(
                   fontFamily: Fonts.serif, fontSize: 24, color: Palette.ink)),
           row('1', 'TikTok, Instagram ya da YouTube\'da tarif videosunu aç.'),
           row('2', 'Paylaş\'a dokun, listeden Buzdolabı Şefi\'ni seç.'),

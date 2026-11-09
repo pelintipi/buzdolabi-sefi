@@ -42,7 +42,9 @@ Future<void> main() async {
     storage: StorageService(),
   );
   await state.load();
-  if (_surveyEveryLaunch) {
+  // Yerel web debug: yenilemede anket yeniden çıksın. Store/TestFlight'ta
+  // yalnızca --dart-define=ANKET_HER_ACILISTA=true ile açılır.
+  if (_surveyEveryLaunch || (kDebugMode && kIsWeb)) {
     state.updateProfile(state.profile.withoutSurvey());
     state.resetForTesting();
   }

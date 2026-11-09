@@ -155,12 +155,11 @@ class FoodIcon extends StatelessWidget {
 
 /// Yumuşak renkli daire içinde ikon.
 class IconBubble extends StatelessWidget {
-  const IconBubble(this.emoji,
-      {super.key, this.size = 56, this.color = Palette.sand});
+  const IconBubble(this.emoji, {super.key, this.size = 56, this.color});
 
   final String emoji;
   final double size;
-  final Color color;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +167,8 @@ class IconBubble extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-          color: color, borderRadius: BorderRadius.circular(size * 0.32)),
+          color: color ?? Palette.sand,
+          borderRadius: BorderRadius.circular(size * 0.32)),
       alignment: Alignment.center,
       child: FoodIcon(emoji, size: size * 0.62),
     );
@@ -241,7 +241,6 @@ const _symbols = <String, IconData>{
   '🍽': Icons.restaurant_rounded,
   '🍲': Icons.soup_kitchen_outlined,
   '🥗': Icons.eco_outlined,
-  '🥦': Icons.grass_outlined,
   '🥨': Icons.cookie_outlined,
   '🍰': Icons.cake_outlined,
   '👋': Icons.waving_hand_outlined,
@@ -275,11 +274,11 @@ class Sym extends StatelessWidget {
 /// Nötr zeminli yuvarlak kare içinde uygulama simgesi.
 class SymBubble extends StatelessWidget {
   const SymBubble(this.emoji,
-      {super.key, this.size = 56, this.color = Palette.sand, this.iconColor});
+      {super.key, this.size = 56, this.color, this.iconColor});
 
   final String emoji;
   final double size;
-  final Color color;
+  final Color? color;
   final Color? iconColor;
 
   @override
@@ -288,7 +287,8 @@ class SymBubble extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-          color: color, borderRadius: BorderRadius.circular(size * 0.32)),
+          color: color ?? Palette.sand,
+          borderRadius: BorderRadius.circular(size * 0.32)),
       alignment: Alignment.center,
       child: Sym(emoji, size: size * 0.52, color: iconColor),
     );
@@ -310,9 +310,9 @@ _ToneColors _tone(ChunkyTone t) => switch (t) {
       ChunkyTone.primary => const _ToneColors(Palette.basil, Colors.white),
       ChunkyTone.accent => const _ToneColors(Palette.basil, Colors.white),
       // İkincil: kum tonu.
-      ChunkyTone.butter => const _ToneColors(Palette.sand, Palette.ink),
+      ChunkyTone.butter => _ToneColors(Palette.sand, Palette.ink),
       // Hafif: açık zemin, ince çerçeve.
-      ChunkyTone.soft => const _ToneColors(Palette.surface, Palette.basil,
+      ChunkyTone.soft => _ToneColors(Palette.surface, Palette.basil,
           border: Palette.lineDeep),
     };
 
@@ -437,20 +437,22 @@ class SoftCard extends StatelessWidget {
   const SoftCard({
     super.key,
     required this.child,
-    this.color = Palette.surface,
-    this.borderColor = Palette.line,
+    this.color,
+    this.borderColor,
     this.padding = const EdgeInsets.all(18),
     this.onTap,
   });
 
   final Widget child;
-  final Color color;
-  final Color borderColor;
+  final Color? color;
+  final Color? borderColor;
   final EdgeInsets padding;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final bg = color ?? Palette.surface;
+    final border = borderColor ?? Palette.line;
     final radius = BorderRadius.circular(26);
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -461,10 +463,10 @@ class SoftCard extends StatelessWidget {
         ],
       ),
       child: Material(
-        color: color,
+        color: bg,
         shape: RoundedRectangleBorder(
             borderRadius: radius,
-            side: BorderSide(color: borderColor, width: 1)),
+            side: BorderSide(color: border, width: 1)),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
@@ -480,15 +482,17 @@ class Pill extends StatelessWidget {
   const Pill(this.text,
       {super.key,
       this.icon,
-      this.color = Palette.surface,
-      this.fg = Palette.ink,
-      this.border = Palette.line,
+      this.color,
+      this.fg,
+      this.bordered = true,
+      this.border,
       this.dense = false});
 
   final String text;
   final String? icon;
-  final Color color;
-  final Color fg;
+  final Color? color;
+  final Color? fg;
+  final bool bordered;
   final Color? border;
 
   /// Kartlarda yan yana birkaç etiket sığsın diye küçük boy.
@@ -496,13 +500,16 @@ class Pill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bg = color ?? Palette.surface;
+    final textColor = fg ?? Palette.ink;
+    final edge = border ?? Palette.line;
     return Container(
       padding: EdgeInsets.symmetric(
           horizontal: dense ? 8 : 10, vertical: dense ? 3 : 5),
       decoration: BoxDecoration(
-        color: color,
+        color: bg,
         borderRadius: BorderRadius.circular(999),
-        border: border == null ? null : Border.all(color: border!, width: 1),
+        border: bordered ? Border.all(color: edge, width: 1) : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -516,7 +523,7 @@ class Pill extends StatelessWidget {
                   fontFamily: Fonts.body,
                   fontWeight: FontWeight.w700,
                   fontSize: dense ? 12 : 13,
-                  color: fg)),
+                  color: textColor)),
         ],
       ),
     );
@@ -556,23 +563,24 @@ class ChunkyProgress extends StatelessWidget {
       {super.key,
       required this.value,
       this.color = Palette.basil,
-      this.track = Palette.basilSoft,
+      this.track,
       this.height = 12});
 
   final double value;
   final Color color;
-  final Color track;
+  final Color? track;
   final double height;
 
   @override
   Widget build(BuildContext context) {
+    final trackColor = track ?? Palette.basilSoft;
     return ClipRRect(
       borderRadius: BorderRadius.circular(height),
       child: SizedBox(
         height: height,
         child: Stack(
           children: [
-            Positioned.fill(child: ColoredBox(color: track)),
+            Positioned.fill(child: ColoredBox(color: trackColor)),
             FractionallySizedBox(
               widthFactor: value.clamp(0.0, 1.0).toDouble(),
               child: Container(
@@ -625,7 +633,7 @@ class WeeklySlots extends StatelessWidget {
                 child: i < done
                     ? FoodIcon('🍳', size: s * 0.6)
                     : Text('${i + 1}',
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontFamily: Fonts.display,
                             fontWeight: FontWeight.w800,
                             color: Palette.lineDeep,

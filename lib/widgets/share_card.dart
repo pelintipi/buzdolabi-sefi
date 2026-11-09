@@ -113,7 +113,7 @@ class ShareCard extends StatelessWidget {
               Sym(icon, size: 20),
               const SizedBox(width: 4),
               Text(text,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontFamily: Fonts.display,
                       fontWeight: FontWeight.w800,
                       fontSize: 14,
@@ -143,7 +143,7 @@ class ShareCard extends StatelessWidget {
                   decoration: BoxDecoration(
                       color: Palette.butter,
                       borderRadius: BorderRadius.circular(999)),
-                  child: const Text('Dolabımdan bu çıktı',
+                  child: Text('Dolabımdan bu çıktı',
                       style: TextStyle(
                           fontFamily: Fonts.display,
                           fontWeight: FontWeight.w800,

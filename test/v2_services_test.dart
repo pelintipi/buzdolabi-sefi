@@ -232,8 +232,9 @@ KREDI KARTI                  *401,08
     expect(p.cookDaysPerWeek, isNull);
     expect(p.household, isNull);
     expect(p.goals, isEmpty);
-    // Kişisel güvenlik ve hedef ayarları kalır.
-    expect(p.allergies, {Allergen.milk});
+    // Alerji / temel malzeme ankette yeniden sorulur; hedef ayarları kalır.
+    expect(p.allergies, isEmpty);
+    expect(p.missingStaples, isEmpty);
     expect(p.dailyProtein, 90);
   });
 

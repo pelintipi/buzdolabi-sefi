@@ -61,7 +61,7 @@ class HomeScreen extends StatelessWidget {
                   child: Text(
                     '${_weekdayNames[now.weekday - 1]}, ${now.day} ${monthNames[now.month - 1]}'
                         .toUpperCase(),
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontFamily: Fonts.body,
                         fontWeight: FontWeight.w700,
                         fontSize: 11.5,
@@ -69,7 +69,11 @@ class HomeScreen extends StatelessWidget {
                         color: Palette.inkSoft),
                   ),
                 ),
-                _StreakChip(done: state.cooksThisWeek, goal: state.weeklyGoal),
+                if (state.profile.cookDaysPerWeek != null)
+                  _StreakChip(
+                    done: state.cooksThisWeek,
+                    goal: state.weeklyGoal,
+                  ),
               ],
             ),
             const SizedBox(height: 6),
@@ -143,7 +147,7 @@ class _HomeHeading extends StatelessWidget {
       children: [
         Expanded(
           child: Text(text,
-              style: const TextStyle(
+              style: TextStyle(
                   fontFamily: Fonts.serif,
                   fontSize: 26,
                   height: 1.1,
@@ -174,28 +178,72 @@ class _StreakChip extends StatelessWidget {
   final int done;
   final int goal;
 
+  static const _goals = [
+    (2, '1-2 gün'),
+    (3, '3-4 gün'),
+    (5, '5-6 gün'),
+    (7, 'Her gün'),
+  ];
+
+  Future<void> _pick(BuildContext context) async {
+    final state = context.read<AppState>();
+    final picked = await showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('Haftada kaç gün pişirirsin?',
+                  style: Theme.of(ctx).textTheme.titleLarge),
+              const SizedBox(height: 12),
+              for (final (days, label) in _goals)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(label,
+                      style: const TextStyle(fontWeight: FontWeight.w800)),
+                  trailing: days == goal
+                      ? Icon(Icons.check_rounded, color: Palette.basil)
+                      : null,
+                  onTap: () => Navigator.of(ctx).pop(days),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (picked == null || !context.mounted) return;
+    state.updateProfile(state.profile.copyWith(cookDaysPerWeek: picked));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(8, 5, 10, 5),
-      decoration: BoxDecoration(
-        color: Palette.surface,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Palette.line),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.local_fire_department_outlined,
-              size: 16, color: Palette.tomato),
-          const SizedBox(width: 4),
-          Text('$done/$goal bu hafta',
-              style: const TextStyle(
-                  fontFamily: Fonts.body,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
-                  color: Palette.ink)),
-        ],
+    return Material(
+      color: Palette.surface,
+      shape: StadiumBorder(side: BorderSide(color: Palette.line)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => _pick(context),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 5, 10, 5),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.local_fire_department_outlined,
+                  size: 16, color: Palette.tomato),
+              const SizedBox(width: 4),
+              Text('$done/$goal bu hafta',
+                  style: TextStyle(
+                      fontFamily: Fonts.body,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                      color: Palette.ink)),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -261,7 +309,7 @@ class _ReadyNow extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Dolabında ne var?',
+            Text('Dolabında ne var?',
                 style: TextStyle(
                     fontFamily: Fonts.serif, fontSize: 26, color: Palette.ink)),
             const SizedBox(height: 6),
@@ -396,7 +444,7 @@ class _ExpiringCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
       child: Row(
         children: [
-          const Icon(Icons.schedule_rounded, color: Palette.tomato, size: 24),
+          Icon(Icons.schedule_rounded, color: Palette.tomato, size: 24),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -411,7 +459,7 @@ class _ExpiringCard extends StatelessWidget {
                 Text(names,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontFamily: Fonts.body,
                         fontWeight: FontWeight.w500,
                         fontSize: 13,
@@ -475,7 +523,7 @@ class _AddActions extends StatelessWidget {
                     Text(actions[i].$2,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontFamily: Fonts.body,
                             fontWeight: FontWeight.w600,
                             fontSize: 11.5,
@@ -548,7 +596,7 @@ class _PlanList extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(rows[i].$2,
-                              style: const TextStyle(
+                              style: TextStyle(
                                   fontFamily: Fonts.body,
                                   fontWeight: FontWeight.w700,
                                   fontSize: 15,
@@ -560,7 +608,7 @@ class _PlanList extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const Icon(Icons.chevron_right_rounded,
+                    Icon(Icons.chevron_right_rounded,
                         color: Palette.lineDeep),
                   ],
                 ),
@@ -582,28 +630,23 @@ class _WeekCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final goal = state.weeklyGoal;
-    // Anket kısaldı: kaç gün pişirdiği burada, yeri gelince sorulur.
+    // Üst chip yalnızca hedef seçilince çıkar; seçim burada.
     if (state.profile.cookDaysPerWeek == null) {
       return SoftCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Haftada kaç gün pişirirsin?',
+            Text('Haftada kaç gün pişirirsin?',
                 style: TextStyle(
                     fontFamily: Fonts.serif, fontSize: 24, color: Palette.ink)),
-            Text('Haftalık hedefini buna göre koyalım.',
+            Text('Seçince üstte "0/N bu hafta" görünür.',
                 style: theme.textTheme.bodySmall),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
-                for (final (days, label) in const [
-                  (2, '1-2 gün'),
-                  (3, '3-4 gün'),
-                  (5, '5-6 gün'),
-                  (7, 'Her gün'),
-                ])
+                for (final (days, label) in _StreakChip._goals)
                   ActionChip(
                     label: Text(label),
                     onPressed: () => state.updateProfile(
@@ -624,7 +667,7 @@ class _WeekCard extends StatelessWidget {
               state.weeklyStreak > 0
                   ? '${state.weeklyStreak} haftalık seri'
                   : 'Haftalık hedef',
-              style: const TextStyle(
+              style: TextStyle(
                   fontFamily: Fonts.serif, fontSize: 24, color: Palette.ink)),
           Text('Bu hafta ${state.cooksThisWeek}/$goal pişirme',
               style: theme.textTheme.bodySmall),

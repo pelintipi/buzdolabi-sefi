@@ -37,8 +37,11 @@ void main() {
       storage: StorageService(),
     );
     await state.load();
-    state.updateProfile(state.profile
-        .copyWith(onboarded: true, allergyAsked: true, appliancesAsked: true));
+    state.updateProfile(state.profile.copyWith(
+        onboarded: true,
+        allergyAsked: true,
+        appliancesAsked: true,
+        seenNavTour: true));
     final r = ScreenshotReport(
         'degisiklik_raporlari/2026-11-04_ana-sayfa', 'Ana sayfa · Ekran testi');
 
@@ -96,21 +99,27 @@ void main() {
               'dünden kalan) ve plan, mevsim, koleksiyonlar sade bir listede.');
       expect(find.text('Yakında bozulacaklar'), findsOneWidget);
 
+      tester.state<ScrollableState>(_mainScroll).position.jumpTo(0);
+      await tester.pumpAndSettle();
+      expect(find.textContaining('bu hafta'), findsNothing);
       await tester.scrollUntilVisible(
-          find.text('Haftada kaç gün pişirirsin?'), 250,
+          find.text('Haftada kaç gün pişirirsin?'), 300,
           scrollable: _mainScroll);
       await tester.pumpAndSettle();
       await r.capture(tester,
           title: 'Kaç gün pişiriyorsun?',
-          action: 'En alta kaydırdım.',
-          result: 'Ankette sorulmayan soru burada, tek dokunuşla.');
-      await r.tap(tester, find.text('3-4 gün'), '3-4 gün');
+          action: 'Alttaki hedef kartına geldim.',
+          result: 'Seçmeden üstte sayı yok.');
+      await r.tap(tester, find.text('5-6 gün'), '5-6 gün');
+      await tester.pumpAndSettle();
+      expect(state.weeklyGoal, 5);
+      tester.state<ScrollableState>(_mainScroll).position.jumpTo(0);
       await tester.pumpAndSettle();
       await r.capture(tester,
           title: 'Haftalık hedef',
-          action: '"3-4 gün"e dokundum.',
-          result: 'Hedef 3 pişirme oldu; kart seri takibine döndü.');
-      expect(find.text('Bu hafta 0/3 pişirme'), findsOneWidget);
+          action: '"5-6 gün"e dokundum, üste çıktım.',
+          result: 'Üstte 0/5 bu hafta çıktı.');
+      expect(find.text('0/5 bu hafta'), findsOneWidget);
     } finally {
       debugDisableShadows = true;
       r.writeHtml();

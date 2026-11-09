@@ -302,7 +302,7 @@ class _CompareCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Text(text,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontFamily: Fonts.display,
                       fontWeight: FontWeight.w800,
                       fontSize: 15,

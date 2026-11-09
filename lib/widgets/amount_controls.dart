@@ -66,7 +66,7 @@ class QuantityStepper extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Text('${formatFraction(value, step: 0.5)} $label',
-              style: const TextStyle(
+              style: TextStyle(
                   fontFamily: Fonts.display,
                   fontWeight: FontWeight.w800,
                   fontSize: 18,

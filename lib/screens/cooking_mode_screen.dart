@@ -506,7 +506,7 @@ class _DonePage extends StatelessWidget {
           Text('Afiyet olsun!',
               style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: 6),
-          const Text('Bitirdiysen dolabını güncelleyelim.',
+          Text('Bitirdiysen dolabını güncelleyelim.',
               style: TextStyle(
                   color: Palette.inkSoft, fontWeight: FontWeight.w700)),
           const SizedBox(height: 28),

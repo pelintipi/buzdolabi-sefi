@@ -135,7 +135,7 @@ class _PantryTile extends StatelessWidget {
                   Text(ing.name,
                       style: Theme.of(context).textTheme.titleMedium),
                   Text(pantryAmountText(item, ing),
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontWeight: FontWeight.w700, color: Palette.inkSoft)),
                 ],
               ),
@@ -287,7 +287,7 @@ class _PantryEditSheetState extends State<_PantryEditSheet> {
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
                 ),
-                const Icon(Icons.edit_calendar_rounded, color: Palette.basil),
+                Icon(Icons.edit_calendar_rounded, color: Palette.basil),
               ],
             ),
           ),
@@ -329,7 +329,7 @@ class _PantryEditSheetState extends State<_PantryEditSheet> {
                   state.removePantryItem(widget.item.id);
                   Navigator.of(context).pop();
                 },
-                icon: const Icon(Icons.delete_outline_rounded,
+                icon: Icon(Icons.delete_outline_rounded,
                     color: Palette.tomatoDeep),
                 label: const Text('Sil',
                     style: TextStyle(color: Palette.tomatoDeep)),

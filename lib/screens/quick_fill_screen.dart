@@ -71,7 +71,7 @@ class QuickFillScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right_rounded, color: Palette.inkSoft),
+                Icon(Icons.chevron_right_rounded, color: Palette.inkSoft),
               ],
             ),
           ),

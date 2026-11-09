@@ -3,15 +3,16 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/ingredient.dart';
 import '../models/recipe.dart';
 import '../models/user_profile.dart';
 import '../state/app_state.dart';
 import '../theme/palette.dart';
 import '../widgets/ui.dart';
 
-/// Açılış anketi: karşılama, 4 kısa soru (Profil'den açılınca 7) ve "senin için ayarladıklarım" özeti.
-/// Her cevap uygulamada bir şeyi değiştirir (soru altında neyi değiştirdiği
-/// yazar). Her soru geçilebilir; cevaplar Profil'den sonra da değiştirilebilir.
+/// Açılış anketi: karşılama, kısa sorular (Profil'den açılınca ekstra)
+/// ve "senin için ayarladıklarım" özeti. Alerji ve "evde hep olanlar"
+/// burada sorulur; Profil'de sabit blok olarak durmaz.
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key, this.onDone});
 
@@ -35,16 +36,35 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _pages = PageController();
   int _page = 0;
 
-  late UserProfile _p = context.read<AppState>().profile;
-
-  /// Aletler kullanıcı seçmeden işaretli gelmez. Profil'den yeniden
-  /// doldururken daha önce kendi seçtikleri işaretli gelir.
-  late Set<Appliance> _appliances =
-      _p.appliancesAsked ? {..._p.appliances} : {};
-
-  /// İlk açılışta yalnızca 4 temel soru sorulur; kalanlar (kaç gün, tarif
-  /// saklama, plan saati) ana sayfada yeri gelince ya da Profil'den sorulur.
+  /// İlk açılışta temel sorular; kalanlar (kaç gün, tarif saklama, plan
+  /// saati) ana sayfada yeri gelince ya da Profil'den sorulur.
   bool get _full => widget.onDone != null;
+
+  late final UserProfile _saved = context.read<AppState>().profile;
+
+  /// Profil'den "yeniden doldur" → seçenekler boş. Tema/hatırlatma korunur.
+  late UserProfile _p = _full
+      ? UserProfile(
+          onboarded: _saved.onboarded,
+          remindersOn: _saved.remindersOn,
+          dailyKcal: _saved.dailyKcal,
+          dailyProtein: _saved.dailyProtein,
+          uiTheme: _saved.uiTheme,
+          seenNavTour: _saved.seenNavTour,
+        )
+      : _saved;
+
+  /// Aletler kullanıcı seçmeden işaretli gelmez (ilk açılış ve yeniden doldur).
+  late Set<Appliance> _appliances = {};
+
+  /// Her zaman boş başlar; eski cevaplar işaretli gelmez.
+  late Set<Allergen> _allergies = {};
+
+  /// İşaretli = evde var. Kullanıcı seçer (arama ile de ekler).
+  late Set<String> _haveIds = {};
+
+  /// Aramayla eklenen (temel listede olmayan) seçenekler.
+  late List<_Option<String>> _extraHave = [];
 
   static const _days = [
     _Option(2, '1-2 gün', '🌱'),
@@ -74,12 +94,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return out;
   }
 
-  /// Tek seçimli sorularda seçim görünsün diye kısa bir bekleyişten sonra geçer.
-  void _pickAndNext(UserProfile p) {
-    setState(() => _p = p);
-    Future<void>.delayed(const Duration(milliseconds: 260), () {
-      if (mounted) _next();
-    });
+  Set<String> get _missingStaples {
+    final ids = context.read<AppState>().repo.staples.map((s) => s.id);
+    return {for (final id in ids) if (!_haveIds.contains(id)) id};
+  }
+
+  List<_Option<String>> get _haveOptions {
+    final repo = context.read<AppState>().repo;
+    final seen = <String>{};
+    final out = <_Option<String>>[];
+    for (final s in repo.staples) {
+      seen.add(s.id);
+      out.add(_Option(s.id, s.name, s.emoji));
+    }
+    for (final o in _extraHave) {
+      if (seen.add(o.value)) out.add(o);
+    }
+    return out;
   }
 
   /// Anketin sonundaki profil. Aletler seçilmediyse (soru geçildiyse)
@@ -88,14 +119,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   UserProfile get _result => _p.copyWith(
         appliances: _appliances.isEmpty ? null : _appliances,
         appliancesAsked: _appliances.isNotEmpty,
+        allergies: _allergies,
+        allergyAsked: true,
+        missingStaples: _missingStaples,
       );
 
-  void _finish() {
+  /// [fromSurvey]: soruları gördü (veya Geç ile geçti). Karşılama
+  /// "Şimdilik geç" alerjiyi sormadı → recipe dialog kalsın.
+  void _finish({bool fromSurvey = false}) {
     final state = context.read<AppState>();
-    state.updateProfile(_result.copyWith(
+    final base = fromSurvey ? _result : _p;
+    state.updateProfile(base.copyWith(
       onboarded: true,
-      diet: _p.eating?.diet ?? _p.diet,
+      diet: (fromSurvey ? _p.eating?.diet : null) ?? _p.diet,
     ));
+    if (fromSurvey) {
+      final extras = [
+        for (final id in _haveIds)
+          if (state.repo.tryById(id) case final ing?
+              when !ing.isStaple)
+            (ingredientId: id, quantity: 1.0, level: null),
+      ];
+      if (extras.isNotEmpty) state.upsertPantryAll(extras);
+    }
     widget.onDone?.call();
   }
 
@@ -109,6 +155,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           onToggle: (v) =>
               setState(() => _p = _p.copyWith(goals: _toggle(_p.goals, v))),
           onNext: _next,
+          minSelected: 1,
         ),
         if (_full)
           _Question<int>.single(
@@ -118,7 +165,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 'Haftalık hedefini buna göre koyarız; seriyi tutmak zorlaşmasın.',
             options: _days,
             selected: _p.cookDaysPerWeek,
-            onPick: (v) => _pickAndNext(_p.copyWith(cookDaysPerWeek: v)),
+            onPick: (v) =>
+                setState(() => _p = _p.copyWith(cookDaysPerWeek: v)),
+            onNext: _next,
           ),
         _Question<Household>.single(
           emoji: '🍽',
@@ -129,7 +178,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             for (final h in Household.values) _Option(h, h.label, h.emoji)
           ],
           selected: _p.household,
-          onPick: (v) => _pickAndNext(_p.copyWith(household: v)),
+          onPick: (v) => setState(() => _p = _p.copyWith(household: v)),
+          onNext: _next,
         ),
         _Question<Appliance>.multi(
           emoji: '🔥',
@@ -153,7 +203,44 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             for (final e in EatingStyle.values) _Option(e, e.label, e.emoji)
           ],
           selected: _p.eating,
-          onPick: (v) => _pickAndNext(_p.copyWith(eating: v)),
+          onPick: (v) => setState(() => _p = _p.copyWith(eating: v)),
+          onNext: _next,
+        ),
+        _Question<Allergen>.multi(
+          emoji: '⚠',
+          title: 'Alerjin var mı?',
+          why: 'Seçtiklerini içeren tarifler hiç çıkmaz. Yoksa boş bırak, Devam.',
+          options: [
+            for (final a in Allergen.values) _Option(a, a.label, a.emoji)
+          ],
+          selected: _allergies,
+          onToggle: (v) => setState(() => _allergies = _toggle(_allergies, v)),
+          onNext: _next,
+          minSelected: 0,
+        ),
+        _SearchableHavePage(
+          options: _haveOptions,
+          selected: _haveIds,
+          onToggle: (id) =>
+              setState(() => _haveIds = _toggle(_haveIds, id)),
+          onAddFromSearch: (ing) {
+            setState(() {
+              _haveIds = {..._haveIds, ing.id};
+              final known = context
+                      .read<AppState>()
+                      .repo
+                      .staples
+                      .any((s) => s.id == ing.id) ||
+                  _extraHave.any((o) => o.value == ing.id);
+              if (!known) {
+                _extraHave = [
+                  ..._extraHave,
+                  _Option(ing.id, ing.name, ing.emoji),
+                ];
+              }
+            });
+          },
+          onNext: _next,
         ),
         if (_full)
           _Question<RecipeHabit>.multi(
@@ -169,6 +256,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             onToggle: (v) =>
                 setState(() => _p = _p.copyWith(habits: _toggle(_p.habits, v))),
             onNext: _next,
+            minSelected: 1,
           ),
         if (_full)
           _Question<PlanTime>.single(
@@ -179,7 +267,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               for (final t in PlanTime.values) _Option(t, t.label, t.emoji)
             ],
             selected: _p.planTime,
-            onPick: (v) => _pickAndNext(_p.copyWith(planTime: v)),
+            onPick: (v) => setState(() => _p = _p.copyWith(planTime: v)),
+            onNext: _next,
           ),
       ];
 
@@ -215,9 +304,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 controller: _pages,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
-                  _Welcome(count: count, onStart: _next, onSkip: _finish),
+                  _Welcome(
+                      count: count,
+                      onStart: _next,
+                      onSkip: () => _finish()),
                   ...questions,
-                  _Done(profile: _result, onDone: _finish),
+                  _Done(
+                      profile: _result,
+                      onDone: () => _finish(fromSurvey: true)),
                 ],
               ),
             ),
@@ -365,7 +459,7 @@ class _WelcomeState extends State<_Welcome>
           offset: const Offset(0, -28),
           child: Container(
             width: double.infinity,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Palette.ground,
               borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
             ),
@@ -441,6 +535,127 @@ class _Perk extends StatelessWidget {
   }
 }
 
+/// Evde olanlar: temel liste + arama ile herhangi bir malzeme.
+class _SearchableHavePage extends StatefulWidget {
+  const _SearchableHavePage({
+    required this.options,
+    required this.selected,
+    required this.onToggle,
+    required this.onAddFromSearch,
+    required this.onNext,
+  });
+
+  final List<_Option<String>> options;
+  final Set<String> selected;
+  final ValueChanged<String> onToggle;
+  final ValueChanged<Ingredient> onAddFromSearch;
+  final VoidCallback onNext;
+
+  @override
+  State<_SearchableHavePage> createState() => _SearchableHavePageState();
+}
+
+class _SearchableHavePageState extends State<_SearchableHavePage> {
+  final _query = TextEditingController();
+  List<Ingredient> _hits = const [];
+
+  @override
+  void dispose() {
+    _query.dispose();
+    super.dispose();
+  }
+
+  void _onQuery(String q) {
+    final repo = context.read<AppState>().repo;
+    setState(() => _hits = repo.search(q, limit: 12));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+      child: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              children: [
+                Center(
+                    child: SymBubble('🧂', size: 88, color: Palette.butterSoft)),
+                const SizedBox(height: 12),
+                Text('Evde genelde neler var?',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.headlineSmall),
+                const SizedBox(height: 6),
+                Text(
+                    'İşaretlediklerin her tarifte var sayılır. Listede yoksa ara.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium
+                        ?.copyWith(color: Palette.inkSoft)),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: _query,
+                  onChanged: _onQuery,
+                  textInputAction: TextInputAction.search,
+                  decoration: InputDecoration(
+                    hintText: 'Malzeme ara…',
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    suffixIcon: _query.text.isEmpty
+                        ? null
+                        : IconButton(
+                            tooltip: 'Temizle',
+                            icon: const Icon(Icons.close_rounded),
+                            onPressed: () {
+                              _query.clear();
+                              _onQuery('');
+                            },
+                          ),
+                  ),
+                ),
+                if (_hits.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  for (final ing in _hits)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _OptionTile(
+                        label: ing.name,
+                        emoji: ing.emoji,
+                        selected: widget.selected.contains(ing.id),
+                        multi: true,
+                        onTap: () => widget.onAddFromSearch(ing),
+                      ),
+                    ),
+                  const Divider(height: 24),
+                ],
+                const SizedBox(height: 6),
+                for (final o in widget.options)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _OptionTile(
+                      label: o.label,
+                      emoji: o.emoji,
+                      selected: widget.selected.contains(o.value),
+                      multi: true,
+                      onTap: () => widget.onToggle(o.value),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          ChunkyButton(
+            label: widget.selected.isEmpty
+                ? 'Devam'
+                : 'Devam (${widget.selected.length})',
+            tone: ChunkyTone.accent,
+            onPressed: widget.onNext,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Tek ya da çok seçimli soru sayfası.
 class _Question<T> extends StatelessWidget {
   const _Question.single({
@@ -451,10 +666,10 @@ class _Question<T> extends StatelessWidget {
     required this.options,
     required T? selected,
     required ValueChanged<T> this.onPick,
+    required VoidCallback this.onNext,
   })  : selectedOne = selected,
         selectedMany = null,
         onToggle = null,
-        onNext = null,
         minSelected = 0;
 
   const _Question.multi({
@@ -466,7 +681,7 @@ class _Question<T> extends StatelessWidget {
     required Set<T> selected,
     required ValueChanged<T> this.onToggle,
     required VoidCallback this.onNext,
-    this.minSelected = 0,
+    this.minSelected = 1,
   })  : selectedMany = selected,
         selectedOne = null,
         onPick = null;
@@ -504,43 +719,61 @@ class _Question<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return ListView(
+    final devam = onNext == null
+        ? null
+        : ChunkyButton(
+            label: !_multi
+                ? (selectedOne == null ? 'Birini seç' : 'Devam')
+                : selectedMany!.length < minSelected
+                    ? 'En az birini seç'
+                    : selectedMany!.isEmpty
+                        ? 'Devam'
+                        : 'Devam (${selectedMany!.length})',
+            tone: ChunkyTone.accent,
+            onPressed: !_multi
+                ? (selectedOne == null ? null : onNext)
+                : (selectedMany!.length < minSelected ? null : onNext),
+          );
+    return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-      children: [
-        Center(child: SymBubble(emoji, size: 88, color: Palette.butterSoft)),
-        const SizedBox(height: 12),
-        Text(title,
-            textAlign: TextAlign.center, style: theme.textTheme.headlineSmall),
-        const SizedBox(height: 6),
-        Text(why,
-            textAlign: TextAlign.center,
-            style:
-                theme.textTheme.bodyMedium?.copyWith(color: Palette.inkSoft)),
-        const SizedBox(height: 18),
-        for (final o in options)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: _OptionTile(
-              label: o.label,
-              emoji: o.emoji,
-              selected: _isSelected(o.value),
-              multi: _multi,
-              onTap: () => _tap(o.value),
+      child: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              children: [
+                Center(
+                    child:
+                        SymBubble(emoji, size: 88, color: Palette.butterSoft)),
+                const SizedBox(height: 12),
+                Text(title,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.headlineSmall),
+                const SizedBox(height: 6),
+                Text(why,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium
+                        ?.copyWith(color: Palette.inkSoft)),
+                const SizedBox(height: 18),
+                for (final o in options)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _OptionTile(
+                      label: o.label,
+                      emoji: o.emoji,
+                      selected: _isSelected(o.value),
+                      multi: _multi,
+                      onTap: () => _tap(o.value),
+                    ),
+                  ),
+              ],
             ),
           ),
-        if (_multi) ...[
-          const SizedBox(height: 6),
-          ChunkyButton(
-            label: selectedMany!.length < minSelected
-                ? 'En az birini seç'
-                : selectedMany!.isEmpty
-                    ? 'Devam'
-                    : 'Devam (${selectedMany!.length})',
-            tone: ChunkyTone.accent,
-            onPressed: selectedMany!.length < minSelected ? null : onNext,
-          ),
+          if (devam != null) ...[
+            const SizedBox(height: 8),
+            devam,
+          ],
         ],
-      ],
+      ),
     );
   }
 }
@@ -588,7 +821,7 @@ class _OptionTile extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Sym(emoji, size: 34),
+                FoodIcon(emoji, size: 34),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(label,
@@ -645,6 +878,15 @@ class _Done extends StatelessWidget {
       if (p.savesVideos)
         ('🎬', 'Sosyal medyadan tarif kaydetme ana sayfada en önde'),
       if (p.planTime != null) (p.planTime!.emoji, p.planTime!.homeLine),
+      if (p.allergyAsked && p.allergies.isEmpty)
+        ('✅', 'Alerji filtresi kapalı'),
+      if (p.allergies.isNotEmpty)
+        (
+          '⚠',
+          'Gizlenen alerjenler: ${p.allergies.map((a) => a.label).join(', ')}'
+        ),
+      if (p.missingStaples.isNotEmpty)
+        ('🧂', '${p.missingStaples.length} temel malzeme evde yok sayılacak'),
     ];
   }
 
@@ -688,7 +930,7 @@ class _Done extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Text('Hepsini Profil\'den istediğin zaman değiştirebilirsin.',
+        Text('Anketi Profil\'den yeniden doldurarak güncelleyebilirsin.',
             textAlign: TextAlign.center, style: theme.textTheme.bodySmall),
         const SizedBox(height: 18),
         ChunkyButton(

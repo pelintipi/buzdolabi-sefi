@@ -131,23 +131,24 @@ Besin değerleri TürKomp/USDA civarındaki yaklaşık değerlerdir; resmi tablo
 tek tek doğrulanmadı. Fiyatlar kaba tahmindir ve uygulamada "tahmini" gösterilir.
 Tarifler henüz bir aşçı ya da editör tarafından kontrol edilmedi.
 
-## TikTok'tan tarif kaydetme
+## TikTok / Instagram'dan tarif kaydetme
 
-TikTok'ta bir videoda **Paylaş → Buzdolabı Şefi** denince tarif uygulamaya kaydedilir.
+Videoda **Paylaş → Buzdolabı Şefi** (Kaydet/bookmark değil — paylaş menüsü).
+Uygulama açılır, linkten tarif çıkarılır ve kaydedilir.
 
 | Parça | Dosya |
 |---|---|
-| iOS paylaşım eklentisi ("Kaydedildi" kartı) | `ios/ShareExtension/ShareViewController.swift` |
-| Eklentiyi Xcode projesine ekleyen betik (CI'da çalışır) | `ios/scripts/add_share_extension.rb` |
-| Paylaşımları Flutter'a veren köprü | `ios/Runner/AppDelegate.swift` → `ShareInboxPlugin` |
-| Video bilgisi (TikTok oEmbed) ve paylaşım kutusu | `lib/services/video_import.dart` |
-| Açıklamadan tarif çıkarma (kural tabanlı, sunucusuz) | `lib/services/caption_recipe_extractor.dart` |
+| iOS paylaşım eklentisi | `ios/ShareExtension/ShareViewController.swift` |
+| Eklentiyi Xcode'a ekleyen betik | `ios/scripts/add_share_extension.rb` |
+| iOS köprü | `ios/Runner/AppDelegate.swift` → `ShareInboxPlugin` |
+| Android paylaşım (ACTION_SEND) | `android/.../MainActivity.kt` + `AndroidManifest.xml` |
+| Video bilgisi / paylaşım kutusu | `lib/services/video_import.dart` → `ShareInbox` |
+| Açıklamadan tarif | `lib/services/caption_recipe_extractor.dart` |
 | Ekran | `lib/screens/import_recipe_screen.dart` |
 
-Akış: eklenti linki uygulama grubunun ortak kutusuna (`group.<paket kimliği>`) bırakır →
-uygulama açılınca/öne gelince kutuyu boşaltır → TikTok'un herkese açık oEmbed
-servisinden açıklama, hesap adı ve kapak alınır → tarif çıkarılır, kaydedilir ve
-dolapla karşılaştırılmış halde açılır. Video dosyası indirilmez.
+Akış: paylaşım linki native tarafa düşer → uygulama açılınca/öne gelince
+`ShareInbox.takePending` okur → oEmbed ile açıklama/kapak → tarif çıkarılır.
+Video dosyası indirilmez. **Web'de paylaş menüsü yok**; gerçek telefonda dene.
 
 Bilinen sınırlar:
 - Tarif açıklamada yazmıyorsa (sesli anlatılıyorsa) çıkarılamaz; kullanıcıdan

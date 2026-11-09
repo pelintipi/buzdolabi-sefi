@@ -43,16 +43,16 @@ void main() {
         'degisiklik_raporlari/2026-11-04_anket-ve-tarif-sekmeleri',
         'Açılış anketi ve tarifin üç parçası · Ekran testi');
 
-    /// Tek seçimli soruda seçer, seçimi görüntüler, otomatik geçişi bekler.
+    /// Tek seçimli soruda seçer, sonra Devam'a basar.
     Future<void> pick(String label, String title, String result) async {
       await r.tap(tester, find.text(label), label);
-      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pumpAndSettle();
       await r.capture(tester,
           title: title,
           action: '"$label" seçeneğine dokundum.',
-          result: result,
-          settle: false);
-      await tester.pump(const Duration(milliseconds: 300));
+          result: result);
+      expect(find.text('Devam'), findsOneWidget);
+      await r.tap(tester, find.text('Devam'), 'Devam');
       await tester.pumpAndSettle();
     }
 
@@ -67,7 +67,7 @@ void main() {
       await r.capture(tester,
           title: 'Hoş geldin',
           action: 'Uygulamayı ilk kez açtım.',
-          result: 'Ana sayfadan önce kısa anket: "4 kısa soru, 20 saniye". '
+          result: 'Ana sayfadan önce kısa anket. '
               'İstemeyen "Şimdilik geç" diyebiliyor.');
       expect(find.text('Hoş geldin!'), findsOneWidget);
 
@@ -113,15 +113,38 @@ void main() {
       await pick(EatingStyle.protein.label, '4 · Nasıl besleniyorsun?',
           'Sonuçlar "En çok protein" sırasıyla açılacak.');
 
+      // -------------------------------------------------------- 5 · Alerji
+      await r.capture(tester,
+          title: '5 · Alerjin var mı?',
+          action: 'Alerji sorusuna geldim.',
+          result: 'Boş bırakıp Devam: alerji filtresi kapalı.');
+      expect(find.text('Devam'), findsOneWidget);
+      await r.tap(tester, find.text('Devam'), 'Devam');
+      await tester.pumpAndSettle();
+
+      // -------------------------------------------------------- 6 · Temel malzemeler
+      await r.capture(tester,
+          title: '6 · Evde genelde neler var?',
+          action: 'Temel malzeme sorusuna geldim.',
+          result: 'İşaretliler her tarifte var sayılır.');
+      expect(find.textContaining('Devam'), findsWidgets);
+      await r.tap(tester, find.textContaining('Devam').last, 'Devam');
+      await tester.pumpAndSettle();
+
       await r.capture(tester,
           title: 'Hazırsın',
-          action: 'Dördüncü ve son soruyu yanıtladım.',
+          action: 'Son soruları yanıtladım.',
           result: 'Cevapların uygulamada neyi değiştirdiği tek tek yazıyor.');
       expect(find.text('Tarifler 2 kişilik açılacak'), findsOneWidget);
 
       // -------------------------------------------------------- Ana sayfa
       await r.tap(tester, find.text('Mutfağa geç'), 'Mutfağa geç');
       await tester.pumpAndSettle();
+      // İlk giriş nav turu — test akışını engellemesin.
+      if (find.text('Geç').evaluate().isNotEmpty) {
+        await tester.tap(find.text('Geç').last);
+        await tester.pumpAndSettle();
+      }
       final p = state.profile;
       await r.capture(tester,
           title: 'Sana göre ana sayfa',
@@ -135,7 +158,8 @@ void main() {
       final tiktok = tester.getTopLeft(find.text('Sosyal medya'));
       final receipt = tester.getTopLeft(find.text('Fiş, barkod'));
       expect(tiktok.dx, lessThan(receipt.dx), reason: 'TikTok ilk sırada');
-      // Kaç gün pişirdiği artık ankette değil, ana sayfada yeri gelince soruluyor.
+      // Haftalık hedef: seçmeden üstte chip yok; altta seçince gelir.
+      expect(find.textContaining('bu hafta'), findsNothing);
       final scroll = find
           .byWidgetPredicate(
               (w) => w is Scrollable && w.axisDirection == AxisDirection.down)
@@ -146,14 +170,14 @@ void main() {
       await tester.pumpAndSettle();
       await r.capture(tester,
           title: 'Haftalık hedef',
-          action: 'Ana sayfanın altına kaydırdım.',
-          result: 'Ankette sorulmayan "kaç gün" sorusu burada tek dokunuşla.');
+          action: 'Alttaki hedef sorusuna geldim.',
+          result: 'Seçmeden üstte 0/3 yazılmaz.');
       await r.tap(tester, find.text('5-6 gün'), '5-6 gün');
       await tester.pumpAndSettle();
-      expect(find.text('Bu hafta 0/5 pişirme'), findsOneWidget);
-      await tester.scrollUntilVisible(find.text('Ne pişirsem?'), -300,
-          scrollable: scroll);
+      expect(state.weeklyGoal, 5);
+      tester.state<ScrollableState>(scroll).position.jumpTo(0);
       await tester.pumpAndSettle();
+      expect(find.text('0/5 bu hafta'), findsOneWidget);
 
       // -------------------------------------------------------- Tarif: 3 parça
       state.updateProfile(state.profile.copyWith(allergyAsked: true));

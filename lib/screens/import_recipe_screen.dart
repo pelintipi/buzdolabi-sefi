@@ -297,7 +297,7 @@ class _HowToCard extends StatelessWidget {
                 decoration: const BoxDecoration(
                     color: Palette.butter, shape: BoxShape.circle),
                 child: Text(n,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontFamily: Fonts.display,
                         fontWeight: FontWeight.w800,
                         color: Palette.ink)),

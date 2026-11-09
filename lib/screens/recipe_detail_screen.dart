@@ -395,7 +395,7 @@ class _FactsRow extends StatelessWidget {
                         fontWeight: FontWeight.w800,
                         fontSize: 18)),
                 Text(label,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 12,
                         color: Palette.inkSoft)),
@@ -776,7 +776,7 @@ class _NutritionTable extends StatelessWidget {
       ('🍞', 'Karbonhidrat', n.carbs, 'g', _daily.carbs, Palette.butterDeep),
       ('🥑', 'Yağ', n.fat, 'g', _daily.fat, const Color(0xFF6E8B3D)),
     ];
-    const head = TextStyle(
+    final head = TextStyle(
         fontWeight: FontWeight.w800, fontSize: 12.5, color: Palette.inkSoft);
     return SoftCard(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
@@ -785,7 +785,7 @@ class _NutritionTable extends StatelessWidget {
           Row(
             children: [
               const Expanded(child: SizedBox()),
-              const SizedBox(
+              SizedBox(
                   width: 78,
                   child: Text('1 porsiyon',
                       textAlign: TextAlign.right, style: head)),
@@ -835,7 +835,7 @@ class _NutritionTable extends StatelessWidget {
                   child: Text(
                       '${formatNumber(r.$3 * servings, decimals: 0)} ${r.$4}',
                       textAlign: TextAlign.right,
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
                           color: Palette.inkSoft)),
@@ -864,7 +864,7 @@ class _Meta extends StatelessWidget {
         Icon(icon, size: 18, color: Palette.inkSoft),
         const SizedBox(width: 5),
         Text(text,
-            style: const TextStyle(
+            style: TextStyle(
                 fontFamily: Fonts.body,
                 fontWeight: FontWeight.w600,
                 fontSize: 14,

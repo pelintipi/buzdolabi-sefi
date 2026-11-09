@@ -91,7 +91,7 @@ class ProfileScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              const SymBubble('🧑‍🍳', size: 72, color: Palette.butterSoft),
+              SymBubble('🧑‍🍳', size: 72, color: Palette.butterSoft),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -136,6 +136,24 @@ class ProfileScreen extends StatelessWidget {
                 builder: (ctx) =>
                     OnboardingScreen(onDone: () => Navigator.of(ctx).pop()),
               )),
+            ),
+          ),
+          group(
+            'Görünüm',
+            '🌓',
+            'Varsayılan: telefonun açık/koyu ayarı.',
+            SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<UiTheme>(
+                segments: [
+                  for (final t in UiTheme.values)
+                    ButtonSegment(value: t, label: Text(t.label)),
+                ],
+                selected: {p.uiTheme},
+                showSelectedIcon: false,
+                onSelectionChanged: (s) =>
+                    state.updateProfile(p.copyWith(uiTheme: s.first)),
+              ),
             ),
           ),
           group(
@@ -290,9 +308,9 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           group(
-            'Evde hep olanlar',
+            'Evde genelde neler var?',
             '🧂',
-            'Bunlar her tarifte var sayılır. Biten olursa kapat.',
+            'İşaretlediklerin her tarifte var sayılır. Biten olursa kapat.',
             Column(
               children: [
                 for (final s in state.repo.staples)

@@ -23,7 +23,7 @@ class SefPlusBadge extends StatelessWidget {
           border: Border.all(
               color: onDark ? Colors.white : Palette.butterDeep, width: 1.5),
         ),
-        child: const Text(
+        child: Text(
           firstReleaseFree ? 'Şef+ · şimdilik ücretsiz' : 'Şef+',
           style: TextStyle(
               fontFamily: Fonts.display,

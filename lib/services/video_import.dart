@@ -113,8 +113,8 @@ class VideoInfoClient {
   }
 }
 
-/// iOS paylaşım eklentisinin (ios/ShareExtension) uygulama grubuna bıraktığı
-/// paylaşımları teslim alır. Diğer platformlarda boş döner.
+/// iOS ShareExtension / Android ACTION_SEND ile gelen paylaşımları teslim alır
+/// (kanal: `buzdolabi_sefi/share`). Web'de boş döner.
 class ShareInbox {
   const ShareInbox();
 

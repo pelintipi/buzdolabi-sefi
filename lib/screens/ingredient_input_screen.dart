@@ -497,7 +497,7 @@ class _DraftTile extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close_rounded, color: Palette.inkSoft),
+            icon: Icon(Icons.close_rounded, color: Palette.inkSoft),
             tooltip: 'Çıkar',
             onPressed: onRemove,
           ),

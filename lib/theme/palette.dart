@@ -1,42 +1,102 @@
 import 'package:flutter/material.dart';
 
-/// Sakin, "yemek dergisi" paleti: kâğıt beyazı zemin, ince çizgili beyaz
-/// kartlar, koyu orman yeşili ana renk ve az miktarda kiremit vurgu.
-/// Renkli bloklar yerine boşluk ve tipografiyle hiyerarşi kurulur.
-/// (Adlar eski paletle aynı kaldı; tüm ekranlar buradan beslenir.)
+/// Açık / koyu yapısal renkler. Vurgu renkleri (basil/tomato/butter) sabit.
+class BrandColors {
+  const BrandColors({
+    required this.ink,
+    required this.inkSoft,
+    required this.line,
+    required this.lineDeep,
+    required this.ground,
+    required this.surface,
+    required this.sand,
+    required this.basilSoft,
+    required this.tomatoSoft,
+    required this.butterSoft,
+  });
+
+  final Color ink;
+  final Color inkSoft;
+  final Color line;
+  final Color lineDeep;
+  final Color ground;
+  final Color surface;
+  final Color sand;
+  final Color basilSoft;
+  final Color tomatoSoft;
+  final Color butterSoft;
+
+  static const light = BrandColors(
+    ink: Color(0xFF1A1A17),
+    inkSoft: Color(0xFF6E6C66),
+    line: Color(0xFFE9E5DE),
+    lineDeep: Color(0xFFD8D2C8),
+    ground: Color(0xFFF8F6F2),
+    surface: Color(0xFFFFFFFF),
+    sand: Color(0xFFF1EEE8),
+    basilSoft: Color(0xFFE9EEE7),
+    tomatoSoft: Color(0xFFF6ECE6),
+    butterSoft: Color(0xFFF6F0E3),
+  );
+
+  static const dark = BrandColors(
+    ink: Color(0xFFF2F0EB),
+    inkSoft: Color(0xFFA8A59C),
+    line: Color(0xFF2E322E),
+    lineDeep: Color(0xFF3D423D),
+    ground: Color(0xFF121411),
+    surface: Color(0xFF1C1F1C),
+    sand: Color(0xFF252825),
+    basilSoft: Color(0xFF1A2E24),
+    tomatoSoft: Color(0xFF2A1C18),
+    butterSoft: Color(0xFF2A2418),
+  );
+
+  static BrandColors forBrightness(Brightness b) =>
+      b == Brightness.dark ? dark : light;
+}
+
+/// Sakin, "yemek dergisi" paleti. Yapısal renkler tema parlaklığına göre
+/// değişir; [Palette.apply] MaterialApp builder'da çağrılır.
 abstract final class Palette {
+  static BrandColors _c = BrandColors.light;
+
+  static void apply(Brightness brightness) {
+    _c = BrandColors.forBrightness(brightness);
+  }
+
   /// Ana renk: koyu orman yeşili (butonlar, seçili öğeler, "Var").
   static const basil = Color(0xFF1F3B2D);
   static const basilDeep = Color(0xFF13261C);
-  static const basilSoft = Color(0xFFE9EEE7);
+  static Color get basilSoft => _c.basilSoft;
 
   /// Vurgu ve uyarı: kiremit ("Yok", bozulacaklar, tek vurgu öğesi).
   static const tomato = Color(0xFFB4532F);
   static const tomatoDeep = Color(0xFF8F3E21);
-  static const tomatoSoft = Color(0xFFF6ECE6);
+  static Color get tomatoSoft => _c.tomatoSoft;
 
   /// Durum: aşı boyası ("Az", en iyi değer).
   static const butter = Color(0xFFC99A3C);
   static const butterDeep = Color(0xFF946E22);
-  static const butterSoft = Color(0xFFF6F0E3);
+  static Color get butterSoft => _c.butterSoft;
 
-  static const ink = Color(0xFF1A1A17);
-  static const inkSoft = Color(0xFF6E6C66);
-  static const line = Color(0xFFE9E5DE);
-  static const lineDeep = Color(0xFFD8D2C8);
+  static Color get ink => _c.ink;
+  static Color get inkSoft => _c.inkSoft;
+  static Color get line => _c.line;
+  static Color get lineDeep => _c.lineDeep;
 
-  /// Sayfa zemini: kâğıt beyazı.
-  static const ground = Color(0xFFF8F6F2);
+  /// Sayfa zemini.
+  static Color get ground => _c.ground;
 
-  /// Kart zemini: beyaz.
-  static const surface = Color(0xFFFFFFFF);
+  /// Kart zemini.
+  static Color get surface => _c.surface;
 
   /// Nötr dolgu (simge zemini, etiketler, ikincil butonlar).
-  static const sand = Color(0xFFF1EEE8);
+  static Color get sand => _c.sand;
 
   /// Eski adlar: artık renkli blok yok, hepsi nötr.
-  static const peach = sand;
-  static const blush = sand;
+  static Color get peach => sand;
+  static Color get blush => sand;
 }
 
 abstract final class Fonts {

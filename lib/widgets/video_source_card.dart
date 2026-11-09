@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/recipe.dart';
@@ -189,7 +189,7 @@ class PlatformBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: onDark ? const Color(0x26FFFFFF) : Palette.surface,
+        color: onDark ? Color(0x26FFFFFF) : Palette.surface,
         borderRadius: BorderRadius.circular(999),
         border: onDark ? null : Border.all(color: Palette.line),
       ),

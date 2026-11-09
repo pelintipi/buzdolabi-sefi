@@ -13,6 +13,7 @@ import 'services/video_import.dart';
 import 'state/app_state.dart';
 import 'theme/app_theme.dart';
 import 'theme/palette.dart';
+import 'widgets/nav_tour.dart';
 
 class BuzdolabiSefiApp extends StatelessWidget {
   const BuzdolabiSefiApp(
@@ -24,11 +25,18 @@ class BuzdolabiSefiApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = context.select<AppState, ThemeMode>(
+        (s) => s.profile.uiTheme.mode);
     return MaterialApp(
       title: 'Buzdolabı Şefi',
       debugShowCheckedModeBanner: false,
-      theme: buildAppTheme(),
-      themeMode: ThemeMode.light,
+      theme: buildAppTheme(Brightness.light),
+      darkTheme: buildAppTheme(Brightness.dark),
+      themeMode: themeMode,
+      builder: (context, child) {
+        Palette.apply(Theme.of(context).brightness);
+        return child ?? const SizedBox.shrink();
+      },
       locale: const Locale('tr'),
       supportedLocales: const [Locale('tr')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
@@ -64,7 +72,22 @@ class _HomeShellState extends State<HomeShell> {
     super.initState();
     // Paylaş menüsünden gelinince uygulama ya yeni açılır ya da öne gelir.
     _lifecycle = AppLifecycleListener(onResume: _checkShares);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkShares());
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _maybeNavTour();
+      if (mounted) await _checkShares();
+    });
+  }
+
+  /// İlk girişte alt menüyü bir kez anlatır; sekmeyi adım adım açar.
+  Future<void> _maybeNavTour() async {
+    final state = context.read<AppState>();
+    if (state.profile.seenNavTour) return;
+    await showNavTour(context, onTab: (i) {
+      if (mounted) setState(() => _index = i);
+    });
+    if (!mounted) return;
+    state.updateProfile(state.profile.copyWith(seenNavTour: true));
+    setState(() => _index = 0);
   }
 
   @override
@@ -131,10 +154,10 @@ class _NavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final shoppingCount = context.watch<AppState>().shoppingList.length;
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Palette.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: [
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: const [
           BoxShadow(
               color: Color(0x143A2A1E), blurRadius: 20, offset: Offset(0, -4)),
         ],

@@ -154,7 +154,7 @@ class ProgressScreen extends StatelessWidget {
                           ),
                         ),
                         if (log.rating != null)
-                          Pill('${log.rating}', icon: '⭐', border: null),
+                          Pill('${log.rating}', icon: '⭐', bordered: false),
                       ],
                     ),
                   ),
@@ -287,7 +287,7 @@ class _TodayCard extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(_weekdays[w.day.weekday - 1],
-                                style: const TextStyle(
+                                style: TextStyle(
                                     fontWeight: FontWeight.w800,
                                     fontSize: 11.5,
                                     color: Palette.inkSoft)),
