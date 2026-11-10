@@ -117,10 +117,26 @@ void main() {
       await r.capture(tester,
           title: '5 · Alerjin var mı?',
           action: 'Alerji sorusuna geldim.',
-          result: 'Boş bırakıp Devam: alerji filtresi kapalı.');
-      expect(find.text('Devam'), findsOneWidget);
-      await r.tap(tester, find.text('Devam'), 'Devam');
+          result: 'Listede olmayan alerji için en altta "Diğer" var.');
+      await tester.ensureVisible(find.text('Diğer'));
       await tester.pumpAndSettle();
+      await r.tap(tester, find.text('Diğer'), 'Diğer');
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).last, 'ceviz, kivi');
+      await r.tap(tester, find.text('Ekle'), 'Ekle');
+      await tester.pumpAndSettle();
+      await r.capture(tester,
+          title: '5 · Diğer alerjiler',
+          action: '"Diğer"e dokunup "ceviz, kivi" yazdım ve Ekle\'ye bastım.',
+          result: 'Ceviz listemizde var, içeren tarifler gizlenecek; kivi '
+              'listemizde yok, bunu açıkça söylüyor.');
+      expect(find.text('Ceviz içeren tarifler gizlenir'), findsOneWidget);
+      expect(find.textContaining('bulamadık'), findsOneWidget);
+      await r.tap(tester, find.text('Devam (2)'), 'Devam');
+      await tester.pumpAndSettle();
+      // Anketin sonunda profile yazılır; ceviz içeren tarif çıkmaz.
+      final walnut = recipeCatalog
+          .firstWhere((x) => x.items.any((i) => i.ingredientId == 'ceviz'));
 
       // -------------------------------------------------------- 6 · Temel malzemeler
       await r.capture(tester,
@@ -136,6 +152,8 @@ void main() {
           action: 'Son soruları yanıtladım.',
           result: 'Cevapların uygulamada neyi değiştirdiği tek tek yazıyor.');
       expect(find.text('Tarifler 2 kişilik açılacak'), findsOneWidget);
+      expect(find.textContaining('ceviz, kivi'), findsOneWidget,
+          reason: 'özet "Gizlenen alerjenler" satırında yazılanları gösterir');
 
       // -------------------------------------------------------- Ana sayfa
       await r.tap(tester, find.text('Mutfağa geç'), 'Mutfağa geç');
@@ -145,6 +163,9 @@ void main() {
         await tester.tap(find.text('Geç').last);
         await tester.pumpAndSettle();
       }
+      expect(state.profile.customAllergies, ['ceviz', 'kivi']);
+      expect(state.matcher.passesProfile(walnut, state.profile), isFalse,
+          reason: '${walnut.title} ceviz içeriyor, gizlenmeli');
       final p = state.profile;
       await r.capture(tester,
           title: 'Sana göre ana sayfa',

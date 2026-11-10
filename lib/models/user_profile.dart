@@ -111,6 +111,7 @@ enum PlanTime {
 class UserProfile {
   const UserProfile({
     this.allergies = const {},
+    this.customAllergies = const [],
     this.diet = Diet.none,
     this.appliances = const {Appliance.ocak, Appliance.firin},
     this.missingStaples = const {},
@@ -131,6 +132,9 @@ class UserProfile {
   });
 
   final Set<Allergen> allergies;
+
+  /// Listede olmayan, kullanıcının "Diğer" diye yazdığı alerjiler ("çilek").
+  final List<String> customAllergies;
   final Diet diet;
   final Set<Appliance> appliances;
 
@@ -183,6 +187,7 @@ class UserProfile {
 
   UserProfile copyWith({
     Set<Allergen>? allergies,
+    List<String>? customAllergies,
     Diet? diet,
     Set<Appliance>? appliances,
     Set<String>? missingStaples,
@@ -203,6 +208,7 @@ class UserProfile {
   }) =>
       UserProfile(
         allergies: allergies ?? this.allergies,
+        customAllergies: customAllergies ?? this.customAllergies,
         diet: diet ?? this.diet,
         appliances: appliances ?? this.appliances,
         missingStaples: missingStaples ?? this.missingStaples,
@@ -224,6 +230,7 @@ class UserProfile {
 
   Map<String, dynamic> toJson() => {
         'allergies': [for (final a in allergies) a.name],
+        if (customAllergies.isNotEmpty) 'customAllergies': customAllergies,
         'diet': diet.name,
         'appliances': [for (final a in appliances) a.name],
         'missingStaples': missingStaples.toList(),
@@ -260,6 +267,10 @@ class UserProfile {
           for (final a in (j['allergies'] as List? ?? const []))
             Allergen.values.byName(a as String)
         },
+        customAllergies: [
+          for (final a in (j['customAllergies'] as List? ?? const []))
+            a as String
+        ],
         diet: Diet.values.byName(j['diet'] as String? ?? Diet.none.name),
         appliances: {
           for (final a in (j['appliances'] as List? ?? const []))

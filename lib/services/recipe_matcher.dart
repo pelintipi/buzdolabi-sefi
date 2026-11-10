@@ -6,6 +6,7 @@ import '../models/user_profile.dart';
 import 'collections.dart';
 import 'ingredient_repository.dart';
 import 'nutrition_review.dart';
+import 'turkish_text.dart';
 
 export 'nutrition_review.dart';
 import 'unit_converter.dart';
@@ -324,10 +325,31 @@ class RecipeMatcher {
     );
   }
 
+  final _allergyLookup = <String, Ingredient?>{};
+
+  /// "Diğer" diye yazılan alerjinin katalogdaki karşılığı ("çilekler" →
+  /// çilek). Bulunamazsa null; o alerji tariflerde aranamaz.
+  Ingredient? allergyIngredient(String text) => _allergyLookup.putIfAbsent(
+      TurkishText.fold(text), () => repo.findByName(text.trim()));
+
+  /// Tarifte kullanıcının yazdığı alerjilere denk gelen malzemeler.
+  List<Ingredient> customAllergyHits(Recipe r, UserProfile profile) {
+    if (profile.customAllergies.isEmpty) return const [];
+    final ids = {
+      for (final t in profile.customAllergies) allergyIngredient(t)?.id,
+    }..remove(null);
+    if (ids.isEmpty) return const [];
+    return [
+      for (final i in r.items)
+        if (ids.contains(i.ingredientId)) repo.byId(i.ingredientId)
+    ];
+  }
+
   /// Profil kuralları (alerji, diyet, mutfak aletleri) her aramada uygulanır.
   bool passesProfile(Recipe r, UserProfile profile) {
     final facts = factsOf(r);
     if (facts.allergens.any(profile.allergies.contains)) return false;
+    if (customAllergyHits(r, profile).isNotEmpty) return false;
     if (profile.diet == Diet.vegan && !facts.isVegan) return false;
     if (profile.diet == Diet.vegetarian && !facts.isVegetarian) return false;
     if (!profile.appliances.containsAll(r.appliances)) return false;

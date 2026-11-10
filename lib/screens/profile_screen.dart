@@ -6,6 +6,7 @@ import '../models/recipe.dart';
 import '../models/user_profile.dart';
 import '../state/app_state.dart';
 import '../theme/palette.dart';
+import '../widgets/other_allergies.dart';
 import '../widgets/recipe_image.dart';
 import '../widgets/ui.dart';
 import '../services/device_services.dart';
@@ -267,21 +268,33 @@ class ProfileScreen extends StatelessWidget {
             'Alerjiler',
             '⚠',
             'Bunları içeren tarifler sana hiç gösterilmez.',
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (final a in Allergen.values)
-                  choice(
-                      a.emoji,
-                      a.label,
-                      p.allergies.contains(a),
-                      (on) => state.updateProfile(p.copyWith(
-                            allergies: on
-                                ? {...p.allergies, a}
-                                : (p.allergies.toSet()..remove(a)),
-                            allergyAsked: true,
-                          ))),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final a in Allergen.values)
+                      choice(
+                          a.emoji,
+                          a.label,
+                          p.allergies.contains(a),
+                          (on) => state.updateProfile(p.copyWith(
+                                allergies: on
+                                    ? {...p.allergies, a}
+                                    : (p.allergies.toSet()..remove(a)),
+                                allergyAsked: true,
+                              ))),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                OtherAllergies(
+                  compact: true,
+                  values: p.customAllergies,
+                  onChanged: (v) => state.updateProfile(
+                      p.copyWith(customAllergies: v, allergyAsked: true)),
+                ),
               ],
             ),
           ),

@@ -8,6 +8,7 @@ import '../models/recipe.dart';
 import '../models/user_profile.dart';
 import '../state/app_state.dart';
 import '../theme/palette.dart';
+import '../widgets/other_allergies.dart';
 import '../widgets/ui.dart';
 
 /// Açılış anketi: karşılama, kısa sorular (Profil'den açılınca ekstra)
@@ -59,6 +60,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   /// Her zaman boş başlar; eski cevaplar işaretli gelmez.
   late Set<Allergen> _allergies = {};
+
+  /// "Diğer" diye yazılan alerjiler.
+  List<String> _customAllergies = const [];
 
   /// İşaretli = evde var. Kullanıcı seçer (arama ile de ekler).
   late Set<String> _haveIds = {};
@@ -123,6 +127,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         appliances: _appliances.isEmpty ? null : _appliances,
         appliancesAsked: _appliances.isNotEmpty,
         allergies: _allergies,
+        customAllergies: _customAllergies,
         allergyAsked: true,
         missingStaples: _missingStaples,
       );
@@ -219,6 +224,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           onToggle: (v) => setState(() => _allergies = _toggle(_allergies, v)),
           onNext: _next,
           minSelected: 0,
+          footer: OtherAllergies(
+            values: _customAllergies,
+            onChanged: (v) => setState(() => _customAllergies = v),
+          ),
+          extraCount: _customAllergies.length,
         ),
         _SearchableHavePage(
           options: _haveOptions,
@@ -670,7 +680,9 @@ class _Question<T> extends StatelessWidget {
   })  : selectedOne = selected,
         selectedMany = null,
         onToggle = null,
-        minSelected = 0;
+        minSelected = 0,
+        footer = null,
+        extraCount = 0;
 
   const _Question.multi({
     super.key,
@@ -682,6 +694,8 @@ class _Question<T> extends StatelessWidget {
     required ValueChanged<T> this.onToggle,
     required VoidCallback this.onNext,
     this.minSelected = 1,
+    this.footer,
+    this.extraCount = 0,
   })  : selectedMany = selected,
         selectedOne = null,
         onPick = null;
@@ -702,6 +716,12 @@ class _Question<T> extends StatelessWidget {
 
   /// Çok seçimlide "Devam" için gereken en az seçim.
   final int minSelected;
+
+  /// Seçeneklerin altına eklenen parça ("Diğer" alerjiler).
+  final Widget? footer;
+
+  /// Seçeneklerin dışında seçilmiş sayılanlar ("Devam (3)" sayısına girer).
+  final int extraCount;
 
   bool get _multi => selectedMany != null;
 
@@ -726,9 +746,9 @@ class _Question<T> extends StatelessWidget {
                 ? (selectedOne == null ? 'Birini seç' : 'Devam')
                 : selectedMany!.length < minSelected
                     ? 'En az birini seç'
-                    : selectedMany!.isEmpty
+                    : selectedMany!.length + extraCount == 0
                         ? 'Devam'
-                        : 'Devam (${selectedMany!.length})',
+                        : 'Devam (${selectedMany!.length + extraCount})',
             tone: ChunkyTone.accent,
             onPressed: !_multi
                 ? (selectedOne == null ? null : onNext)
@@ -765,6 +785,7 @@ class _Question<T> extends StatelessWidget {
                       onTap: () => _tap(o.value),
                     ),
                   ),
+                if (footer != null) footer!,
               ],
             ),
           ),
@@ -878,12 +899,15 @@ class _Done extends StatelessWidget {
       if (p.savesVideos)
         ('🎬', 'Sosyal medyadan tarif kaydetme ana sayfada en önde'),
       if (p.planTime != null) (p.planTime!.emoji, p.planTime!.homeLine),
-      if (p.allergyAsked && p.allergies.isEmpty)
+      if (p.allergyAsked && p.allergies.isEmpty && p.customAllergies.isEmpty)
         ('✅', 'Alerji filtresi kapalı'),
-      if (p.allergies.isNotEmpty)
+      if (p.allergies.isNotEmpty || p.customAllergies.isNotEmpty)
         (
           '⚠',
-          'Gizlenen alerjenler: ${p.allergies.map((a) => a.label).join(', ')}'
+          'Gizlenen alerjenler: ${[
+            ...p.allergies.map((a) => a.label),
+            ...p.customAllergies
+          ].join(', ')}'
         ),
       if (p.missingStaples.isNotEmpty)
         ('🧂', '${p.missingStaples.length} temel malzeme evde yok sayılacak'),

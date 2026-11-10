@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../models/ingredient.dart';
 import '../models/recipe.dart';
+import '../state/app_state.dart';
 import '../theme/palette.dart';
+import 'other_allergies.dart';
 import 'ui.dart';
 
 Widget _choice(String icon, String label, bool selected,
@@ -29,6 +32,13 @@ class AllergyDialog extends StatefulWidget {
 
 class _AllergyDialogState extends State<AllergyDialog> {
   late final Set<Allergen> _selected = {...widget.initial};
+  List<String> _custom = const [];
+
+  void _close(Set<Allergen> result, List<String> custom) {
+    final state = context.read<AppState>();
+    state.updateProfile(state.profile.copyWith(customAllergies: custom));
+    Navigator.of(context).pop(result);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,19 +69,25 @@ class _AllergyDialogState extends State<AllergyDialog> {
                           () => on ? _selected.add(a) : _selected.remove(a))),
               ],
             ),
+            const SizedBox(height: 12),
+            OtherAllergies(
+              compact: true,
+              values: _custom,
+              onChanged: (v) => setState(() => _custom = v),
+            ),
           ],
         ),
       ),
       actionsAlignment: MainAxisAlignment.spaceBetween,
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(<Allergen>{}),
+          onPressed: () => _close(<Allergen>{}, const []),
           child: const Text('Alerjim yok'),
         ),
         FilledButton(
-          onPressed: _selected.isEmpty
+          onPressed: _selected.isEmpty && _custom.isEmpty
               ? null
-              : () => Navigator.of(context).pop(_selected),
+              : () => _close(_selected, _custom),
           child: const Text('Kaydet'),
         ),
       ],

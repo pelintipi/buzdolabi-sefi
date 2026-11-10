@@ -111,7 +111,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         state.matcher.evaluate(recipe, state.snapshot, servings: _servings);
     final facts = match.facts;
     final scale = _servings / recipe.servings;
-    final conflicts = facts.allergens.intersection(state.profile.allergies);
+    // Listedeki alerjenler ve "Diğer" diye yazılanlara denk gelen malzemeler.
+    final conflicts = [
+      for (final a in facts.allergens.intersection(state.profile.allergies))
+        a.label,
+      for (final i in state.matcher.customAllergyHits(recipe, state.profile))
+        i.name,
+    ];
     final favorite = state.isFavorite(recipe.id);
 
     return Scaffold(
@@ -213,7 +219,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   Expanded(
                     child: Text(
                       'Bu tarif alerjin olan şunları içeriyor: '
-                      '${conflicts.map((a) => a.label).join(', ')}',
+                      '${conflicts.join(', ')}',
                       style: const TextStyle(
                           fontWeight: FontWeight.w800,
                           color: Palette.tomatoDeep),
