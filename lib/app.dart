@@ -194,7 +194,7 @@ class _NavBar extends StatelessWidget {
                                 i == index ? _items[i].$2 : _items[i].$1,
                                 size: 28,
                                 color: i == index
-                                    ? Palette.basil
+                                    ? Palette.accent
                                     : Palette.inkSoft,
                               ),
                             ),
@@ -208,7 +208,7 @@ class _NavBar extends StatelessWidget {
                                     : FontWeight.w600,
                                 fontSize: 13,
                                 color: i == index
-                                    ? Palette.basilDeep
+                                    ? Palette.accentDeep
                                     : Palette.inkSoft,
                               ),
                             ),

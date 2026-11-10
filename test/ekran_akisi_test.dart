@@ -1,4 +1,4 @@
-﻿// Kullanıcı gibi tıklayarak uygulamayı baştan sona dener ve her adımın ekran
+// Kullanıcı gibi tıklayarak uygulamayı baştan sona dener ve her adımın ekran
 // görüntüsünü alır. Çalıştırınca test_raporu/ altında rapor.html ve
 // oynatılabilir prototip için prototip.json oluşur:
 //   flutter test test/ekran_akisi_test.dart
@@ -56,7 +56,8 @@ void main() {
     );
     await state.load();
     // Açılış anketini daha önce doldurmuş kullanıcı (anket: anket_akisi_test).
-    state.updateProfile(state.profile.copyWith(onboarded: true));
+    state.updateProfile(
+        state.profile.copyWith(onboarded: true, seenNavTour: true));
     final r = ScreenshotReport('test_raporu', 'Buzdolabı Şefi · Ekran testi');
 
     // Testler gölgeyi siyah çerçeve olarak çizer; görüntüler gerçeğe benzesin.

@@ -160,11 +160,11 @@ class _HomeHeading extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(bottom: 3),
               child: Text(action!,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontFamily: Fonts.body,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
-                      color: Palette.basil)),
+                      color: Palette.accent)),
             ),
           ),
       ],
@@ -206,7 +206,7 @@ class _StreakChip extends StatelessWidget {
                   title: Text(label,
                       style: const TextStyle(fontWeight: FontWeight.w800)),
                   trailing: days == goal
-                      ? Icon(Icons.check_rounded, color: Palette.basil)
+                      ? Icon(Icons.check_rounded, color: Palette.accent)
                       : null,
                   onTap: () => Navigator.of(ctx).pop(days),
                 ),
@@ -517,7 +517,7 @@ class _AddActions extends StatelessWidget {
                       ),
                       alignment: Alignment.center,
                       child:
-                          Icon(actions[i].$1, color: Palette.basil, size: 28),
+                          Icon(actions[i].$1, color: Palette.accent, size: 28),
                     ),
                     const SizedBox(height: 6),
                     Text(actions[i].$2,
@@ -588,7 +588,7 @@ class _PlanList extends StatelessWidget {
                       decoration: BoxDecoration(
                           color: Palette.sand,
                           borderRadius: BorderRadius.circular(12)),
-                      child: Icon(rows[i].$1, color: Palette.basil, size: 21),
+                      child: Icon(rows[i].$1, color: Palette.accent, size: 21),
                     ),
                     const SizedBox(width: 14),
                     Expanded(

@@ -70,8 +70,8 @@ void main() {
     );
     await state.load();
     // Alerji sorusunu daha önce yanıtlamış bir kullanıcı.
-    state.updateProfile(
-        state.profile.copyWith(allergyAsked: true, onboarded: true));
+    state.updateProfile(state.profile
+        .copyWith(allergyAsked: true, onboarded: true, seenNavTour: true));
     // Dolapta tavuk ve soğan var; mantar ve krema yok.
     state.upsertPantry('tavuk_gogsu', quantity: 600);
     state.upsertPantry('sogan', quantity: 3);

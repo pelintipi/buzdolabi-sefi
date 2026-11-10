@@ -266,7 +266,7 @@ class Sym extends StatelessWidget {
     return SizedBox(
       width: size,
       height: size,
-      child: Icon(icon, size: size * 0.82, color: color ?? Palette.basil),
+      child: Icon(icon, size: size * 0.82, color: color ?? Palette.accent),
     );
   }
 }
@@ -312,7 +312,7 @@ _ToneColors _tone(ChunkyTone t) => switch (t) {
       // İkincil: kum tonu.
       ChunkyTone.butter => _ToneColors(Palette.sand, Palette.ink),
       // Hafif: açık zemin, ince çerçeve.
-      ChunkyTone.soft => _ToneColors(Palette.surface, Palette.basil,
+      ChunkyTone.soft => _ToneColors(Palette.surface, Palette.accent,
           border: Palette.lineDeep),
     };
 

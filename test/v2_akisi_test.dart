@@ -120,6 +120,7 @@ void main() {
     await state.load();
     state.updateProfile(state.profile.copyWith(
         onboarded: true,
+        seenNavTour: true,
         allergyAsked: true,
         appliancesAsked: true,
         cookDaysPerWeek: 5));

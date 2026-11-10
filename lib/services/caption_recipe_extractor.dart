@@ -60,7 +60,9 @@ class CaptionRecipeExtractor {
 
   /// Emir ya da bağlaç fiil ekleri: "çırpın", "pişirip", "karıştırarak".
   static final _verbEnding = RegExp(
-      r'(in|un|yin|yun|iniz|unuz|ip|up|yip|yup|erek|arak|yoruz|dik|duk|tik|tuk|elim|alim)$');
+      // "ekliyorum, döküyorum, kavurdum, pişireceğim" gibi kendi
+      // mutfağını anlatan videolar da adım sayılır.
+      r'(in|un|yin|yun|iniz|unuz|ip|up|yip|yup|erek|arak|yoruz|yorum|iyor|uyor|dik|duk|tik|tuk|dim|dum|tim|tum|ecegim|acagim|ecegiz|acagiz|elim|alim|iriz|eriz|ariz|urum|irim|erim|arim)$');
   static final _numberedStep = RegExp(r'(?:^|\s)\d{1,2}\s*[.)]\s+(?=\D)');
   static final _sentenceEnd = RegExp(r'(?<=[.!?])\s+');
   static final _timer = RegExp(r'(\d+)\s*(?:-\s*(\d+)\s*)?(dakika|dk|saat)');
@@ -107,9 +109,20 @@ class CaptionRecipeExtractor {
             .substring(marker.start, marker.end)
             .replaceFirst(RegExp(r'\s+\S+\s*[:：]\s*$'), '')
         : base.substring(0, titleEnd);
-    final title = _cleanTitle(rawTitle) ??
+    // "...takip etmeyi unutmayın TAVUK TANTUNİ (2 kişilik) 400 gr tavuğu..."
+    // Büyük harfle yazılmış ad, giriş cümlesinden daha iyi bir başlıktır.
+    final caps = marker == null && ingMatch == null ? _capsTitle(text) : null;
+    final title = (caps != null ? _cleanTitle(_titleCase(caps)) : null) ??
+        _cleanTitle(rawTitle) ??
         _cleanTitle(fallbackTitle ?? '') ??
         'Videodan tarif';
+
+    String withoutCaps(String part) => caps == null
+        ? part
+        : part.replaceFirst(
+            RegExp('${RegExp.escape(caps)}\\s*(\\(\\s*\\d+\\s*kişilik\\s*\\))?',
+                caseSensitive: false),
+            '\n');
 
     final String ingredientPart;
     final String stepPart;
@@ -121,7 +134,7 @@ class CaptionRecipeExtractor {
       ingredientPart = base.substring(titleEnd, stepsMatch.start);
       stepPart = base.substring(stepsMatch.end);
     } else {
-      ingredientPart = base.substring(titleEnd);
+      ingredientPart = withoutCaps(base.substring(titleEnd));
       stepPart = '';
     }
 
@@ -131,8 +144,18 @@ class CaptionRecipeExtractor {
     // Cümle cümle bakılır: "Hepsini çırpın, tavada pişirin." bir adımdır,
     // "2 yumurta, 1 su bardağı süt." ise malzeme listesi.
     for (final sentence in ingredientPart.split(RegExp(r'\n+|(?<=[.!?])\s+'))) {
-      if (_looksLikeStep(sentence)) {
+      // "Tavuğu doğrayıp, tuz ekliyorum" virgülle bölünse de tek adımdır:
+      // parçalardan biri fiille bitiyorsa cümlenin tamamı adım sayılır.
+      if (_looksLikeStep(sentence) ||
+          _ingredientChunks(sentence).any(_chunkIsVerbPhrase)) {
         leftover.add(sentence.trim());
+        // Malzeme listesi yazılmamışsa malzemeler adım cümlelerinden bulunur.
+        if (ingMatch == null) {
+          for (final ing in _mentionedIngredients(sentence)) {
+            final (amount, measure) = _defaultAmount(ing);
+            items.putIfAbsent(ing.id, () => _Item(ing, amount, measure, false));
+          }
+        }
         continue;
       }
       for (final chunk in _ingredientChunks(sentence)) {
@@ -212,6 +235,88 @@ class CaptionRecipeExtractor {
     final last = words.last;
     if (repo.findByName(last) != null) return false;
     return _verbEnding.hasMatch(last);
+  }
+
+  /// Büyük harfle yazılmış 2-5 kelimelik ad: "TAVUK TANTUNİ".
+  static final _capsRun = RegExp(
+      r'(?<![\p{L}])\p{Lu}{2,}(?:[ \t]+\p{Lu}{2,}){1,4}(?![\p{L}])',
+      unicode: true);
+
+  String? _capsTitle(String text) {
+    for (final m in _capsRun.allMatches(text)) {
+      final s = m.group(0)!;
+      // "500 GR" ya da tek kelimelik vurgu ("ÇOK") başlık değildir.
+      if (s.replaceAll(' ', '').length >= 6) return s;
+    }
+    return null;
+  }
+
+  static String _titleCase(String s) => s
+      .split(RegExp(r'\s+'))
+      .map((w) => _capitalize(TurkishText.lower(w)))
+      .join(' ');
+
+  /// "dilimleyip", "tuz ekliyorum": son kelimesi fiil olan virgüllü parça.
+  bool _chunkIsVerbPhrase(String chunk) {
+    final words = TurkishText.fold(chunk)
+        .replaceAll(RegExp(r'[^a-z0-9 ]'), ' ')
+        .split(' ')
+        .where((w) => w.isNotEmpty)
+        .toList();
+    if (words.isEmpty) return false;
+    final last = words.last;
+    if (RegExp(r'^\d').hasMatch(words.first) && words.length <= 3) return false;
+    if (last.length < 5 || repo.findByName(last) != null) return false;
+    return _verbEnding.hasMatch(last);
+  }
+
+  /// Adım cümlesinde geçen katalog malzemeleri: "tavukları doğrayıp tuz
+  /// ekliyorum" → tavuk, tuz. Önce iki kelimelik adlar ("domates salçası").
+  List<Ingredient> _mentionedIngredients(String sentence) {
+    final words = TurkishText.lower(sentence)
+        .replaceAll(RegExp(r'[^\p{L}\s]', unicode: true), ' ')
+        .split(RegExp(r'\s+'))
+        .where((w) => w.length >= 2)
+        .toList();
+    final found = <Ingredient>[];
+    var i = 0;
+    while (i < words.length) {
+      Ingredient? hit;
+      var used = 1;
+      if (i + 1 < words.length) {
+        final pair = _index2(words[i], words[i + 1]);
+        if (pair != null) {
+          hit = pair;
+          used = 2;
+        }
+      }
+      if (hit == null && !_verbEnding.hasMatch(TurkishText.fold(words[i]))) {
+        hit = _exact(words[i]);
+      }
+      if (hit != null && !found.contains(hit)) found.add(hit);
+      i += used;
+    }
+    return found;
+  }
+
+  /// Tek kelime için yalnızca kelimenin kendisi ya da ekleri atılmış hâli
+  /// ("tavukları" → tavuk); "sosundan" gibi tahminlere gidilmez.
+  Ingredient? _exact(String word) {
+    for (final stem in TurkishText.stems(word)) {
+      if (stem.length < 2) continue;
+      final hit = repo.findByName(stem);
+      if (hit != null && TurkishText.fold(hit.name).split(' ').length == 1) {
+        return hit;
+      }
+    }
+    return null;
+  }
+
+  Ingredient? _index2(String a, String b) {
+    final hit = repo.findByName('$a $b');
+    if (hit == null) return null;
+    // findByName son kelimeye düşebilir; gerçekten iki kelimelik ad olmalı.
+    return TurkishText.fold(hit.name).contains(' ') ? hit : null;
   }
 
   /// Başlık sayılacak ilk satırın sonu; tek satırlık metinde başlık yoktur.

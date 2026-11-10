@@ -40,8 +40,11 @@ void main() {
       storage: StorageService(),
     );
     await state.load();
-    state.updateProfile(state.profile
-        .copyWith(onboarded: true, allergyAsked: true, appliancesAsked: true));
+    state.updateProfile(state.profile.copyWith(
+        onboarded: true,
+        seenNavTour: true,
+        allergyAsked: true,
+        appliancesAsked: true));
     state.upsertPantryAll([
       (ingredientId: 'yumurta', quantity: 10, level: null),
       (ingredientId: 'domates', quantity: 6, level: null),

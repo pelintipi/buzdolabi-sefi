@@ -147,9 +147,7 @@ ThemeData buildAppTheme(Brightness brightness) {
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: brightness == Brightness.dark
-            ? const Color(0xFF8FBF9F)
-            : Palette.basil,
+        foregroundColor: c.accent,
         textStyle: const TextStyle(
             fontFamily: Fonts.body, fontWeight: FontWeight.w800, fontSize: 15),
       ),

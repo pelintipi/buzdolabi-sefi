@@ -29,7 +29,8 @@ void main() {
     );
     await state.load();
     // Açılış anketini daha önce doldurmuş kullanıcı (anket: anket_akisi_test).
-    state.updateProfile(state.profile.copyWith(onboarded: true));
+    state.updateProfile(
+        state.profile.copyWith(onboarded: true, seenNavTour: true));
 
     await tester.pumpWidget(ChangeNotifierProvider.value(
       value: state,

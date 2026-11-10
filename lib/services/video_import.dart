@@ -9,14 +9,20 @@ class SharedPayload {
   const SharedPayload({this.url, this.text});
 
   /// Paylaşılan metnin içinden link de çıkarılır: "Şuna bak https://vm.tiktok.com/x".
+  /// Link kutusuna "url + malzemeler" yapıştırılırsa URL ayrılır, kalan metin
+  /// tarif metni sayılır (eski davranış tüm satırı URL sanıyordu).
   factory SharedPayload.fromRaw({String? url, String? text}) {
-    final found = url ?? _urlIn(text ?? '');
-    var rest = text;
-    if (found != null && rest != null) {
+    final found = _urlIn(url ?? '') ?? _urlIn(text ?? '');
+    final parts = <String>[
+      if (url != null && url.trim().isNotEmpty) url.trim(),
+      if (text != null && text.trim().isNotEmpty) text.trim(),
+    ];
+    var rest = parts.join('\n');
+    if (found != null) {
       rest = rest.replaceAll(found, '').trim();
-      if (rest.isEmpty) rest = null;
     }
-    return SharedPayload(url: found, text: rest);
+    return SharedPayload(
+        url: found, text: rest.isEmpty ? null : rest);
   }
 
   final String? url;
@@ -80,23 +86,45 @@ class VideoInfoClient {
   /// TikTok açıklamanın tamamını verir; YouTube yalnızca başlığı verir.
   /// Instagram'ın servisi geliştirici anahtarı istediği için çağrılmaz;
   /// orada açıklama kullanıcıdan alınır.
+  ///
+  /// Web'de tarayıcı CORS TikTok'u engeller; oEmbed isteği açık proxy üzerinden
+  /// gider. Yerelde (mobil/desktop) doğrudan çağrılır.
   Future<VideoInfo?> fetch(String url) async {
-    final endpoint = switch (SocialPlatform.of(url)) {
+    final platform = SocialPlatform.of(url);
+    if (platform != SocialPlatform.tiktok &&
+        platform != SocialPlatform.youtube) {
+      return null;
+    }
+    // Önce verilen adresi dene (vt.tiktok.com oEmbed'de çoğu zaman yeter);
+    // olmazsa kısa linki açıp tekrar dene.
+    final candidates = <String>[url];
+    final resolved = await _resolve(url);
+    if (resolved != url) candidates.add(resolved);
+
+    for (final candidate in candidates) {
+      final info = await _oembed(candidate, platform);
+      if (info != null) return info;
+    }
+    return null;
+  }
+
+  Future<VideoInfo?> _oembed(String url, SocialPlatform platform) async {
+    final endpoint = switch (platform) {
       SocialPlatform.tiktok =>
         Uri.https('www.tiktok.com', '/oembed', {'url': url}),
-      SocialPlatform.youtube =>
-        Uri.https('www.youtube.com', '/oembed', {'url': url, 'format': 'json'}),
+      SocialPlatform.youtube => Uri.https(
+          'www.youtube.com', '/oembed', {'url': url, 'format': 'json'}),
       _ => null,
     };
     if (endpoint == null) return null;
     try {
-      final res =
-          await _client.get(endpoint).timeout(const Duration(seconds: 10));
-      if (res.statusCode != 200) return null;
-      final j = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
+      final res = await _getJson(endpoint);
+      if (res == null) return null;
       String? str(String k) {
-        final v = j[k];
-        return v is String && v.trim().isNotEmpty ? v.trim() : null;
+        final v = res[k];
+        if (v is! String) return null;
+        final t = _unescape(v).trim();
+        return t.isEmpty ? null : t;
       }
 
       return VideoInfo(
@@ -106,11 +134,74 @@ class VideoInfoClient {
         thumbnailUrl: str('thumbnail_url'),
       );
     } catch (e) {
-      // Çevrimdışı, gizli video ya da tarayıcıda CORS engeli.
       debugPrint('Video bilgisi alınamadı: $e');
       return null;
     }
   }
+
+  /// Web'de yerel oembed_proxy (tool/oembed_proxy.mjs :8787); native'de doğrudan.
+  Future<Map<String, dynamic>?> _getJson(Uri endpoint) async {
+    final target = kIsWeb ? _proxyUri('/oembed', endpoint.queryParameters['url'] ?? '') : endpoint;
+    final res =
+        await _client.get(target).timeout(const Duration(seconds: 12));
+    if (res.statusCode != 200) return null;
+    final body = utf8.decode(res.bodyBytes).trim();
+    if (body.isEmpty) return null;
+    final decoded = jsonDecode(body);
+    return decoded is Map<String, dynamic> ? decoded : null;
+  }
+
+  /// Web tarayıcısından LAN'daki proxy: aynı host, port 8787.
+  static Uri _proxyUri(String path, String videoUrl) {
+    final base = Uri.base;
+    return Uri(
+      scheme: base.scheme.isEmpty ? 'http' : base.scheme,
+      host: base.host.isEmpty ? '127.0.0.1' : base.host,
+      port: 8787,
+      path: path,
+      queryParameters: {'url': videoUrl},
+    );
+  }
+
+  /// vm/vt.tiktok.com kısa linklerini açıp kalıcı video adresine çevirir.
+  Future<String> _resolve(String url) async {
+    final host = (Uri.tryParse(url)?.host ?? '').toLowerCase();
+    final short = host == 'vm.tiktok.com' ||
+        host == 'vt.tiktok.com' ||
+        (host == 'www.tiktok.com' && url.contains('/t/'));
+    if (!short) return url;
+    try {
+      if (kIsWeb) {
+        final res = await _client
+            .get(_proxyUri('/resolve', url))
+            .timeout(const Duration(seconds: 8));
+        if (res.statusCode == 200) {
+          final j = jsonDecode(utf8.decode(res.bodyBytes));
+          if (j is Map && j['url'] is String) return j['url'] as String;
+        }
+      } else {
+        final res = await _client
+            .get(Uri.parse(url), headers: const {'User-Agent': 'Mozilla/5.0'})
+            .timeout(const Duration(seconds: 8));
+        final finalUrl = res.request?.url.toString();
+        if (finalUrl != null && finalUrl.isNotEmpty) return finalUrl;
+      }
+    } catch (e) {
+      debugPrint('Kısa link açılamadı: $e');
+    }
+    return url;
+  }
+
+  static String _unescape(String s) => s
+      .replaceAll('&amp;', '&')
+      .replaceAll('&lt;', '<')
+      .replaceAll('&gt;', '>')
+      .replaceAll('&quot;', '"')
+      .replaceAll('&#39;', "'")
+      .replaceAllMapped(RegExp(r'&#(\d+);'), (m) {
+        final code = int.tryParse(m.group(1)!);
+        return code == null ? m.group(0)! : String.fromCharCode(code);
+      });
 }
 
 /// iOS ShareExtension / Android ACTION_SEND ile gelen paylaşımları teslim alır

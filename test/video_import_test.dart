@@ -93,6 +93,51 @@ void main() {
     expect(x.recipe.appliances, contains(Appliance.firin));
   });
 
+  test('"ekliyorum, döküyorum" diye anlatılan açıklama adımlara bölünür', () {
+    final x = run('İş çıkışı yemek hazırlığı (tek tabak) 20 dakika\n'
+        'Tavuk göğsünü kuşbaşı doğrayıp tavaya alıyorum. Tuz ekliyorum, '
+        'karabiber ekliyorum. Domates salçası ekleyip karıştırıyorum. '
+        '200 ml su da ekleyip tıkırdayana kadar pişiriyorum. Patatesleri '
+        'dilimleyip, fırında pişiriyorum. Yoğurdu tabağa alıp, tavuğun '
+        'sosundan döküyorum. #yemek #tarif');
+    expect(x.unmatched, isEmpty,
+        reason: 'fiilli parçalar malzeme sanılmamalı: ${x.unmatched}');
+    expect(x.recipe.steps.length, 6,
+        reason: '${x.recipe.steps.map((s) => s.text)}');
+    expect(x.recipe.steps.first.text,
+        'Tavuk göğsünü kuşbaşı doğrayıp tavaya alıyorum.');
+    expect(byId(x.recipe).keys,
+        containsAll(['tuz', 'karabiber', 'salca', 'patates', 'yogurt']));
+  });
+
+  test('gerçek açıklama: büyük harfli ad başlık olur, adımlar tam çıkar', () {
+    final x = run('İş çıkışı tek tabak yemek önerileri Part 2  Diğer tarifler '
+        'için profilimi ziyaret edip , takip etmeyi unutmayın 🥹💙 TAVUK '
+        'TANTUNİ (2 kişilik) 400 gr küçük küçük doğranmış tavuğu kızgın tava '
+        'da hafif kızarana kadar pişiriyorum.  İçerisine kırmızı toz biber , '
+        'kekik , pul biber, karabiber ve tuz ekliyorum.  200 ml su da ekleyip '
+        'tıkırdayana kadar pişiriyorum.  Hazır tortillaları ben tantuniye çok '
+        'yakıştırıyorum. O yüzden ben onları kullanıyorum lavaş seçimi size '
+        'kalmış🫶🏼 İçerisine videodaki gibi sumaklı soğan , domates ve tavuk '
+        'koyup dürüm yapıyorum.  Dilimleyip , üzerine sarımsaklı yoğurt ve '
+        'tavuğun sosundan döküyorum.  Bu ölçülerle 4 tane dürüm çıkıyor '
+        'bilginize🫶🏼 #işçıkışı #pratikyemek');
+    expect(x.recipe.title, 'Tavuk Tantuni');
+    expect(x.recipe.servings, 2);
+    expect(x.unmatched, isEmpty);
+    expect(x.recipe.steps.length, greaterThanOrEqualTo(5));
+    expect(x.recipe.steps.first.text,
+        startsWith('400 gr küçük küçük doğranmış tavuğu'));
+    expect(
+        x.recipe.steps.map((s) => s.text),
+        contains(
+            'Dilimleyip , üzerine sarımsaklı yoğurt ve tavuğun sosundan döküyorum.'));
+    expect(
+        byId(x.recipe).keys,
+        containsAll(
+            ['tavuk', 'kekik', 'karabiber', 'tuz', 'domates', 'yogurt']));
+  });
+
   test('tarif yazmayan açıklama kullanılabilir sayılmaz', () {
     final x = run('Bu tarif çok tuttu 😍 denemeyen kalmasın #keşfet #fyp');
     expect(x.isUsable, isFalse);
@@ -106,6 +151,14 @@ void main() {
     expect(p.isTikTok, isTrue);
     expect(
         SharedPayload.fromRaw(url: 'https://youtube.com/x').isTikTok, isFalse);
+  });
+
+  test('link kutusuna url + malzemeler yapıştırılırsa metin kaybolmaz', () {
+    final p = SharedPayload.fromRaw(
+        url:
+            'https://vm.tiktok.com/ZMabc123/ Malzemeler: 2 yumurta, 1 su bardağı süt');
+    expect(p.url, 'https://vm.tiktok.com/ZMabc123/');
+    expect(p.text, contains('2 yumurta'));
   });
 
   test('link adresinden platform anlaşılır', () {

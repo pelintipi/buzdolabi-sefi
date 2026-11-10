@@ -70,7 +70,13 @@ class _ImportRecipeScreenState extends State<ImportRecipeScreen> {
 
     // Aynı video ikinci kez paylaşıldıysa kopyalamak yerine kayıtlı tarifi aç.
     final existing = url == null ? null : state.importedFromUrl(url);
-    if (existing != null && payload.text == null) {
+    // Önceki kayıt zayıf çıkarıldıysa (tek adım, tanınmayan malzeme) aynı
+    // id ile yeniden çıkarılıp güncellenir; iyi kayıtlar ve elle yapılan
+    // düzeltmeler korunur.
+    final weakBefore = existing != null &&
+        (existing.steps.length < 2 ||
+            (existing.source?.unmatched.isNotEmpty ?? false));
+    if (existing != null && payload.text == null && !weakBefore) {
       _openRecipe(existing, 'Bu videoyu daha önce kaydetmiştin');
       return;
     }
@@ -200,7 +206,11 @@ class _ImportRecipeScreenState extends State<ImportRecipeScreen> {
               padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
               children: [
                 if (_phase == _Phase.noRecipe)
-                  _NoRecipeCard(info: _info, hadLink: _hadLink),
+                  _NoRecipeCard(
+                    info: _info,
+                    hadLink: _hadLink,
+                    pastedText: _nonEmpty(_text.text),
+                  ),
                 if (_phase == _Phase.noRecipe && _hadLink) ...[
                   const SizedBox(height: 12),
                   SoftCard(
@@ -209,18 +219,25 @@ class _ImportRecipeScreenState extends State<ImportRecipeScreen> {
                       children: [
                         Row(
                           children: [
-                            const Sym('🎙', size: 34),
+                            const Sym('📋', size: 34),
                             const SizedBox(width: 10),
                             Expanded(
-                              child: Text('Tarif sesli mi anlatılıyor?',
+                              child: Text('TikTok açıklamasını yapıştır',
                                   style: theme.textTheme.titleMedium),
                             ),
                           ],
                         ),
                         const SizedBox(height: 4),
                         Text(
-                            'Videoyu telefonuna kaydettiysen galeriden seç; konuşmayı '
-                            'telefonunda yazıya çevirip tarifi ondan çıkarayım.',
+                            'Videoda … → Açıklama → Kopyala, sonra aşağıdaki kutuya '
+                            'yapıştırıp tekrar Kaydet. Malzemeler yazıyorsa tarif çıkar.',
+                            style: theme.textTheme.bodySmall),
+                        const SizedBox(height: 10),
+                        Text('Sesli anlatım varsa',
+                            style: theme.textTheme.titleSmall),
+                        const SizedBox(height: 4),
+                        Text(
+                            'Videoyu galerine kaydettiysen seç; konuşmayı yazıya çeviririm.',
                             style: theme.textTheme.bodySmall),
                         const SizedBox(height: 10),
                         ChunkyButton(
@@ -356,14 +373,36 @@ class _HowToCard extends StatelessWidget {
 }
 
 class _NoRecipeCard extends StatelessWidget {
-  const _NoRecipeCard({required this.info, required this.hadLink});
+  const _NoRecipeCard(
+      {required this.info, required this.hadLink, this.pastedText});
 
   final VideoInfo? info;
   final bool hadLink;
+  final String? pastedText;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final caption = info?.caption?.trim() ?? '';
+    final title = !hadLink
+        ? 'Bu metinde tarif bulamadım'
+        : info == null
+            ? 'Videoya ulaşamadım'
+            : caption.isEmpty
+                ? 'Açıklama gelmedi'
+                : 'Açıklamada malzeme listesi yok';
+    final body = !hadLink
+        ? 'Malzemeleri "2 yumurta, 1 su bardağı süt" gibi miktarlarıyla yaz.'
+        : info == null
+            ? 'Linkten otomatik okuyamadım. TikTok’ta Açıklama → Kopyala, '
+                'aşağıdaki kutuya yapıştırıp tekrar Kaydet.'
+            : caption.isEmpty
+                ? 'Kapak geldi ama yazı yok. Açıklamayı kopyalayıp aşağıya yapıştır.'
+                : pastedText != null
+                    ? 'Yapıştırdığın metinde de yeterli malzeme yok. '
+                        '"Malzemeler:" satırını da kopyala.'
+                    : 'Videoda kısa bir yazı var, tarif listesi yok. '
+                        'Tam açıklamayı TikTok’tan kopyalayıp aşağıya yapıştır.';
     return SoftCard(
       color: Palette.butterSoft,
       borderColor: Palette.butter,
@@ -375,24 +414,11 @@ class _NoRecipeCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                    !hadLink
-                        ? 'Bu metinde tarif bulamadım'
-                        : info == null
-                            ? 'Videoya ulaşamadım'
-                            : 'Açıklamada tarif yok',
-                    style: theme.textTheme.titleMedium),
+                Text(title, style: theme.textTheme.titleMedium),
                 const SizedBox(height: 2),
-                Text(
-                  !hadLink
-                      ? 'Malzemeleri "2 yumurta, 1 su bardağı süt" gibi miktarlarıyla yaz.'
-                      : info == null
-                          ? 'İnternet bağlantını kontrol et ya da tarifi aşağıya yapıştır.'
-                          : 'Bu videoda tarif sesli anlatılıyor gibi. Malzemeleri '
-                              'aşağıya yazarsan dolabınla karşılaştırırım.',
-                  style:
-                      theme.textTheme.bodySmall?.copyWith(color: Palette.ink),
-                ),
+                Text(body,
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: Palette.ink)),
               ],
             ),
           ),

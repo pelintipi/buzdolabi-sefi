@@ -13,6 +13,8 @@ class BrandColors {
     required this.basilSoft,
     required this.tomatoSoft,
     required this.butterSoft,
+    required this.accent,
+    required this.accentDeep,
   });
 
   final Color ink;
@@ -26,6 +28,10 @@ class BrandColors {
   final Color tomatoSoft;
   final Color butterSoft;
 
+  /// Metin / ikon yeşili (koyu temada açık nane; dolgu rengi [Palette.basil] kalır).
+  final Color accent;
+  final Color accentDeep;
+
   static const light = BrandColors(
     ink: Color(0xFF1A1A17),
     inkSoft: Color(0xFF6E6C66),
@@ -37,6 +43,8 @@ class BrandColors {
     basilSoft: Color(0xFFE9EEE7),
     tomatoSoft: Color(0xFFF6ECE6),
     butterSoft: Color(0xFFF6F0E3),
+    accent: Color(0xFF1F3B2D),
+    accentDeep: Color(0xFF13261C),
   );
 
   static const dark = BrandColors(
@@ -47,9 +55,11 @@ class BrandColors {
     ground: Color(0xFF121411),
     surface: Color(0xFF1C1F1C),
     sand: Color(0xFF252825),
-    basilSoft: Color(0xFF1A2E24),
+    basilSoft: Color(0xFF243D32),
     tomatoSoft: Color(0xFF2A1C18),
     butterSoft: Color(0xFF2A2418),
+    accent: Color(0xFF9ED4AE),
+    accentDeep: Color(0xFFB6E3C4),
   );
 
   static BrandColors forBrightness(Brightness b) =>
@@ -65,10 +75,14 @@ abstract final class Palette {
     _c = BrandColors.forBrightness(brightness);
   }
 
-  /// Ana renk: koyu orman yeşili (butonlar, seçili öğeler, "Var").
+  /// Ana renk: koyu orman yeşili (dolu buton zemini; koyu temada da dolgu).
   static const basil = Color(0xFF1F3B2D);
   static const basilDeep = Color(0xFF13261C);
   static Color get basilSoft => _c.basilSoft;
+
+  /// Zemin üstü yeşil metin/ikon (koyu temada açık; soft buton, nav, link).
+  static Color get accent => _c.accent;
+  static Color get accentDeep => _c.accentDeep;
 
   /// Vurgu ve uyarı: kiremit ("Yok", bozulacaklar, tek vurgu öğesi).
   static const tomato = Color(0xFFB4532F);
