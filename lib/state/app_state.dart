@@ -177,7 +177,23 @@ class AppState extends ChangeNotifier {
         debugPrint('Kaydedilen tarif okunamadı: $e');
       }
     }
-    return result;
+    // Eski sürümlerde aynı video farklı linkle iki kez kaydedilebiliyordu;
+    // daha çok adımı olan (eşitse sonraki) kayıt kalır.
+    final unique = <Recipe>[];
+    for (final r in result) {
+      final i = unique.indexWhere((u) =>
+          u.source != null &&
+          r.source != null &&
+          sameVideo(u.source!, r.source!));
+      if (i < 0) {
+        unique.add(r);
+      } else if (r.steps.length >= unique[i].steps.length) {
+        // Silinen kopya favorideyse kalan kayıt favoride olur.
+        if (_favorites.remove(unique[i].id)) _favorites.add(r.id);
+        unique[i] = r;
+      }
+    }
+    return unique;
   }
 
   Map<String, dynamic> _toJson() => {
@@ -642,17 +658,50 @@ class AppState extends ChangeNotifier {
 
   /// Aynı video daha önce kaydedildiyse o tarif.
   Recipe? importedFromUrl(String url) {
+    final key = videoKey(url);
     for (final r in _imported) {
-      if (r.source?.url == url) return r;
+      final s = r.source;
+      if (s != null && videoKey(s.url) == key) return r;
     }
     return null;
+  }
+
+  /// Aynı videodan kaydedilmiş tarif: link (kısa/uzun, ekli/eksiz) ya da
+  /// açıklama metni aynıysa.
+  Recipe? importedSameAs(RecipeSource source) {
+    for (final r in _imported) {
+      final s = r.source;
+      if (s != null && sameVideo(s, source)) return r;
+    }
+    return null;
+  }
+
+  /// "https://www.tiktok.com/@a/video/123?_r=1" ile ".../video/123" aynıdır.
+  static String videoKey(String url) {
+    final tiktok = RegExp(r'tiktok\.com/.*?/video/(\d+)').firstMatch(url);
+    if (tiktok != null) return 'tiktok:${tiktok.group(1)}';
+    final u = Uri.tryParse(url.trim());
+    if (u == null || u.host.isEmpty) return url.trim();
+    final host = u.host.toLowerCase().replaceFirst(RegExp(r'^(www|m)\.'), '');
+    final path = u.path.replaceFirst(RegExp(r'/+$'), '');
+    // YouTube'da video kimliği sorgudadır (?v=...).
+    final v = u.queryParameters['v'];
+    return '$host$path${v == null ? '' : '?v=$v'}';
+  }
+
+  static bool sameVideo(RecipeSource a, RecipeSource b) {
+    if (videoKey(a.url) == videoKey(b.url)) return true;
+    final ca = a.caption?.trim(), cb = b.caption?.trim();
+    return ca != null && ca.length >= 20 && ca == cb;
   }
 
   /// Yeni tarifi kaydeder; aynı kimlik ya da aynı video varsa üzerine yazar.
   void saveImported(Recipe recipe) {
     _imported.removeWhere((r) =>
         r.id == recipe.id ||
-        (recipe.source != null && r.source?.url == recipe.source!.url));
+        (recipe.source != null &&
+            r.source != null &&
+            sameVideo(r.source!, recipe.source!)));
     _imported.add(recipe);
     matcher.forget(recipe.id);
     _allRecipes = null;

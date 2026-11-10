@@ -209,6 +209,45 @@ void main() {
     expect(await failing.fetch('https://www.tiktok.com/x'), isNull);
   });
 
+  test('aynı video farklı linkle kaydedilince kopya oluşmaz', () async {
+    expect(AppState.videoKey('https://www.tiktok.com/@a/video/123?_r=1&x=2'),
+        AppState.videoKey('https://m.tiktok.com/@a/video/123'));
+    expect(AppState.videoKey('https://youtube.com/watch?v=abc&t=10'),
+        AppState.videoKey('https://www.youtube.com/watch?v=abc'));
+
+    SharedPreferences.setMockInitialValues({});
+    final storage = StorageService();
+    final state =
+        AppState(repo: repo, recipes: recipeCatalog, storage: storage);
+    await state.load();
+    const caption = 'Menemen\nMalzemeler: 3 yumurta, 2 domates\n'
+        'Yapılışı: Domatesi kavurun. Yumurtayı kırın.';
+    Recipe save(String id, String url, {bool weak = false}) {
+      final r = extractor
+          .extract(caption,
+              id: id, source: RecipeSource(url: url, caption: caption))
+          .recipe;
+      return weak
+          ? Recipe.fromJson({
+              ...r.toJson(),
+              'steps': [r.steps.first.toJson()]
+            })
+          : r;
+    }
+
+    // Kısa link ile kaydedilmiş, sonra uzun linkle yeniden kaydedilmiş.
+    state.saveImported(save('v1', 'https://vm.tiktok.com/ZMabc/', weak: true));
+    state.saveImported(save('v2', 'https://www.tiktok.com/@a/video/9?_r=1'));
+    expect(state.importedRecipes, hasLength(1),
+        reason: 'açıklama aynı: aynı video');
+    expect(
+        state
+            .importedSameAs(const RecipeSource(
+                url: 'https://www.tiktok.com/@a/video/9', caption: caption))
+            ?.id,
+        'v2');
+  });
+
   test('kaydedilen tarif kalıcıdır, eşleşmeye girer ve silinebilir', () async {
     SharedPreferences.setMockInitialValues({});
     final storage = StorageService();

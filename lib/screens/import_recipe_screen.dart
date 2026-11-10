@@ -93,10 +93,28 @@ class _ImportRecipeScreenState extends State<ImportRecipeScreen> {
     }
     if (!mounted) return;
 
+    // Kısa link (vm.tiktok.com) ile uzun link farklı görünür; video bilgisi
+    // geldikten sonra açılmış link ve açıklamayla aynı video yeniden aranır.
+    final info = _info;
+    final same = existing ??
+        (info == null
+            ? null
+            : state.importedSameAs(
+                RecipeSource(url: info.url, caption: info.caption)));
+    if (same != null &&
+        existing == null &&
+        payload.text == null &&
+        same.steps.length >= 2 &&
+        (same.source?.unmatched.isEmpty ?? true)) {
+      setState(() => _phase = _Phase.form);
+      _openRecipe(same, 'Bu videoyu daha önce kaydetmiştin');
+      return;
+    }
+
     // Paylaşılan metin ("Bu tarife bak!") ile videonun açıklamasından hangisinde
     // daha çok malzeme bulunursa o kullanılır; eşitlikte kullanıcının metni.
     final extractor = CaptionRecipeExtractor(state.repo);
-    final id = existing?.id ?? 'video_${DateTime.now().millisecondsSinceEpoch}';
+    final id = same?.id ?? 'video_${DateTime.now().millisecondsSinceEpoch}';
     final source = RecipeSource(
       url: url ?? 'yapistirilan-metin',
       platform: payload.platform.label,
