@@ -341,8 +341,22 @@ class NativeBridge {
   Future<String?> recognizeText(Uint8List image) =>
       _call<String>('recognizeText', {'image': image});
 
-  Future<String?> transcribeVideo(String path) =>
-      _call<String>('transcribeVideo', {'path': path, 'locale': 'tr-TR'});
+  /// Önce Türkçe dinler; anlamlı bir metin çıkmazsa İngilizce dener
+  /// (yabancı tarif videoları için).
+  Future<String?> transcribeVideo(String path) async {
+    String? best;
+    for (final locale in const ['tr-TR', 'en-US']) {
+      final text = await _call<String>(
+          'transcribeVideo', {'path': path, 'locale': locale});
+      if (text != null && text.trim().length > (best?.trim().length ?? 0)) {
+        best = text;
+      }
+      if (best != null && best.trim().split(RegExp(r'\s+')).length >= 15) {
+        break;
+      }
+    }
+    return best;
+  }
 
   Future<void> updateWidget(Map<String, Object?> data) async {
     await _call<bool>('updateWidget', data);

@@ -4,6 +4,7 @@ import 'package:buzdolabi_sefi/models/measure.dart';
 import 'package:buzdolabi_sefi/models/recipe.dart';
 import 'package:buzdolabi_sefi/services/caption_recipe_extractor.dart';
 import 'package:buzdolabi_sefi/services/ingredient_repository.dart';
+import 'package:buzdolabi_sefi/services/quantity_parser.dart';
 import 'package:buzdolabi_sefi/services/recipe_matcher.dart';
 import 'package:buzdolabi_sefi/services/storage_service.dart';
 import 'package:buzdolabi_sefi/services/video_import.dart';
@@ -136,6 +137,51 @@ void main() {
         byId(x.recipe).keys,
         containsAll(
             ['tavuk', 'kekik', 'karabiber', 'tuz', 'domates', 'yogurt']));
+  });
+
+  test('İngilizce açıklama: cups/tbsp, satır sonu olmayan " - " maddeler', () {
+    const caption = 'Servings: 5-6 Ingredients: - 2 containers Siggi’s plain '
+        '0% yogurt (1,360g if you’re using a different brand) - 1.5 cups milk '
+        'of choice (I use MALK unsweetened vanilla almond milk) - 3 '
+        'tablespoons maple syrup (use more if you want it sweet) - 2 tsp '
+        'vanilla  - 3 tablespoons almond butter  - 0.5 cups chia seeds - 3.5 '
+        'tablespoons ground flax  - pinch of salt Instructions: - mix together '
+        'yogurt, milk, maple syrup, vanilla, almond butter and salt until '
+        'homogenous - add in chia and flax seeds and mix well being sure to '
+        'scrape down the sides of the bowl - let mixture sit for 5 minutes - '
+        'mix again - store in the fridge overnight  #breakfastideas #chia';
+    final x = extractor.extract(caption,
+        id: 'en', source: _src, fallbackTitle: caption);
+    final items = byId(x.recipe);
+    expect(
+        items.keys,
+        containsAll([
+          'yogurt',
+          'sut',
+          'akcaagac_surubu',
+          'vanilya',
+          'badem_ezmesi',
+          'chia_tohumu',
+          'keten_tohumu',
+          'tuz',
+        ]));
+    expect(x.unmatched, isEmpty);
+    expect(x.foundIngredientSection, isTrue);
+    expect(x.recipe.servings, 5);
+    expect(x.recipe.steps, hasLength(5));
+    expect(x.recipe.title, isNot(contains('Servings')));
+    // 1 cup ≈ 240 ml = 1,2 su bardağı; 1,5 cup → 1,8 su bardağı.
+    expect(items['sut']!.measure, Measure.suBardagi);
+    expect(items['sut']!.amount, closeTo(1.8, 0.01));
+    expect(items['tuz']!.measure, Measure.tutam);
+  });
+
+  test('kesirler: 1/2 cup, 1 ½ cups', () {
+    final p = QuantityParser(repo);
+    expect(p.parseChunk('1/2 cup milk').amount, closeTo(0.6, 0.01));
+    expect(p.parseChunk('1 ½ cups milk').amount, closeTo(1.8, 0.01));
+    expect(p.parseChunk('2 eggs').ingredient?.id, 'yumurta');
+    expect(p.parseChunk('a pinch of salt').measure, Measure.tutam);
   });
 
   test('tarif yazmayan açıklama kullanılabilir sayılmaz', () {

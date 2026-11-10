@@ -48,12 +48,16 @@ class CaptionRecipeExtractor {
       r'[\u{FE0F}\u{200D}\u{1F3FB}-\u{1F3FF}]*',
       unicode: true);
   static final _bullet = RegExp(r'(^|\n)\s*[-–•▪·*✓✔]\s*');
+
+  /// TikTok açıklamasında satır sonları kaybolur: "Ingredients: - 2 cups …
+  /// - 1 tsp …" → her " - " yeni madde ("5-6" gibi boşluksuz tire değil).
+  static final _inlineBullet = RegExp(r'\s+[-–•▪]\s+(?=\S)');
   // Başlık sayılması için ardından ":" ya da satır sonu gelmeli; yoksa
   // "malzemeleri karıştırın" cümlesi de başlık sanılır.
   static final _ingredientsHeader = RegExp(
-      r'(malzemeler|malzeme listesi|gerekli malzemeler|ihtiyacınız olanlar)\s*(?:[:：]|(?=\n))');
+      r'(malzemeler|malzeme listesi|gerekli malzemeler|ihtiyacınız olanlar|[iı]ngredients?|what you.?ll need|you.?ll need)\s*(?:[:：]|(?=\n))');
   static final _stepsHeader = RegExp(
-      r'(yapılışı|yapılış|hazırlanışı|hazırlanış|nasıl yapılır|yapımı)\s*(?:[:：]|(?=\n))');
+      r'(yapılışı|yapılış|hazırlanışı|hazırlanış|nasıl yapılır|yapımı|[iı]nstructions?|directions?|method|steps|how to make|preparation)\s*(?:[:：]|(?=\n))');
 
   /// "Pankek tarifi: 2 yumurta, ..." → başlık "Pankek".
   static final _titleMarker = RegExp(r'^\s*([^\n:]{2,60}?)\s+tarifi\s*[:：]');
@@ -68,7 +72,13 @@ class CaptionRecipeExtractor {
   static final _timer = RegExp(r'(\d+)\s*(?:-\s*(\d+)\s*)?(dakika|dk|saat)');
   static final _readyIn =
       RegExp(r'(\d+)\s*(dakika|dk)(da|de)\s*(hazır|bitiyor)');
-  static final _servingsRe = RegExp(r'(\d+)\s*kişilik');
+  static final _servingsRe = RegExp(
+      r'(\d+)\s*kişilik|servings?\s*[:：]?\s*(\d+)|serves\s*(\d+)|(\d+)\s*servings');
+
+  /// İngilizce başlık önündeki porsiyon yazısı: "Servings: 5-6".
+  static final _servingsNoise = RegExp(
+      r'servings?\s*[:：]?\s*[\d\s\-–]+|serves\s*[\d\s\-–]+',
+      caseSensitive: false);
 
   /// "arzuya göre pul biber" → "pul biber" (isteğe bağlı)
   static final _optionalPhrase = RegExp(
@@ -88,6 +98,9 @@ class CaptionRecipeExtractor {
         .replaceAll(_emoji, '\n')
         .replaceAll('\r', '\n');
     text = text.replaceAllMapped(_bullet, (m) => '${m.group(1)}\n');
+    if (_inlineBullet.allMatches(text).length >= 2) {
+      text = text.replaceAll(_inlineBullet, '\n');
+    }
     final lower = TurkishText.lower(text);
     // Konumlar küçük harfli metinde bulunup aynı konumlar orijinale uygulanır.
     final positions = lower.length == text.length;
@@ -112,10 +125,15 @@ class CaptionRecipeExtractor {
     // "...takip etmeyi unutmayın TAVUK TANTUNİ (2 kişilik) 400 gr tavuğu..."
     // Büyük harfle yazılmış ad, giriş cümlesinden daha iyi bir başlıktır.
     final caps = marker == null && ingMatch == null ? _capsTitle(text) : null;
-    final title = (caps != null ? _cleanTitle(_titleCase(caps)) : null) ??
+    // Açıklamanın kendisi yedek başlık olarak verildiyse kullanılmaz; yoksa
+    // "Servings: 5-6 Ingredients: - 2 cups…" başlık olur.
+    final fallback = fallbackTitle == null ||
+            TurkishText.fold(fallbackTitle) == TurkishText.fold(caption)
+        ? null
+        : fallbackTitle;
+    final foundTitle = (caps != null ? _cleanTitle(_titleCase(caps)) : null) ??
         _cleanTitle(rawTitle) ??
-        _cleanTitle(fallbackTitle ?? '') ??
-        'Videodan tarif';
+        _cleanTitle(fallback ?? '');
 
     String withoutCaps(String part) => caps == null
         ? part
@@ -185,6 +203,9 @@ class CaptionRecipeExtractor {
     }
 
     final all = TurkishText.fold(caption);
+    final roled = _withRoles(items.values.toList());
+    final title =
+        foundTitle ?? _titleFromItems(roled, repo) ?? 'Videodan tarif';
     final recipe = Recipe(
       id: id,
       title: title,
@@ -195,10 +216,10 @@ class CaptionRecipeExtractor {
           : steps.length <= 8
               ? Difficulty.orta
               : Difficulty.zor,
-      servings: int.tryParse(_servingsRe.firstMatch(lower)?.group(1) ?? '')
+      servings: int.tryParse(_servingsGroup(_servingsRe.firstMatch(lower)))
               ?.clamp(1, 12) ??
           2,
-      items: _withRoles(items.values.toList()),
+      items: roled,
       steps: steps,
       appliances: _appliances(all),
       techniques: _techniques(all),
@@ -231,7 +252,8 @@ class CaptionRecipeExtractor {
         .toList();
     if (words.length < 2) return false;
     // "1 paket vanilin" gibi kısa, sayıyla başlayan satır malzemedir.
-    if (words.length <= 3 && RegExp(r'^\d').hasMatch(words.first)) return false;
+    // "3 tablespoons maple syrup" de (4 kelime) malzemedir.
+    if (words.length <= 5 && RegExp(r'^\d').hasMatch(words.first)) return false;
     final last = words.last;
     if (repo.findByName(last) != null) return false;
     return _verbEnding.hasMatch(last);
@@ -265,7 +287,9 @@ class CaptionRecipeExtractor {
         .toList();
     if (words.isEmpty) return false;
     final last = words.last;
-    if (RegExp(r'^\d').hasMatch(words.first) && words.length <= 3) return false;
+    // "3 tablespoons maple syrup": sayıyla başlayan kısa parça malzemedir
+    // ("syrup" sonundaki -up Türkçe fiil eki sanılmasın).
+    if (RegExp(r'^\d').hasMatch(words.first) && words.length <= 6) return false;
     if (last.length < 5 || repo.findByName(last) != null) return false;
     return _verbEnding.hasMatch(last);
   }
@@ -338,8 +362,29 @@ class CaptionRecipeExtractor {
       r'\s+(tarifi|çok kolay|kolay|pratik|nefis)\s*$',
       caseSensitive: false);
 
+  static String _servingsGroup(RegExpMatch? m) {
+    if (m == null) return '';
+    for (var i = 1; i <= m.groupCount; i++) {
+      if (m.group(i) != null) return m.group(i)!;
+    }
+    return '';
+  }
+
+  /// Başlık bulunamazsa ana malzemelerden: "Yoğurt ve chia tohumu".
+  static String? _titleFromItems(
+      List<RecipeItem> items, IngredientRepository repo) {
+    final mains = [
+      for (final i in items)
+        if (i.isMain) repo.byId(i.ingredientId).name
+    ];
+    if (mains.isEmpty) return null;
+    final t = mains.take(2).join(' ve ');
+    return _capitalize(TurkishText.lower(t));
+  }
+
   String? _cleanTitle(String raw) {
     var t = raw.replaceAll(RegExp(r'\s+'), ' ').trim();
+    t = t.replaceAll(_servingsNoise, '').trim();
     t = t.replaceAll(_titleNoise, '').trim();
     t = t.replaceAll(RegExp(r'^[^\p{L}\d]+|[^\p{L}\d)]+$', unicode: true), '');
     if (t.isEmpty) return null;

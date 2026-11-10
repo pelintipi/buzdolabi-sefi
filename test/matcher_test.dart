@@ -38,7 +38,7 @@ void main() {
   test('JSON kataloğu hatasız okunur', () {
     expect(testCatalog.problems, isEmpty);
     expect(recipeCatalog, hasLength(109));
-    expect(ingredientCatalog, hasLength(119));
+    expect(ingredientCatalog, hasLength(125));
   });
 
   test('tarif kalitesi: ana malzeme, adım, süre, benzersiz ad, 3D ikon', () {

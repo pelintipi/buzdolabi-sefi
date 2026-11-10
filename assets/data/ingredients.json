@@ -4,7 +4,7 @@
     {
       "id": "sut",
       "name": "Süt",
-      "emoji": "🥛",
+      "emoji": "🥛", "synonyms": ["milk", "whole milk"],
       "baseUnit": "ml",
       "density": 1.03,
       "packageAmount": 1000,
@@ -26,7 +26,7 @@
     {
       "id": "yogurt",
       "name": "Yoğurt",
-      "emoji": "🥣",
+      "emoji": "🥣", "synonyms": ["yogurt", "yoghurt", "greek yogurt", "plain yogurt"],
       "baseUnit": "gram",
       "density": 1.05,
       "packageAmount": 1000,
@@ -48,7 +48,7 @@
     {
       "id": "peynir",
       "name": "Peynir",
-      "emoji": "🧀",
+      "emoji": "🧀", "synonyms": ["cheese"],
       "baseUnit": "gram",
       "packageAmount": 500,
       "shelfLifeDays": 14,
@@ -72,8 +72,7 @@
       "emoji": "🧀",
       "parent": "peynir",
       "synonyms": [
-        "feta"
-      ],
+        "feta", "feta cheese"],
       "baseUnit": "gram",
       "packageAmount": 500,
       "shelfLifeDays": 14,
@@ -91,8 +90,7 @@
       "emoji": "🧀",
       "parent": "peynir",
       "synonyms": [
-        "kaşar peyniri"
-      ],
+        "kaşar peyniri", "cheddar", "shredded cheese"],
       "baseUnit": "gram",
       "packageAmount": 400,
       "shelfLifeDays": 30,
@@ -110,8 +108,7 @@
       "emoji": "🧀",
       "parent": "peynir",
       "synonyms": [
-        "lor peyniri"
-      ],
+        "lor peyniri", "cottage cheese", "ricotta"],
       "baseUnit": "gram",
       "packageAmount": 500,
       "shelfLifeDays": 5,
@@ -128,8 +125,7 @@
       "name": "Tereyağı",
       "emoji": "🧈",
       "synonyms": [
-        "tereyağ"
-      ],
+        "tereyağ", "butter"],
       "baseUnit": "gram",
       "density": 0.95,
       "packageAmount": 250,
@@ -151,7 +147,7 @@
     {
       "id": "yumurta",
       "name": "Yumurta",
-      "emoji": "🥚",
+      "emoji": "🥚", "synonyms": ["egg", "eggs"],
       "baseUnit": "piece",
       "pieceGrams": 55,
       "packageAmount": 10,
@@ -173,7 +169,7 @@
     {
       "id": "tavuk",
       "name": "Tavuk",
-      "emoji": "🍗",
+      "emoji": "🍗", "synonyms": ["chicken"],
       "baseUnit": "gram",
       "packageAmount": 500,
       "shelfLifeDays": 2,
@@ -195,8 +191,7 @@
       "parent": "tavuk",
       "synonyms": [
         "tavuk fileto",
-        "göğüs"
-      ],
+        "göğüs", "chicken breast", "chicken breasts"],
       "baseUnit": "gram",
       "packageAmount": 500,
       "shelfLifeDays": 2,
@@ -215,8 +210,7 @@
       "parent": "tavuk",
       "synonyms": [
         "tavuk baget",
-        "baget"
-      ],
+        "baget", "chicken thigh", "chicken thighs"],
       "baseUnit": "gram",
       "packageAmount": 1000,
       "shelfLifeDays": 2,
@@ -233,8 +227,7 @@
       "name": "Kıyma",
       "emoji": "🥩",
       "synonyms": [
-        "dana kıyma"
-      ],
+        "dana kıyma", "ground beef", "minced meat", "ground meat"],
       "baseUnit": "gram",
       "packageAmount": 500,
       "shelfLifeDays": 2,
@@ -273,8 +266,7 @@
       "emoji": "🐟",
       "synonyms": [
         "ton",
-        "ton balık"
-      ],
+        "ton balık", "tuna"],
       "baseUnit": "gram",
       "packageAmount": 160,
       "shelfLifeDays": 365,
@@ -297,8 +289,7 @@
       "name": "Soğan",
       "emoji": "🧅",
       "synonyms": [
-        "kuru soğan"
-      ],
+        "kuru soğan", "onion", "onions"],
       "baseUnit": "piece",
       "pieceGrams": 110,
       "packageAmount": 5,
@@ -314,7 +305,7 @@
     {
       "id": "sarimsak",
       "name": "Sarımsak",
-      "emoji": "🧄",
+      "emoji": "🧄", "synonyms": ["garlic"],
       "baseUnit": "piece",
       "pieceGrams": 5,
       "pieceLabel": "diş",
@@ -331,7 +322,7 @@
     {
       "id": "domates",
       "name": "Domates",
-      "emoji": "🍅",
+      "emoji": "🍅", "synonyms": ["tomato", "tomatoes"],
       "baseUnit": "piece",
       "pieceGrams": 150,
       "packageAmount": 6,
@@ -353,7 +344,7 @@
     {
       "id": "biber",
       "name": "Biber",
-      "emoji": "🫑",
+      "emoji": "🫑", "synonyms": ["pepper", "peppers"],
       "baseUnit": "piece",
       "pieceGrams": 40,
       "packageAmount": 6,
@@ -408,8 +399,7 @@
       "parent": "biber",
       "synonyms": [
         "kırmızı biber",
-        "kapya"
-      ],
+        "kapya", "bell pepper", "red pepper"],
       "baseUnit": "piece",
       "pieceGrams": 120,
       "packageAmount": 4,
@@ -431,7 +421,7 @@
     {
       "id": "patates",
       "name": "Patates",
-      "emoji": "🥔",
+      "emoji": "🥔", "synonyms": ["potato", "potatoes"],
       "baseUnit": "piece",
       "pieceGrams": 170,
       "packageAmount": 6,
@@ -447,7 +437,7 @@
     {
       "id": "havuc",
       "name": "Havuç",
-      "emoji": "🥕",
+      "emoji": "🥕", "synonyms": ["carrot", "carrots"],
       "baseUnit": "piece",
       "pieceGrams": 70,
       "packageAmount": 5,
@@ -472,7 +462,7 @@
     {
       "id": "ispanak",
       "name": "Ispanak",
-      "emoji": "🥬",
+      "emoji": "🥬", "synonyms": ["spinach"],
       "baseUnit": "gram",
       "packageAmount": 500,
       "shelfLifeDays": 4,
@@ -496,7 +486,7 @@
     {
       "id": "kabak",
       "name": "Kabak",
-      "emoji": "🥒",
+      "emoji": "🥒", "synonyms": ["zucchini", "courgette"],
       "baseUnit": "piece",
       "pieceGrams": 200,
       "packageAmount": 3,
@@ -519,7 +509,7 @@
     {
       "id": "patlican",
       "name": "Patlıcan",
-      "emoji": "🍆",
+      "emoji": "🍆", "synonyms": ["eggplant", "aubergine"],
       "baseUnit": "piece",
       "pieceGrams": 250,
       "packageAmount": 4,
@@ -541,7 +531,7 @@
     {
       "id": "mantar",
       "name": "Mantar",
-      "emoji": "🍄",
+      "emoji": "🍄", "synonyms": ["mushroom", "mushrooms"],
       "baseUnit": "gram",
       "packageAmount": 400,
       "shelfLifeDays": 5,
@@ -556,7 +546,7 @@
     {
       "id": "maydanoz",
       "name": "Maydanoz",
-      "emoji": "🌿",
+      "emoji": "🌿", "synonyms": ["parsley"],
       "baseUnit": "piece",
       "pieceGrams": 50,
       "pieceLabel": "demet",
@@ -573,7 +563,7 @@
     {
       "id": "limon",
       "name": "Limon",
-      "emoji": "🍋",
+      "emoji": "🍋", "synonyms": ["lemon", "lemon juice"],
       "baseUnit": "piece",
       "packageAmount": 4,
       "shelfLifeDays": 21,
@@ -597,8 +587,7 @@
       "name": "Salatalık",
       "emoji": "🥒",
       "synonyms": [
-        "hıyar"
-      ],
+        "hıyar", "cucumber", "cucumbers"],
       "baseUnit": "piece",
       "pieceGrams": 150,
       "packageAmount": 4,
@@ -621,7 +610,7 @@
     {
       "id": "muz",
       "name": "Muz",
-      "emoji": "🍌",
+      "emoji": "🍌", "synonyms": ["banana", "bananas"],
       "baseUnit": "piece",
       "pieceGrams": 120,
       "packageAmount": 4,
@@ -645,7 +634,7 @@
     {
       "id": "pirinc",
       "name": "Pirinç",
-      "emoji": "🍚",
+      "emoji": "🍚", "synonyms": ["rice"],
       "baseUnit": "gram",
       "density": 0.85,
       "packageAmount": 1000,
@@ -661,7 +650,7 @@
     {
       "id": "bulgur",
       "name": "Bulgur",
-      "emoji": "🌾",
+      "emoji": "🌾", "synonyms": ["bulgur"],
       "baseUnit": "gram",
       "density": 0.8,
       "packageAmount": 1000,
@@ -680,7 +669,7 @@
     {
       "id": "makarna",
       "name": "Makarna",
-      "emoji": "🍝",
+      "emoji": "🍝", "synonyms": ["pasta", "spaghetti", "penne"],
       "baseUnit": "gram",
       "packageAmount": 500,
       "shelfLifeDays": 365,
@@ -700,8 +689,7 @@
       "name": "Kırmızı mercimek",
       "emoji": "🫘",
       "synonyms": [
-        "mercimek"
-      ],
+        "mercimek", "red lentils", "lentils"],
       "baseUnit": "gram",
       "density": 0.85,
       "packageAmount": 1000,
@@ -720,8 +708,7 @@
       "emoji": "🫘",
       "synonyms": [
         "nohut",
-        "haşlanmış nohut"
-      ],
+        "haşlanmış nohut", "chickpeas", "chickpea"],
       "baseUnit": "gram",
       "packageAmount": 400,
       "shelfLifeDays": 365,
@@ -738,8 +725,7 @@
       "name": "Ekmek",
       "emoji": "🍞",
       "synonyms": [
-        "tost ekmeği"
-      ],
+        "tost ekmeği", "bread"],
       "baseUnit": "gram",
       "packageAmount": 350,
       "shelfLifeDays": 3,
@@ -760,8 +746,7 @@
       "emoji": "🫓",
       "synonyms": [
         "dürüm",
-        "tortilla"
-      ],
+        "tortilla", "tortillas", "wrap", "wraps"],
       "baseUnit": "piece",
       "pieceGrams": 60,
       "packageAmount": 6,
@@ -782,8 +767,7 @@
       "name": "Yulaf",
       "emoji": "🥣",
       "synonyms": [
-        "yulaf ezmesi"
-      ],
+        "yulaf ezmesi", "oats", "rolled oats", "oatmeal"],
       "baseUnit": "gram",
       "density": 0.4,
       "packageAmount": 500,
@@ -802,7 +786,7 @@
     {
       "id": "bal",
       "name": "Bal",
-      "emoji": "🍯",
+      "emoji": "🍯", "synonyms": ["honey"],
       "baseUnit": "gram",
       "density": 1.4,
       "packageAmount": 450,
@@ -821,7 +805,7 @@
     {
       "id": "ceviz",
       "name": "Ceviz",
-      "emoji": "🌰",
+      "emoji": "🌰", "synonyms": ["walnuts", "walnut"],
       "baseUnit": "gram",
       "density": 0.5,
       "packageAmount": 200,
@@ -842,8 +826,7 @@
       "name": "Fıstık ezmesi",
       "emoji": "🥜",
       "synonyms": [
-        "yer fıstığı ezmesi"
-      ],
+        "yer fıstığı ezmesi", "peanut butter"],
       "baseUnit": "gram",
       "density": 1.05,
       "packageAmount": 340,
@@ -865,8 +848,7 @@
       "emoji": "🫙",
       "synonyms": [
         "maya",
-        "instant maya"
-      ],
+        "instant maya", "yeast"],
       "baseUnit": "gram",
       "density": 0.6,
       "packageAmount": 10,
@@ -884,8 +866,7 @@
       "name": "Şeker",
       "emoji": "🍬",
       "synonyms": [
-        "toz şeker"
-      ],
+        "toz şeker", "sugar", "brown sugar"],
       "baseUnit": "gram",
       "density": 0.85,
       "packageAmount": 1000,
@@ -904,8 +885,7 @@
       "name": "Kabartma tozu",
       "emoji": "🫙",
       "synonyms": [
-        "kabartma"
-      ],
+        "kabartma", "baking powder", "baking soda"],
       "baseUnit": "gram",
       "density": 0.9,
       "packageAmount": 10,
@@ -922,7 +902,7 @@
     {
       "id": "tuz",
       "name": "Tuz",
-      "emoji": "🧂",
+      "emoji": "🧂", "synonyms": ["salt"],
       "baseUnit": "gram",
       "density": 1.2,
       "packageAmount": 750,
@@ -939,7 +919,7 @@
     {
       "id": "karabiber",
       "name": "Karabiber",
-      "emoji": "🧂",
+      "emoji": "🧂", "synonyms": ["black pepper"],
       "baseUnit": "gram",
       "density": 0.5,
       "packageAmount": 50,
@@ -958,8 +938,7 @@
       "name": "Pul biber",
       "emoji": "🌶️",
       "synonyms": [
-        "kırmızı pul biber"
-      ],
+        "kırmızı pul biber", "chili flakes", "red pepper flakes"],
       "baseUnit": "gram",
       "density": 0.45,
       "packageAmount": 100,
@@ -978,8 +957,7 @@
       "name": "Kuru nane",
       "emoji": "🌿",
       "synonyms": [
-        "nane"
-      ],
+        "nane", "mint"],
       "baseUnit": "gram",
       "density": 0.3,
       "packageAmount": 30,
@@ -998,8 +976,7 @@
       "name": "Zeytinyağı",
       "emoji": "🫒",
       "synonyms": [
-        "zeytinyağ"
-      ],
+        "zeytinyağ", "olive oil"],
       "baseUnit": "ml",
       "density": 0.91,
       "packageAmount": 1000,
@@ -1020,8 +997,7 @@
       "synonyms": [
         "ayçiçek yağı",
         "sıvıyağ",
-        "yağ"
-      ],
+        "yağ", "oil", "vegetable oil"],
       "baseUnit": "ml",
       "density": 0.92,
       "packageAmount": 1000,
@@ -1041,8 +1017,7 @@
       "emoji": "🥫",
       "synonyms": [
         "domates salçası",
-        "biber salçası"
-      ],
+        "biber salçası", "tomato paste"],
       "baseUnit": "gram",
       "density": 1.1,
       "packageAmount": 700,
@@ -1061,8 +1036,7 @@
       "name": "Un",
       "emoji": "🌾",
       "synonyms": [
-        "buğday unu"
-      ],
+        "buğday unu", "flour"],
       "baseUnit": "gram",
       "density": 0.55,
       "packageAmount": 1000,
@@ -1082,7 +1056,7 @@
     {
       "id": "tahin",
       "name": "Tahin",
-      "emoji": "🫙",
+      "emoji": "🫙", "synonyms": ["tahini"],
       "baseUnit": "gram",
       "density": 1.1,
       "packageAmount": 300,
@@ -1103,8 +1077,7 @@
       "name": "Pekmez",
       "emoji": "🍯",
       "synonyms": [
-        "üzüm pekmezi"
-      ],
+        "üzüm pekmezi", "molasses"],
       "baseUnit": "gram",
       "density": 1.4,
       "packageAmount": 700,
@@ -1140,7 +1113,7 @@
     {
       "id": "elma",
       "name": "Elma",
-      "emoji": "🍎",
+      "emoji": "🍎", "synonyms": ["apple", "apples"],
       "baseUnit": "piece",
       "pieceGrams": 180,
       "packageAmount": 6,
@@ -1162,7 +1135,7 @@
     {
       "id": "tarcin",
       "name": "Tarçın",
-      "emoji": "🌿",
+      "emoji": "🌿", "synonyms": ["cinnamon"],
       "baseUnit": "gram",
       "density": 0.5,
       "packageAmount": 50,
@@ -1181,8 +1154,7 @@
       "emoji": "🌽",
       "synonyms": [
         "mısır",
-        "konserve mısır"
-      ],
+        "konserve mısır", "corn"],
       "baseUnit": "gram",
       "packageAmount": 220,
       "shelfLifeDays": 365,
@@ -1199,8 +1171,7 @@
       "name": "Kuru fasulye",
       "emoji": "🫘",
       "synonyms": [
-        "fasulye"
-      ],
+        "fasulye", "beans", "white beans", "kidney beans"],
       "baseUnit": "gram",
       "density": 0.8,
       "packageAmount": 1000,
@@ -1216,7 +1187,7 @@
     {
       "id": "yesil_mercimek",
       "name": "Yeşil mercimek",
-      "emoji": "🫘",
+      "emoji": "🫘", "synonyms": ["green lentils"],
       "baseUnit": "gram",
       "density": 0.85,
       "packageAmount": 1000,
@@ -1274,7 +1245,7 @@
     {
       "id": "brokoli",
       "name": "Brokoli",
-      "emoji": "🥦",
+      "emoji": "🥦", "synonyms": ["broccoli"],
       "baseUnit": "gram",
       "packageAmount": 500,
       "shelfLifeDays": 5,
@@ -1297,7 +1268,7 @@
     {
       "id": "karnabahar",
       "name": "Karnabahar",
-      "emoji": "🥦",
+      "emoji": "🥦", "synonyms": ["cauliflower"],
       "baseUnit": "gram",
       "packageAmount": 800,
       "shelfLifeDays": 7,
@@ -1322,8 +1293,7 @@
       "emoji": "🫛",
       "synonyms": [
         "yeşil fasulye",
-        "çalı fasulye"
-      ],
+        "çalı fasulye", "green beans"],
       "baseUnit": "gram",
       "packageAmount": 500,
       "shelfLifeDays": 5,
@@ -1346,8 +1316,7 @@
       "name": "Bezelye",
       "emoji": "🫛",
       "synonyms": [
-        "dondurulmuş bezelye"
-      ],
+        "dondurulmuş bezelye", "peas"],
       "baseUnit": "gram",
       "packageAmount": 450,
       "shelfLifeDays": 180,
@@ -1367,7 +1336,7 @@
     {
       "id": "pirasa",
       "name": "Pırasa",
-      "emoji": "🥬",
+      "emoji": "🥬", "synonyms": ["leek", "leeks"],
       "baseUnit": "piece",
       "pieceGrams": 250,
       "packageAmount": 3,
@@ -1394,8 +1363,7 @@
       "emoji": "🥬",
       "synonyms": [
         "göbek marul",
-        "yeşillik"
-      ],
+        "yeşillik", "lettuce"],
       "baseUnit": "piece",
       "pieceGrams": 400,
       "packageAmount": 1,
@@ -1421,7 +1389,7 @@
     {
       "id": "dereotu",
       "name": "Dereotu",
-      "emoji": "🌿",
+      "emoji": "🌿", "synonyms": ["dill"],
       "baseUnit": "piece",
       "pieceGrams": 50,
       "pieceLabel": "demet",
@@ -1446,8 +1414,7 @@
       "name": "Taze soğan",
       "emoji": "🧅",
       "synonyms": [
-        "yeşil soğan"
-      ],
+        "yeşil soğan", "green onion", "green onions", "scallions"],
       "baseUnit": "piece",
       "pieceGrams": 15,
       "packageAmount": 6,
@@ -1473,8 +1440,7 @@
       "synonyms": [
         "kuşbaşı",
         "dana eti",
-        "et"
-      ],
+        "et", "beef"],
       "baseUnit": "gram",
       "packageAmount": 500,
       "shelfLifeDays": 3,
@@ -1492,7 +1458,7 @@
     {
       "id": "somon",
       "name": "Somon",
-      "emoji": "🐟",
+      "emoji": "🐟", "synonyms": ["salmon"],
       "baseUnit": "gram",
       "packageAmount": 400,
       "shelfLifeDays": 2,
@@ -1515,8 +1481,7 @@
       "name": "Krema",
       "emoji": "🥛",
       "synonyms": [
-        "sıvı krema"
-      ],
+        "sıvı krema", "cream", "heavy cream"],
       "baseUnit": "ml",
       "packageAmount": 200,
       "shelfLifeDays": 10,
@@ -1539,8 +1504,7 @@
       "name": "Mısır nişastası",
       "emoji": "🌽",
       "synonyms": [
-        "nişasta"
-      ],
+        "nişasta", "cornstarch", "corn starch"],
       "baseUnit": "gram",
       "density": 0.6,
       "packageAmount": 200,
@@ -1556,7 +1520,7 @@
     {
       "id": "kakao",
       "name": "Kakao",
-      "emoji": "🍫",
+      "emoji": "🍫", "synonyms": ["cocoa", "cocoa powder"],
       "baseUnit": "gram",
       "density": 0.45,
       "packageAmount": 100,
@@ -1572,7 +1536,7 @@
     {
       "id": "kimyon",
       "name": "Kimyon",
-      "emoji": "🌿",
+      "emoji": "🌿", "synonyms": ["cumin"],
       "baseUnit": "gram",
       "density": 0.45,
       "packageAmount": 50,
@@ -1591,8 +1555,7 @@
       "name": "Kekik",
       "emoji": "🌿",
       "synonyms": [
-        "kuru kekik"
-      ],
+        "kuru kekik", "thyme", "oregano"],
       "baseUnit": "gram",
       "density": 0.3,
       "packageAmount": 30,
@@ -1717,42 +1680,48 @@
       "pricePerKg": 0,
       "leftover": true
     },
-    {"id": "karides", "name": "Karides", "emoji": "🍤", "synonyms": ["jumbo karides", "karidesler"], "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 2, "tags": ["fish"], "per100g": {"kcal": 99, "protein": 24, "fat": 0.3, "carbs": 0.2, "fiber": 0}, "pricePerKg": 900},
-    {"id": "midye", "name": "Midye", "emoji": "🦪", "synonyms": ["midyeler", "midye içi"], "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 2, "tags": ["fish"], "per100g": {"kcal": 86, "protein": 12, "fat": 2.2, "carbs": 3.7, "fiber": 0}, "pricePerKg": 300},
-    {"id": "kalamar", "name": "Kalamar", "emoji": "🦑", "synonyms": ["kalamarlar"], "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 2, "tags": ["fish"], "per100g": {"kcal": 92, "protein": 15.6, "fat": 1.4, "carbs": 3.1, "fiber": 0}, "pricePerKg": 600},
-    {"id": "ahtapot", "name": "Ahtapot", "emoji": "🐙", "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 2, "tags": ["fish"], "per100g": {"kcal": 82, "protein": 14.9, "fat": 1, "carbs": 2.2, "fiber": 0}, "pricePerKg": 900},
-    {"id": "yengec", "name": "Yengeç", "emoji": "🦀", "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 2, "tags": ["fish"], "per100g": {"kcal": 97, "protein": 19, "fat": 1.5, "carbs": 0, "fiber": 0}, "pricePerKg": 1000},
-    {"id": "istakoz", "name": "Istakoz", "emoji": "🦞", "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 2, "tags": ["fish"], "per100g": {"kcal": 89, "protein": 19, "fat": 0.9, "carbs": 0, "fiber": 0}, "pricePerKg": 3000},
+    {"id": "karides", "name": "Karides", "emoji": "🍤", "synonyms": ["jumbo karides", "karidesler", "shrimp", "prawns"], "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 2, "tags": ["fish"], "per100g": {"kcal": 99, "protein": 24, "fat": 0.3, "carbs": 0.2, "fiber": 0}, "pricePerKg": 900},
+    {"id": "midye", "name": "Midye", "emoji": "🦪", "synonyms": ["midyeler", "midye içi", "mussels"], "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 2, "tags": ["fish"], "per100g": {"kcal": 86, "protein": 12, "fat": 2.2, "carbs": 3.7, "fiber": 0}, "pricePerKg": 300},
+    {"id": "kalamar", "name": "Kalamar", "emoji": "🦑", "synonyms": ["kalamarlar", "squid", "calamari"], "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 2, "tags": ["fish"], "per100g": {"kcal": 92, "protein": 15.6, "fat": 1.4, "carbs": 3.1, "fiber": 0}, "pricePerKg": 600},
+    {"id": "ahtapot", "name": "Ahtapot", "emoji": "🐙", "synonyms": ["octopus"], "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 2, "tags": ["fish"], "per100g": {"kcal": 82, "protein": 14.9, "fat": 1, "carbs": 2.2, "fiber": 0}, "pricePerKg": 900},
+    {"id": "yengec", "name": "Yengeç", "emoji": "🦀", "synonyms": ["crab"], "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 2, "tags": ["fish"], "per100g": {"kcal": 97, "protein": 19, "fat": 1.5, "carbs": 0, "fiber": 0}, "pricePerKg": 1000},
+    {"id": "istakoz", "name": "Istakoz", "emoji": "🦞", "synonyms": ["lobster"], "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 2, "tags": ["fish"], "per100g": {"kcal": 89, "protein": 19, "fat": 0.9, "carbs": 0, "fiber": 0}, "pricePerKg": 3000},
     {"id": "hamsi", "name": "Hamsi", "emoji": "🐟", "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 2, "allergens": ["fish"], "tags": ["fish"], "per100g": {"kcal": 131, "protein": 20, "fat": 4.8, "carbs": 0, "fiber": 0}, "pricePerKg": 200, "season": [11, 12, 1, 2]},
     {"id": "levrek", "name": "Levrek", "emoji": "🐟", "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 2, "allergens": ["fish"], "tags": ["fish"], "per100g": {"kcal": 97, "protein": 18, "fat": 2, "carbs": 0, "fiber": 0}, "pricePerKg": 450},
     {"id": "cipura", "name": "Çipura", "emoji": "🐟", "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 2, "allergens": ["fish"], "tags": ["fish"], "per100g": {"kcal": 96, "protein": 19, "fat": 2, "carbs": 0, "fiber": 0}, "pricePerKg": 450},
-    {"id": "findik", "name": "Fındık", "emoji": "🌰", "synonyms": ["fındık içi"], "baseUnit": "gram", "packageAmount": 200, "shelfLifeDays": 180, "allergens": ["treeNut"], "per100g": {"kcal": 628, "protein": 15, "fat": 61, "carbs": 17, "fiber": 9.7}, "pricePerKg": 600},
-    {"id": "badem", "name": "Badem", "emoji": "🌰", "synonyms": ["çiğ badem", "badem içi"], "baseUnit": "gram", "packageAmount": 200, "shelfLifeDays": 180, "allergens": ["treeNut"], "per100g": {"kcal": 579, "protein": 21, "fat": 50, "carbs": 22, "fiber": 12.5}, "pricePerKg": 700},
-    {"id": "antep_fistigi", "name": "Antep fıstığı", "emoji": "🌰", "synonyms": ["antep fıstık", "fıstık içi"], "baseUnit": "gram", "packageAmount": 200, "shelfLifeDays": 180, "allergens": ["treeNut"], "per100g": {"kcal": 560, "protein": 20, "fat": 45, "carbs": 28, "fiber": 10.6}, "pricePerKg": 1200},
-    {"id": "kaju", "name": "Kaju", "emoji": "🌰", "baseUnit": "gram", "packageAmount": 200, "shelfLifeDays": 180, "allergens": ["treeNut"], "per100g": {"kcal": 553, "protein": 18, "fat": 44, "carbs": 30, "fiber": 3.3}, "pricePerKg": 900},
-    {"id": "yer_fistigi", "name": "Yer fıstığı", "emoji": "🥜", "synonyms": ["fıstık", "çiğ fıstık", "kavrulmuş fıstık"], "baseUnit": "gram", "packageAmount": 200, "shelfLifeDays": 180, "allergens": ["peanut"], "per100g": {"kcal": 567, "protein": 26, "fat": 49, "carbs": 16, "fiber": 8.5}, "pricePerKg": 300},
-    {"id": "hindistan_cevizi", "name": "Hindistan cevizi", "emoji": "🥥", "synonyms": ["hindistancevizi", "hindistan cevizi rendesi"], "baseUnit": "gram", "packageAmount": 100, "shelfLifeDays": 180, "per100g": {"kcal": 354, "protein": 3.3, "fat": 33, "carbs": 15, "fiber": 9}, "pricePerKg": 300},
-    {"id": "susam", "name": "Susam", "emoji": "🫙", "baseUnit": "gram", "packageAmount": 100, "shelfLifeDays": 365, "allergens": ["sesame"], "per100g": {"kcal": 573, "protein": 18, "fat": 50, "carbs": 23, "fiber": 11.8}, "pricePerKg": 300},
-    {"id": "soya", "name": "Soya fasulyesi", "emoji": "🫘", "synonyms": ["soya"], "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 365, "per100g": {"kcal": 446, "protein": 36, "fat": 20, "carbs": 30, "fiber": 9.3}, "pricePerKg": 120},
-    {"id": "soya_sosu", "name": "Soya sosu", "emoji": "🫙", "baseUnit": "ml", "density": 1.1, "packageAmount": 250, "shelfLifeDays": 365, "allergens": ["gluten"], "per100g": {"kcal": 53, "protein": 8, "fat": 0.6, "carbs": 4.9, "fiber": 0.8}, "pricePerKg": 200},
-    {"id": "hardal", "name": "Hardal", "emoji": "🫙", "baseUnit": "gram", "packageAmount": 250, "shelfLifeDays": 180, "per100g": {"kcal": 66, "protein": 4, "fat": 3.3, "carbs": 5.8, "fiber": 4}, "pricePerKg": 150},
-    {"id": "kereviz", "name": "Kereviz", "emoji": "🥬", "synonyms": ["kereviz sapı", "kereviz kökü", "sap kereviz"], "baseUnit": "piece", "pieceGrams": 500, "packageAmount": 1, "shelfLifeDays": 14, "per100g": {"kcal": 16, "protein": 0.7, "fat": 0.2, "carbs": 3, "fiber": 1.6}, "pricePerKg": 40, "season": [10, 11, 12, 1, 2, 3]},
-    {"id": "cilek", "name": "Çilek", "emoji": "🍓", "synonyms": ["çilekler"], "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 4, "per100g": {"kcal": 32, "protein": 0.7, "fat": 0.3, "carbs": 7.7, "fiber": 2}, "pricePerKg": 120, "season": [4, 5, 6]},
-    {"id": "kivi", "name": "Kivi", "emoji": "🥝", "baseUnit": "piece", "pieceGrams": 75, "packageAmount": 6, "shelfLifeDays": 14, "per100g": {"kcal": 61, "protein": 1.1, "fat": 0.5, "carbs": 15, "fiber": 3}, "pricePerKg": 100, "season": [10, 11, 12, 1, 2, 3]},
-    {"id": "ananas", "name": "Ananas", "emoji": "🍍", "baseUnit": "piece", "pieceGrams": 1000, "packageAmount": 1, "shelfLifeDays": 5, "per100g": {"kcal": 50, "protein": 0.5, "fat": 0.1, "carbs": 13, "fiber": 1.4}, "pricePerKg": 150},
-    {"id": "mango", "name": "Mango", "emoji": "🥭", "baseUnit": "piece", "pieceGrams": 300, "packageAmount": 1, "shelfLifeDays": 5, "per100g": {"kcal": 60, "protein": 0.8, "fat": 0.4, "carbs": 15, "fiber": 1.6}, "pricePerKg": 250},
-    {"id": "seftali", "name": "Şeftali", "emoji": "🍑", "baseUnit": "piece", "pieceGrams": 150, "packageAmount": 6, "shelfLifeDays": 5, "per100g": {"kcal": 39, "protein": 0.9, "fat": 0.3, "carbs": 9.5, "fiber": 1.5}, "pricePerKg": 60, "season": [6, 7, 8]},
-    {"id": "kayisi", "name": "Kayısı", "emoji": "🍑", "synonyms": ["kuru kayısı"], "baseUnit": "piece", "pieceGrams": 40, "packageAmount": 10, "shelfLifeDays": 5, "per100g": {"kcal": 48, "protein": 1.4, "fat": 0.4, "carbs": 11, "fiber": 2}, "pricePerKg": 80, "season": [6, 7]},
-    {"id": "kiraz", "name": "Kiraz", "emoji": "🍒", "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 4, "per100g": {"kcal": 63, "protein": 1.1, "fat": 0.2, "carbs": 16, "fiber": 2.1}, "pricePerKg": 150, "season": [5, 6, 7]},
+    {"id": "findik", "name": "Fındık", "emoji": "🌰", "synonyms": ["fındık içi", "hazelnuts", "hazelnut"], "baseUnit": "gram", "packageAmount": 200, "shelfLifeDays": 180, "allergens": ["treeNut"], "per100g": {"kcal": 628, "protein": 15, "fat": 61, "carbs": 17, "fiber": 9.7}, "pricePerKg": 600},
+    {"id": "badem", "name": "Badem", "emoji": "🌰", "synonyms": ["çiğ badem", "badem içi", "almonds", "almond"], "baseUnit": "gram", "packageAmount": 200, "shelfLifeDays": 180, "allergens": ["treeNut"], "per100g": {"kcal": 579, "protein": 21, "fat": 50, "carbs": 22, "fiber": 12.5}, "pricePerKg": 700},
+    {"id": "antep_fistigi", "name": "Antep fıstığı", "emoji": "🌰", "synonyms": ["antep fıstık", "fıstık içi", "pistachios", "pistachio"], "baseUnit": "gram", "packageAmount": 200, "shelfLifeDays": 180, "allergens": ["treeNut"], "per100g": {"kcal": 560, "protein": 20, "fat": 45, "carbs": 28, "fiber": 10.6}, "pricePerKg": 1200},
+    {"id": "kaju", "name": "Kaju", "emoji": "🌰", "synonyms": ["cashews", "cashew"], "baseUnit": "gram", "packageAmount": 200, "shelfLifeDays": 180, "allergens": ["treeNut"], "per100g": {"kcal": 553, "protein": 18, "fat": 44, "carbs": 30, "fiber": 3.3}, "pricePerKg": 900},
+    {"id": "yer_fistigi", "name": "Yer fıstığı", "emoji": "🥜", "synonyms": ["fıstık", "çiğ fıstık", "kavrulmuş fıstık", "peanuts", "peanut"], "baseUnit": "gram", "packageAmount": 200, "shelfLifeDays": 180, "allergens": ["peanut"], "per100g": {"kcal": 567, "protein": 26, "fat": 49, "carbs": 16, "fiber": 8.5}, "pricePerKg": 300},
+    {"id": "hindistan_cevizi", "name": "Hindistan cevizi", "emoji": "🥥", "synonyms": ["hindistancevizi", "hindistan cevizi rendesi", "coconut", "shredded coconut"], "baseUnit": "gram", "packageAmount": 100, "shelfLifeDays": 180, "per100g": {"kcal": 354, "protein": 3.3, "fat": 33, "carbs": 15, "fiber": 9}, "pricePerKg": 300},
+    {"id": "susam", "name": "Susam", "emoji": "🫙", "synonyms": ["sesame", "sesame seeds"], "baseUnit": "gram", "packageAmount": 100, "shelfLifeDays": 365, "allergens": ["sesame"], "per100g": {"kcal": 573, "protein": 18, "fat": 50, "carbs": 23, "fiber": 11.8}, "pricePerKg": 300},
+    {"id": "soya", "name": "Soya fasulyesi", "emoji": "🫘", "synonyms": ["soya", "soybeans", "edamame"], "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 365, "per100g": {"kcal": 446, "protein": 36, "fat": 20, "carbs": 30, "fiber": 9.3}, "pricePerKg": 120},
+    {"id": "soya_sosu", "name": "Soya sosu", "emoji": "🫙", "synonyms": ["soy sauce"], "baseUnit": "ml", "density": 1.1, "packageAmount": 250, "shelfLifeDays": 365, "allergens": ["gluten"], "per100g": {"kcal": 53, "protein": 8, "fat": 0.6, "carbs": 4.9, "fiber": 0.8}, "pricePerKg": 200},
+    {"id": "hardal", "name": "Hardal", "emoji": "🫙", "synonyms": ["mustard"], "baseUnit": "gram", "packageAmount": 250, "shelfLifeDays": 180, "per100g": {"kcal": 66, "protein": 4, "fat": 3.3, "carbs": 5.8, "fiber": 4}, "pricePerKg": 150},
+    {"id": "kereviz", "name": "Kereviz", "emoji": "🥬", "synonyms": ["kereviz sapı", "kereviz kökü", "sap kereviz", "celery"], "baseUnit": "piece", "pieceGrams": 500, "packageAmount": 1, "shelfLifeDays": 14, "per100g": {"kcal": 16, "protein": 0.7, "fat": 0.2, "carbs": 3, "fiber": 1.6}, "pricePerKg": 40, "season": [10, 11, 12, 1, 2, 3]},
+    {"id": "cilek", "name": "Çilek", "emoji": "🍓", "synonyms": ["çilekler", "strawberries", "strawberry"], "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 4, "per100g": {"kcal": 32, "protein": 0.7, "fat": 0.3, "carbs": 7.7, "fiber": 2}, "pricePerKg": 120, "season": [4, 5, 6]},
+    {"id": "kivi", "name": "Kivi", "emoji": "🥝", "synonyms": ["kiwi"], "baseUnit": "piece", "pieceGrams": 75, "packageAmount": 6, "shelfLifeDays": 14, "per100g": {"kcal": 61, "protein": 1.1, "fat": 0.5, "carbs": 15, "fiber": 3}, "pricePerKg": 100, "season": [10, 11, 12, 1, 2, 3]},
+    {"id": "ananas", "name": "Ananas", "emoji": "🍍", "synonyms": ["pineapple"], "baseUnit": "piece", "pieceGrams": 1000, "packageAmount": 1, "shelfLifeDays": 5, "per100g": {"kcal": 50, "protein": 0.5, "fat": 0.1, "carbs": 13, "fiber": 1.4}, "pricePerKg": 150},
+    {"id": "mango", "name": "Mango", "emoji": "🥭", "synonyms": ["mango"], "baseUnit": "piece", "pieceGrams": 300, "packageAmount": 1, "shelfLifeDays": 5, "per100g": {"kcal": 60, "protein": 0.8, "fat": 0.4, "carbs": 15, "fiber": 1.6}, "pricePerKg": 250},
+    {"id": "seftali", "name": "Şeftali", "emoji": "🍑", "synonyms": ["peach", "peaches"], "baseUnit": "piece", "pieceGrams": 150, "packageAmount": 6, "shelfLifeDays": 5, "per100g": {"kcal": 39, "protein": 0.9, "fat": 0.3, "carbs": 9.5, "fiber": 1.5}, "pricePerKg": 60, "season": [6, 7, 8]},
+    {"id": "kayisi", "name": "Kayısı", "emoji": "🍑", "synonyms": ["kuru kayısı", "apricot", "apricots"], "baseUnit": "piece", "pieceGrams": 40, "packageAmount": 10, "shelfLifeDays": 5, "per100g": {"kcal": 48, "protein": 1.4, "fat": 0.4, "carbs": 11, "fiber": 2}, "pricePerKg": 80, "season": [6, 7]},
+    {"id": "kiraz", "name": "Kiraz", "emoji": "🍒", "synonyms": ["cherries", "cherry"], "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 4, "per100g": {"kcal": 63, "protein": 1.1, "fat": 0.2, "carbs": 16, "fiber": 2.1}, "pricePerKg": 150, "season": [5, 6, 7]},
     {"id": "visne", "name": "Vişne", "emoji": "🍒", "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 4, "per100g": {"kcal": 50, "protein": 1, "fat": 0.3, "carbs": 12, "fiber": 1.6}, "pricePerKg": 120, "season": [6, 7]},
-    {"id": "uzum", "name": "Üzüm", "emoji": "🍇", "synonyms": ["kuru üzüm"], "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 5, "per100g": {"kcal": 69, "protein": 0.7, "fat": 0.2, "carbs": 18, "fiber": 0.9}, "pricePerKg": 70, "season": [8, 9, 10]},
-    {"id": "armut", "name": "Armut", "emoji": "🍐", "baseUnit": "piece", "pieceGrams": 180, "packageAmount": 4, "shelfLifeDays": 10, "per100g": {"kcal": 57, "protein": 0.4, "fat": 0.1, "carbs": 15, "fiber": 3.1}, "pricePerKg": 60, "season": [8, 9, 10, 11]},
-    {"id": "portakal", "name": "Portakal", "emoji": "🍊", "baseUnit": "piece", "pieceGrams": 200, "packageAmount": 6, "shelfLifeDays": 14, "per100g": {"kcal": 47, "protein": 0.9, "fat": 0.1, "carbs": 12, "fiber": 2.4}, "pricePerKg": 40, "season": [11, 12, 1, 2, 3]},
-    {"id": "mandalina", "name": "Mandalina", "emoji": "🍊", "baseUnit": "piece", "pieceGrams": 90, "packageAmount": 8, "shelfLifeDays": 10, "per100g": {"kcal": 53, "protein": 0.8, "fat": 0.3, "carbs": 13, "fiber": 1.8}, "pricePerKg": 40, "season": [10, 11, 12, 1, 2]},
-    {"id": "karpuz", "name": "Karpuz", "emoji": "🍉", "baseUnit": "piece", "pieceGrams": 6000, "packageAmount": 1, "shelfLifeDays": 10, "per100g": {"kcal": 30, "protein": 0.6, "fat": 0.2, "carbs": 7.6, "fiber": 0.4}, "pricePerKg": 15, "season": [6, 7, 8]},
-    {"id": "kavun", "name": "Kavun", "emoji": "🍈", "baseUnit": "piece", "pieceGrams": 2000, "packageAmount": 1, "shelfLifeDays": 10, "per100g": {"kcal": 34, "protein": 0.8, "fat": 0.2, "carbs": 8, "fiber": 0.9}, "pricePerKg": 25, "season": [6, 7, 8, 9]},
-    {"id": "yaban_mersini", "name": "Yaban mersini", "emoji": "🫐", "synonyms": ["blueberry"], "baseUnit": "gram", "packageAmount": 125, "shelfLifeDays": 7, "per100g": {"kcal": 57, "protein": 0.7, "fat": 0.3, "carbs": 14, "fiber": 2.4}, "pricePerKg": 600},
-    {"id": "avokado", "name": "Avokado", "emoji": "🥑", "baseUnit": "piece", "pieceGrams": 200, "packageAmount": 2, "shelfLifeDays": 5, "per100g": {"kcal": 160, "protein": 2, "fat": 15, "carbs": 9, "fiber": 6.7}, "pricePerKg": 300},
-    {"id": "cikolata", "name": "Çikolata", "emoji": "🍫", "synonyms": ["bitter çikolata", "sütlü çikolata"], "baseUnit": "gram", "packageAmount": 80, "shelfLifeDays": 270, "allergens": ["milk"], "tags": ["animalProduct"], "per100g": {"kcal": 546, "protein": 4.9, "fat": 31, "carbs": 61, "fiber": 7}, "pricePerKg": 500}
+    {"id": "uzum", "name": "Üzüm", "emoji": "🍇", "synonyms": ["kuru üzüm", "grapes", "raisins"], "baseUnit": "gram", "packageAmount": 500, "shelfLifeDays": 5, "per100g": {"kcal": 69, "protein": 0.7, "fat": 0.2, "carbs": 18, "fiber": 0.9}, "pricePerKg": 70, "season": [8, 9, 10]},
+    {"id": "armut", "name": "Armut", "emoji": "🍐", "synonyms": ["pear", "pears"], "baseUnit": "piece", "pieceGrams": 180, "packageAmount": 4, "shelfLifeDays": 10, "per100g": {"kcal": 57, "protein": 0.4, "fat": 0.1, "carbs": 15, "fiber": 3.1}, "pricePerKg": 60, "season": [8, 9, 10, 11]},
+    {"id": "portakal", "name": "Portakal", "emoji": "🍊", "synonyms": ["orange", "oranges"], "baseUnit": "piece", "pieceGrams": 200, "packageAmount": 6, "shelfLifeDays": 14, "per100g": {"kcal": 47, "protein": 0.9, "fat": 0.1, "carbs": 12, "fiber": 2.4}, "pricePerKg": 40, "season": [11, 12, 1, 2, 3]},
+    {"id": "mandalina", "name": "Mandalina", "emoji": "🍊", "synonyms": ["tangerine", "mandarin"], "baseUnit": "piece", "pieceGrams": 90, "packageAmount": 8, "shelfLifeDays": 10, "per100g": {"kcal": 53, "protein": 0.8, "fat": 0.3, "carbs": 13, "fiber": 1.8}, "pricePerKg": 40, "season": [10, 11, 12, 1, 2]},
+    {"id": "karpuz", "name": "Karpuz", "emoji": "🍉", "synonyms": ["watermelon"], "baseUnit": "piece", "pieceGrams": 6000, "packageAmount": 1, "shelfLifeDays": 10, "per100g": {"kcal": 30, "protein": 0.6, "fat": 0.2, "carbs": 7.6, "fiber": 0.4}, "pricePerKg": 15, "season": [6, 7, 8]},
+    {"id": "kavun", "name": "Kavun", "emoji": "🍈", "synonyms": ["melon"], "baseUnit": "piece", "pieceGrams": 2000, "packageAmount": 1, "shelfLifeDays": 10, "per100g": {"kcal": 34, "protein": 0.8, "fat": 0.2, "carbs": 8, "fiber": 0.9}, "pricePerKg": 25, "season": [6, 7, 8, 9]},
+    {"id": "yaban_mersini", "name": "Yaban mersini", "emoji": "🫐", "synonyms": ["blueberry", "blueberries"], "baseUnit": "gram", "packageAmount": 125, "shelfLifeDays": 7, "per100g": {"kcal": 57, "protein": 0.7, "fat": 0.3, "carbs": 14, "fiber": 2.4}, "pricePerKg": 600},
+    {"id": "avokado", "name": "Avokado", "emoji": "🥑", "synonyms": ["avocado", "avocados"], "baseUnit": "piece", "pieceGrams": 200, "packageAmount": 2, "shelfLifeDays": 5, "per100g": {"kcal": 160, "protein": 2, "fat": 15, "carbs": 9, "fiber": 6.7}, "pricePerKg": 300},
+    {"id": "cikolata", "name": "Çikolata", "emoji": "🍫", "synonyms": ["bitter çikolata", "sütlü çikolata", "chocolate", "dark chocolate", "chocolate chips"], "baseUnit": "gram", "packageAmount": 80, "shelfLifeDays": 270, "allergens": ["milk"], "tags": ["animalProduct"], "per100g": {"kcal": 546, "protein": 4.9, "fat": 31, "carbs": 61, "fiber": 7}, "pricePerKg": 500},
+    {"id": "chia_tohumu", "name": "Chia tohumu", "emoji": "🌱", "synonyms": ["chia", "chia seeds", "chia seed"], "baseUnit": "gram", "packageAmount": 250, "shelfLifeDays": 365, "per100g": {"kcal": 486, "protein": 17, "fat": 31, "carbs": 42, "fiber": 34}, "pricePerKg": 400},
+    {"id": "keten_tohumu", "name": "Keten tohumu", "emoji": "🌾", "synonyms": ["flax", "flaxseed", "flax seeds", "ground flax", "flaxseed meal"], "baseUnit": "gram", "packageAmount": 250, "shelfLifeDays": 180, "per100g": {"kcal": 534, "protein": 18, "fat": 42, "carbs": 29, "fiber": 27}, "pricePerKg": 200},
+    {"id": "vanilya", "name": "Vanilya", "emoji": "🌿", "synonyms": ["vanilin", "vanilya özütü", "vanilla", "vanilla extract"], "baseUnit": "ml", "density": 0.88, "packageAmount": 50, "shelfLifeDays": 730, "per100g": {"kcal": 288, "protein": 0.1, "fat": 0.1, "carbs": 13, "fiber": 0}, "pricePerKg": 800},
+    {"id": "akcaagac_surubu", "name": "Akçaağaç şurubu", "emoji": "🍯", "synonyms": ["maple şurubu", "maple syrup", "maple"], "baseUnit": "ml", "density": 1.32, "packageAmount": 250, "shelfLifeDays": 365, "per100g": {"kcal": 260, "protein": 0, "fat": 0.1, "carbs": 67, "fiber": 0}, "pricePerKg": 900},
+    {"id": "badem_ezmesi", "name": "Badem ezmesi", "emoji": "🫙", "synonyms": ["almond butter"], "baseUnit": "gram", "packageAmount": 250, "shelfLifeDays": 180, "allergens": ["treeNut"], "per100g": {"kcal": 614, "protein": 21, "fat": 56, "carbs": 19, "fiber": 10}, "pricePerKg": 1200},
+    {"id": "badem_sutu", "name": "Badem sütü", "emoji": "🥛", "synonyms": ["almond milk", "unsweetened almond milk"], "baseUnit": "ml", "density": 1.0, "packageAmount": 1000, "shelfLifeDays": 7, "allergens": ["treeNut"], "per100g": {"kcal": 15, "protein": 0.6, "fat": 1.2, "carbs": 0.6, "fiber": 0.2}, "pricePerKg": 120}
   ]
 }

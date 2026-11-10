@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -254,17 +255,26 @@ class _ImportRecipeScreenState extends State<ImportRecipeScreen> {
                         Text('Sesli anlatım varsa',
                             style: theme.textTheme.titleSmall),
                         const SizedBox(height: 4),
-                        Text(
-                            'Videoyu galerine kaydettiysen seç; konuşmayı yazıya çeviririm.',
-                            style: theme.textTheme.bodySmall),
-                        const SizedBox(height: 10),
-                        ChunkyButton(
-                          label: 'Videoyu seç',
-                          icon: '🎬',
-                          tone: ChunkyTone.soft,
-                          height: 48,
-                          onPressed: _fromVideoAudio,
-                        ),
+                        // Konuşmayı yazıya çeviren Apple'ın iPhone'daki
+                        // konuşma tanıması; tarayıcıda yok.
+                        if (kIsWeb)
+                          Text(
+                              'Videodaki konuşmayı yazıya çevirme iPhone '
+                              'uygulamasında çalışır; tarayıcıda bu özellik yok.',
+                              style: theme.textTheme.bodySmall)
+                        else ...[
+                          Text(
+                              'Videoyu galerine kaydettiysen seç; konuşmayı yazıya çeviririm.',
+                              style: theme.textTheme.bodySmall),
+                          const SizedBox(height: 10),
+                          ChunkyButton(
+                            label: 'Videoyu seç',
+                            icon: '🎬',
+                            tone: ChunkyTone.soft,
+                            height: 48,
+                            onPressed: _fromVideoAudio,
+                          ),
+                        ],
                       ],
                     ),
                   ),
