@@ -122,6 +122,25 @@ const _iconFiles = {
   '🥨': 'pretzel',
   '🔖': 'bookmark',
   '🗂': 'card_index_dividers',
+  // Meyveler ve deniz ürünleri (alerji için genişletilen malzeme listesi).
+  '🍓': 'strawberry',
+  '🥝': 'kiwi_fruit',
+  '🍍': 'pineapple',
+  '🥭': 'mango',
+  '🍑': 'peach',
+  '🍒': 'cherries',
+  '🍇': 'grapes',
+  '🍐': 'pear',
+  '🍊': 'tangerine',
+  '🍉': 'watermelon',
+  '🍈': 'melon',
+  '🫐': 'blueberries',
+  '🥥': 'coconut',
+  '🦪': 'oyster',
+  '🦑': 'squid',
+  '🐙': 'octopus',
+  '🦀': 'crab',
+  '🦞': 'lobster',
 };
 
 String? iconAssetFor(String emoji) {

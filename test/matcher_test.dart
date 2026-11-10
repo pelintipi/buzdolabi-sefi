@@ -38,7 +38,7 @@ void main() {
   test('JSON kataloğu hatasız okunur', () {
     expect(testCatalog.problems, isEmpty);
     expect(recipeCatalog, hasLength(109));
-    expect(ingredientCatalog, hasLength(82));
+    expect(ingredientCatalog, hasLength(119));
   });
 
   test('tarif kalitesi: ana malzeme, adım, süre, benzersiz ad, 3D ikon', () {
@@ -66,6 +66,41 @@ void main() {
     for (final i in ingredientCatalog) {
       expect(iconAssetFor(i.emoji), isNotNull,
           reason: '${i.id}: ${i.emoji} ikonu yok');
+    }
+  });
+
+  test('"Diğer" alerjiler malzeme listesinde karşılık bulur', () {
+    final m = RecipeMatcher(IngredientRepository(ingredientCatalog));
+    const expected = {
+      'çilek': 'cilek',
+      'Çilekler': 'cilek',
+      'karides': 'karides',
+      'kivi': 'kivi',
+      'midye': 'midye',
+      'kalamar': 'kalamar',
+      'fındık': 'findik',
+      'badem': 'badem',
+      'antep fıstığı': 'antep_fistigi',
+      'fıstık': 'yer_fistigi',
+      'yer fıstığı': 'yer_fistigi',
+      'kaju': 'kaju',
+      'susam': 'susam',
+      'soya': 'soya',
+      'hardal': 'hardal',
+      'kereviz': 'kereviz',
+      'şeftali': 'seftali',
+      'kayısı': 'kayisi',
+      'ananas': 'ananas',
+      'portakal': 'portakal',
+      'domates': 'domates',
+      'yumurta': 'yumurta',
+    };
+    expected.forEach((text, id) {
+      expect(m.allergyIngredient(text)?.id, id, reason: text);
+    });
+    // Kuruyemiş kutusu yeni kuruyemişleri de kapsar.
+    for (final id in ['findik', 'badem', 'antep_fistigi', 'kaju', 'ceviz']) {
+      expect(m.repo.byId(id).allergens, contains(Allergen.treeNut), reason: id);
     }
   });
 

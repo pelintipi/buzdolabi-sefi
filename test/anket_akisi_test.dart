@@ -122,13 +122,14 @@ void main() {
       await tester.pumpAndSettle();
       await r.tap(tester, find.text('Diğer'), 'Diğer');
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField).last, 'ceviz, kivi');
+      await tester.enterText(find.byType(TextField).last, 'ceviz, acı bakla');
       await r.tap(tester, find.text('Ekle'), 'Ekle');
       await tester.pumpAndSettle();
       await r.capture(tester,
           title: '5 · Diğer alerjiler',
-          action: '"Diğer"e dokunup "ceviz, kivi" yazdım ve Ekle\'ye bastım.',
-          result: 'Ceviz listemizde var, içeren tarifler gizlenecek; kivi '
+          action:
+              '"Diğer"e dokunup "ceviz, acı bakla" yazdım ve Ekle\'ye bastım.',
+          result: 'Ceviz listemizde var, içeren tarifler gizlenecek; acı bakla '
               'listemizde yok, bunu açıkça söylüyor.');
       expect(find.text('Ceviz içeren tarifler gizlenir'), findsOneWidget);
       expect(find.textContaining('bulamadık'), findsOneWidget);
@@ -152,7 +153,7 @@ void main() {
           action: 'Son soruları yanıtladım.',
           result: 'Cevapların uygulamada neyi değiştirdiği tek tek yazıyor.');
       expect(find.text('Tarifler 2 kişilik açılacak'), findsOneWidget);
-      expect(find.textContaining('ceviz, kivi'), findsOneWidget,
+      expect(find.textContaining('ceviz, acı bakla'), findsOneWidget,
           reason: 'özet "Gizlenen alerjenler" satırında yazılanları gösterir');
 
       // -------------------------------------------------------- Ana sayfa
@@ -163,7 +164,7 @@ void main() {
         await tester.tap(find.text('Geç').last);
         await tester.pumpAndSettle();
       }
-      expect(state.profile.customAllergies, ['ceviz', 'kivi']);
+      expect(state.profile.customAllergies, ['ceviz', 'acı bakla']);
       expect(state.matcher.passesProfile(walnut, state.profile), isFalse,
           reason: '${walnut.title} ceviz içeriyor, gizlenmeli');
       final p = state.profile;
