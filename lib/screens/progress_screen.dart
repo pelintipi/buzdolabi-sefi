@@ -7,6 +7,7 @@ import '../models/recipe.dart';
 import '../state/app_state.dart';
 import '../theme/palette.dart';
 import '../utils/format.dart';
+import '../widgets/body_targets_sheet.dart';
 import '../widgets/recipe_image.dart';
 import '../widgets/ui.dart';
 
@@ -297,9 +298,27 @@ class _TodayCard extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 6),
               Text(
-                  'Hedefler Profil\'den değişir. Tahmini değerlerdir, tıbbi tavsiye değildir.',
+                  p.body == null
+                      ? '2000 kcal ve 50 g protein genel değerler; herkese '
+                          'uymaz. Boyuna, kilona ve hedefine göre hesaplayalım.'
+                      : 'Hedefin ${p.body!.heightCm.round()} cm, '
+                          '${formatNumber(p.body!.weightKg, decimals: 1)} kg ve '
+                          '"${p.body!.goal.label.toLowerCase()}" hedefine göre. '
+                          'Tahminidir, tıbbi tavsiye değildir.',
                   style: theme.textTheme.bodySmall),
+              const SizedBox(height: 4),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => showBodyTargetsSheet(context),
+                  icon: const Icon(Icons.tune_rounded, size: 18),
+                  label: Text(p.body == null
+                      ? 'Bana göre hesapla'
+                      : 'Bilgilerimi güncelle'),
+                ),
+              ),
             ],
           ),
         ),

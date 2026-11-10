@@ -6,6 +6,8 @@ import '../models/recipe.dart';
 import '../models/user_profile.dart';
 import '../state/app_state.dart';
 import '../theme/palette.dart';
+import '../utils/format.dart';
+import '../widgets/body_targets_sheet.dart';
 import '../widgets/other_allergies.dart';
 import '../widgets/recipe_image.dart';
 import '../widgets/ui.dart';
@@ -190,9 +192,25 @@ class ProfileScreen extends StatelessWidget {
           group(
             'Günlük hedefler',
             '🎯',
-            'İlerleme sekmesindeki "Bugün yediklerin" çubukları bunlara göre.',
+            p.body == null
+                ? 'Şu an genel değerler. Boyuna, kilona ve hedefine göre '
+                    'hesaplatabilirsin.'
+                : '${p.body!.sex.label}, ${p.body!.age} yaş, '
+                    '${p.body!.heightCm.round()} cm, '
+                    '${formatNumber(p.body!.weightKg, decimals: 1)} kg · '
+                    '${p.body!.goal.label.toLowerCase()} için hesaplandı.',
             Column(
               children: [
+                ChunkyButton(
+                  label: p.body == null
+                      ? 'Bana göre hesapla'
+                      : 'Bilgilerimi güncelle',
+                  icon: '🎯',
+                  tone: ChunkyTone.soft,
+                  height: 48,
+                  onPressed: () => showBodyTargetsSheet(context),
+                ),
+                const SizedBox(height: 8),
                 _TargetRow(
                   label: 'Kalori',
                   unit: 'kcal',

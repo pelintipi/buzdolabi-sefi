@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'body_profile.dart';
+
+export 'body_profile.dart';
 import 'ingredient.dart';
 import 'recipe.dart';
 
@@ -129,6 +132,7 @@ class UserProfile {
     this.dailyProtein = 50,
     this.uiTheme = UiTheme.system,
     this.seenNavTour = false,
+    this.body,
   });
 
   final Set<Allergen> allergies;
@@ -167,6 +171,9 @@ class UserProfile {
   /// Alt menü turu bir kez gösterildi.
   final bool seenNavTour;
 
+  /// Boy, kilo, yaş... Verildiyse günlük hedefler bunlardan hesaplanır.
+  final BodyProfile? body;
+
   /// Anket cevapları boşaltılmış hali (aletler de "sorulmadı"); alerjiler,
   /// evde olmayan temel malzemeler, hatırlatma, tema, tur ve günlük hedefler korunur.
   /// Yerel test sunucusu anketi her açılışta sıfırdan göstermek için kullanır.
@@ -177,6 +184,7 @@ class UserProfile {
         dailyProtein: dailyProtein,
         uiTheme: uiTheme,
         seenNavTour: seenNavTour,
+        body: body,
       );
 
   /// Videodan tarif kaydetmeye yatkın mı? (TikTok kartı öne çıkar)
@@ -205,6 +213,7 @@ class UserProfile {
     double? dailyProtein,
     UiTheme? uiTheme,
     bool? seenNavTour,
+    BodyProfile? body,
   }) =>
       UserProfile(
         allergies: allergies ?? this.allergies,
@@ -226,6 +235,7 @@ class UserProfile {
         dailyProtein: dailyProtein ?? this.dailyProtein,
         uiTheme: uiTheme ?? this.uiTheme,
         seenNavTour: seenNavTour ?? this.seenNavTour,
+        body: body ?? this.body,
       );
 
   Map<String, dynamic> toJson() => {
@@ -248,6 +258,7 @@ class UserProfile {
         'dailyProtein': dailyProtein,
         'uiTheme': uiTheme.name,
         'seenNavTour': seenNavTour,
+        if (body != null) 'body': body!.toJson(),
       };
 
   static T? _enum<T extends Enum>(List<T> values, Object? name) {
@@ -295,5 +306,6 @@ class UserProfile {
         dailyProtein: (j['dailyProtein'] as num?)?.toDouble() ?? 50,
         uiTheme: _enum(UiTheme.values, j['uiTheme']) ?? UiTheme.system,
         seenNavTour: j['seenNavTour'] as bool? ?? false,
+        body: BodyProfile.fromJson(j['body']),
       );
 }
