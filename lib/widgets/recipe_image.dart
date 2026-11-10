@@ -69,6 +69,18 @@ class RecipeImage extends StatelessWidget {
     final h = height ?? width;
     final photo = RecipePhotos.pathFor(recipe.id);
     final shortest = width < h ? width : h;
+    final placeholder = DecoratedBox(
+      decoration: BoxDecoration(color: _tint(categoryOf(recipe))),
+      child: Center(
+        child: iconAssetFor(recipe.emoji) != null
+            ? FoodIcon(recipe.emoji, size: shortest * 0.62)
+            : Icon(_iconFor(categoryOf(recipe)),
+                size: shortest * 0.34, color: const Color(0x591A1A17)),
+      ),
+    );
+    // Videodan kaydedilen tarifte videonun kapağı; yüklenemezse (bağlantı
+    // eskidiyse, internet yoksa) yer tutucu.
+    final thumb = recipe.source?.thumbnailUrl;
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: SizedBox(
@@ -76,16 +88,13 @@ class RecipeImage extends StatelessWidget {
         height: h,
         child: photo != null
             ? Image.asset(photo, fit: BoxFit.cover)
-            : DecoratedBox(
-                decoration: BoxDecoration(color: _tint(categoryOf(recipe))),
-                child: Center(
-                  child: iconAssetFor(recipe.emoji) != null
-                      ? FoodIcon(recipe.emoji, size: shortest * 0.62)
-                      : Icon(_iconFor(categoryOf(recipe)),
-                          size: shortest * 0.34,
-                          color: const Color(0x591A1A17)),
-                ),
-              ),
+            : thumb != null
+                ? Image.network(thumb,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => placeholder,
+                    loadingBuilder: (_, child, progress) =>
+                        progress == null ? child : placeholder)
+                : placeholder,
       ),
     );
   }
