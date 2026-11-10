@@ -21,8 +21,7 @@ class SharedPayload {
     if (found != null) {
       rest = rest.replaceAll(found, '').trim();
     }
-    return SharedPayload(
-        url: found, text: rest.isEmpty ? null : rest);
+    return SharedPayload(url: found, text: rest.isEmpty ? null : rest);
   }
 
   final String? url;
@@ -112,8 +111,8 @@ class VideoInfoClient {
     final endpoint = switch (platform) {
       SocialPlatform.tiktok =>
         Uri.https('www.tiktok.com', '/oembed', {'url': url}),
-      SocialPlatform.youtube => Uri.https(
-          'www.youtube.com', '/oembed', {'url': url, 'format': 'json'}),
+      SocialPlatform.youtube =>
+        Uri.https('www.youtube.com', '/oembed', {'url': url, 'format': 'json'}),
       _ => null,
     };
     if (endpoint == null) return null;
@@ -141,9 +140,10 @@ class VideoInfoClient {
 
   /// Web'de yerel oembed_proxy (tool/oembed_proxy.mjs :8787); native'de doğrudan.
   Future<Map<String, dynamic>?> _getJson(Uri endpoint) async {
-    final target = kIsWeb ? _proxyUri('/oembed', endpoint.queryParameters['url'] ?? '') : endpoint;
-    final res =
-        await _client.get(target).timeout(const Duration(seconds: 12));
+    final target = kIsWeb
+        ? _proxyUri('/oembed', endpoint.queryParameters['url'] ?? '')
+        : endpoint;
+    final res = await _client.get(target).timeout(const Duration(seconds: 12));
     if (res.statusCode != 200) return null;
     final body = utf8.decode(res.bodyBytes).trim();
     if (body.isEmpty) return null;
@@ -180,9 +180,9 @@ class VideoInfoClient {
           if (j is Map && j['url'] is String) return j['url'] as String;
         }
       } else {
-        final res = await _client
-            .get(Uri.parse(url), headers: const {'User-Agent': 'Mozilla/5.0'})
-            .timeout(const Duration(seconds: 8));
+        final res = await _client.get(Uri.parse(url), headers: const {
+          'User-Agent': 'Mozilla/5.0'
+        }).timeout(const Duration(seconds: 8));
         final finalUrl = res.request?.url.toString();
         if (finalUrl != null && finalUrl.isNotEmpty) return finalUrl;
       }
@@ -193,12 +193,12 @@ class VideoInfoClient {
   }
 
   static String _unescape(String s) => s
-      .replaceAll('&amp;', '&')
-      .replaceAll('&lt;', '<')
-      .replaceAll('&gt;', '>')
-      .replaceAll('&quot;', '"')
-      .replaceAll('&#39;', "'")
-      .replaceAllMapped(RegExp(r'&#(\d+);'), (m) {
+          .replaceAll('&amp;', '&')
+          .replaceAll('&lt;', '<')
+          .replaceAll('&gt;', '>')
+          .replaceAll('&quot;', '"')
+          .replaceAll('&#39;', "'")
+          .replaceAllMapped(RegExp(r'&#(\d+);'), (m) {
         final code = int.tryParse(m.group(1)!);
         return code == null ? m.group(0)! : String.fromCharCode(code);
       });

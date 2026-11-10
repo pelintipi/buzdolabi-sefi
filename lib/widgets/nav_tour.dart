@@ -15,7 +15,8 @@ const _steps = <({int tab, String emoji, String title, String body})>[
     tab: 0,
     emoji: '🏠',
     title: 'Ana sayfa',
-    body: 'Bugün ne pişireceğini bulur, haftalık hedefini ve hızlı eklemeleri görürsün.',
+    body:
+        'Bugün ne pişireceğini bulur, haftalık hedefini ve hızlı eklemeleri görürsün.',
   ),
   (
     tab: 1,
@@ -33,7 +34,8 @@ const _steps = <({int tab, String emoji, String title, String body})>[
     tab: 3,
     emoji: '📝',
     title: 'Liste',
-    body: 'Eksik malzemeler alışveriş listene düşer; “Neler alabilirim?” önerir.',
+    body:
+        'Eksik malzemeler alışveriş listene düşer; “Neler alabilirim?” önerir.',
   ),
   (
     tab: 4,

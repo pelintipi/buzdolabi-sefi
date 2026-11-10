@@ -106,8 +106,8 @@ class ShoppingScreen extends StatelessWidget {
                               mode: LaunchMode.externalApplication),
                         ),
                         IconButton(
-                          icon: Icon(Icons.close_rounded,
-                              color: Palette.inkSoft),
+                          icon:
+                              Icon(Icons.close_rounded, color: Palette.inkSoft),
                           tooltip: 'Listeden çıkar',
                           onPressed: () => state.removeFromShopping(id),
                         ),

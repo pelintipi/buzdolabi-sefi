@@ -223,8 +223,8 @@ class _HowTo extends StatelessWidget {
                 width: 26,
                 height: 26,
                 alignment: Alignment.center,
-                decoration: BoxDecoration(
-                    color: Palette.sand, shape: BoxShape.circle),
+                decoration:
+                    BoxDecoration(color: Palette.sand, shape: BoxShape.circle),
                 child: Text(n,
                     style: const TextStyle(
                         fontFamily: Fonts.body,

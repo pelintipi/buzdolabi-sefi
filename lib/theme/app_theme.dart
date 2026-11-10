@@ -92,12 +92,10 @@ ThemeData buildAppTheme(Brightness brightness) {
         titleSmall: _display(16, weight: FontWeight.w600, color: c.ink),
         bodyLarge: _body(17, FontWeight.w500, color: c.ink),
         bodyMedium: _body(15, FontWeight.w500, color: c.ink),
-        bodySmall:
-            _body(13, FontWeight.w500, color: c.inkSoft, height: 1.35),
+        bodySmall: _body(13, FontWeight.w500, color: c.inkSoft, height: 1.35),
         labelLarge: _body(15, FontWeight.w800, color: c.ink, height: 1.2),
         labelMedium: _body(13, FontWeight.w700, color: c.ink, height: 1.2),
-        labelSmall:
-            _body(12, FontWeight.w700, color: c.inkSoft, height: 1.2),
+        labelSmall: _body(12, FontWeight.w700, color: c.inkSoft, height: 1.2),
       );
 
   final rounded20 =
@@ -154,15 +152,12 @@ ThemeData buildAppTheme(Brightness brightness) {
     ),
     segmentedButtonTheme: SegmentedButtonThemeData(
       style: ButtonStyle(
-        side: WidgetStatePropertyAll(
-            BorderSide(color: c.line, width: 1.5)),
-        backgroundColor: WidgetStateProperty.resolveWith((s) =>
-            s.contains(WidgetState.selected) ? c.basilSoft : c.surface),
+        side: WidgetStatePropertyAll(BorderSide(color: c.line, width: 1.5)),
+        backgroundColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.selected) ? c.basilSoft : c.surface),
         foregroundColor: WidgetStateProperty.resolveWith((s) =>
             s.contains(WidgetState.selected)
-                ? (brightness == Brightness.dark
-                    ? c.ink
-                    : Palette.basilDeep)
+                ? (brightness == Brightness.dark ? c.ink : Palette.basilDeep)
                 : c.ink),
         textStyle: const WidgetStatePropertyAll(TextStyle(
             fontFamily: Fonts.body, fontWeight: FontWeight.w800, fontSize: 14)),
@@ -172,8 +167,7 @@ ThemeData buildAppTheme(Brightness brightness) {
       filled: true,
       fillColor: c.surface,
       contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-      hintStyle:
-          TextStyle(color: c.inkSoft, fontWeight: FontWeight.w600),
+      hintStyle: TextStyle(color: c.inkSoft, fontWeight: FontWeight.w600),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
         borderSide: BorderSide(color: c.line, width: 1.5),
@@ -200,7 +194,8 @@ ThemeData buildAppTheme(Brightness brightness) {
     ),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
-      backgroundColor: brightness == Brightness.dark ? c.sand : Palette.basilDeep,
+      backgroundColor:
+          brightness == Brightness.dark ? c.sand : Palette.basilDeep,
       actionTextColor: Palette.butter,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       contentTextStyle: const TextStyle(
@@ -210,8 +205,8 @@ ThemeData buildAppTheme(Brightness brightness) {
           fontSize: 15),
     ),
     switchTheme: SwitchThemeData(
-      trackColor: WidgetStateProperty.resolveWith((s) =>
-          s.contains(WidgetState.selected) ? Palette.basil : c.line),
+      trackColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? Palette.basil : c.line),
       thumbColor: const WidgetStatePropertyAll(Colors.white),
       trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
     ),

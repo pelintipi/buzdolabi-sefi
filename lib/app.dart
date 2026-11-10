@@ -14,6 +14,7 @@ import 'state/app_state.dart';
 import 'theme/app_theme.dart';
 import 'theme/palette.dart';
 import 'widgets/nav_tour.dart';
+import 'widgets/ui.dart' show IconPrecache;
 
 class BuzdolabiSefiApp extends StatelessWidget {
   const BuzdolabiSefiApp(
@@ -25,8 +26,8 @@ class BuzdolabiSefiApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = context.select<AppState, ThemeMode>(
-        (s) => s.profile.uiTheme.mode);
+    final themeMode =
+        context.select<AppState, ThemeMode>((s) => s.profile.uiTheme.mode);
     return MaterialApp(
       title: 'Buzdolabı Şefi',
       debugShowCheckedModeBanner: false,
@@ -35,7 +36,7 @@ class BuzdolabiSefiApp extends StatelessWidget {
       themeMode: themeMode,
       builder: (context, child) {
         Palette.apply(Theme.of(context).brightness);
-        return child ?? const SizedBox.shrink();
+        return IconPrecache(child: child ?? const SizedBox.shrink());
       },
       locale: const Locale('tr'),
       supportedLocales: const [Locale('tr')],

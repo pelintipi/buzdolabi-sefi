@@ -129,6 +129,40 @@ String? iconAssetFor(String emoji) {
   return name == null ? null : 'assets/icons/$name.png';
 }
 
+/// Açılışta tüm 3D ikonları arka planda indirip hazırlar. Telefonda (web)
+/// ikonlar ancak ekrana gelince tek tek indiriliyordu; artık sayfalara
+/// geçildiğinde hazır olurlar. Önce ilk ekran çizilir, sonra yüklenir.
+class IconPrecache extends StatefulWidget {
+  const IconPrecache({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  State<IconPrecache> createState() => _IconPrecacheState();
+}
+
+class _IconPrecacheState extends State<IconPrecache> {
+  bool _started = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      for (final name in _iconFiles.values.toSet()) {
+        // Hata (ör. eksik dosya) açılışı bozmasın.
+        precacheImage(AssetImage('assets/icons/$name.png'), context,
+            onError: (_, __) {});
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
 /// Emojiyi 3D ikon olarak çizer; ikonu olmayan emojiler yazı olarak kalır.
 class FoodIcon extends StatelessWidget {
   const FoodIcon(this.emoji, {super.key, this.size = 28});
@@ -149,7 +183,17 @@ class FoodIcon extends StatelessWidget {
       );
     }
     return Image.asset(asset,
-        width: size, height: size, filterQuality: FilterQuality.medium);
+        width: size,
+        height: size,
+        filterQuality: FilterQuality.medium,
+        // Henüz hazır değilse birden belirmek yerine yumuşakça görünür.
+        frameBuilder: (_, child, frame, sync) => sync
+            ? child
+            : AnimatedOpacity(
+                opacity: frame == null ? 0 : 1,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+                child: child));
   }
 }
 
@@ -312,8 +356,8 @@ _ToneColors _tone(ChunkyTone t) => switch (t) {
       // İkincil: kum tonu.
       ChunkyTone.butter => _ToneColors(Palette.sand, Palette.ink),
       // Hafif: açık zemin, ince çerçeve.
-      ChunkyTone.soft => _ToneColors(Palette.surface, Palette.accent,
-          border: Palette.lineDeep),
+      ChunkyTone.soft =>
+        _ToneColors(Palette.surface, Palette.accent, border: Palette.lineDeep),
     };
 
 /// Düz, hap şeklinde buton; basınca hafifçe küçülür.
@@ -465,8 +509,7 @@ class SoftCard extends StatelessWidget {
       child: Material(
         color: bg,
         shape: RoundedRectangleBorder(
-            borderRadius: radius,
-            side: BorderSide(color: border, width: 1)),
+            borderRadius: radius, side: BorderSide(color: border, width: 1)),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,

@@ -96,7 +96,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Set<String> get _missingStaples {
     final ids = context.read<AppState>().repo.staples.map((s) => s.id);
-    return {for (final id in ids) if (!_haveIds.contains(id)) id};
+    return {
+      for (final id in ids)
+        if (!_haveIds.contains(id)) id
+    };
   }
 
   List<_Option<String>> get _haveOptions {
@@ -136,8 +139,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (fromSurvey) {
       final extras = [
         for (final id in _haveIds)
-          if (state.repo.tryById(id) case final ing?
-              when !ing.isStaple)
+          if (state.repo.tryById(id) case final ing? when !ing.isStaple)
             (ingredientId: id, quantity: 1.0, level: null),
       ];
       if (extras.isNotEmpty) state.upsertPantryAll(extras);
@@ -165,8 +167,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 'Haftalık hedefini buna göre koyarız; seriyi tutmak zorlaşmasın.',
             options: _days,
             selected: _p.cookDaysPerWeek,
-            onPick: (v) =>
-                setState(() => _p = _p.copyWith(cookDaysPerWeek: v)),
+            onPick: (v) => setState(() => _p = _p.copyWith(cookDaysPerWeek: v)),
             onNext: _next,
           ),
         _Question<Household>.single(
@@ -209,7 +210,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         _Question<Allergen>.multi(
           emoji: '⚠',
           title: 'Alerjin var mı?',
-          why: 'Seçtiklerini içeren tarifler hiç çıkmaz. Yoksa boş bırak, Devam.',
+          why:
+              'Seçtiklerini içeren tarifler hiç çıkmaz. Yoksa boş bırak, Devam.',
           options: [
             for (final a in Allergen.values) _Option(a, a.label, a.emoji)
           ],
@@ -221,8 +223,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         _SearchableHavePage(
           options: _haveOptions,
           selected: _haveIds,
-          onToggle: (id) =>
-              setState(() => _haveIds = _toggle(_haveIds, id)),
+          onToggle: (id) => setState(() => _haveIds = _toggle(_haveIds, id)),
           onAddFromSearch: (ing) {
             setState(() {
               _haveIds = {..._haveIds, ing.id};
@@ -305,9 +306,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
                   _Welcome(
-                      count: count,
-                      onStart: _next,
-                      onSkip: () => _finish()),
+                      count: count, onStart: _next, onSkip: () => _finish()),
                   ...questions,
                   _Done(
                       profile: _result,
@@ -581,7 +580,8 @@ class _SearchableHavePageState extends State<_SearchableHavePage> {
             child: ListView(
               children: [
                 Center(
-                    child: SymBubble('🧂', size: 88, color: Palette.butterSoft)),
+                    child:
+                        SymBubble('🧂', size: 88, color: Palette.butterSoft)),
                 const SizedBox(height: 12),
                 Text('Evde genelde neler var?',
                     textAlign: TextAlign.center,
