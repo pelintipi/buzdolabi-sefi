@@ -185,6 +185,22 @@ class QuickFilters {
         kind: kind,
       );
 
+  // Aynı filtreyle tekrar aranınca önbellekteki sonuç kullanılsın diye.
+  @override
+  bool operator ==(Object other) =>
+      other is QuickFilters &&
+      other.quick == quick &&
+      other.highProtein == highProtein &&
+      other.vegetarian == vegetarian &&
+      other.economic == economic &&
+      other.onePot == onePot &&
+      other.breakfast == breakfast &&
+      other.kind == kind;
+
+  @override
+  int get hashCode => Object.hash(
+      quick, highProtein, vegetarian, economic, onePot, breakfast, kind);
+
   QuickFilters withKind(DishKind? kind) => QuickFilters(
         quick: quick,
         highProtein: highProtein,

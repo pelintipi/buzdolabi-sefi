@@ -292,7 +292,33 @@ class AppState extends ChangeNotifier {
     ]..sort((a, b) => a.expiresAt!.compareTo(b.expiresAt!));
   }
 
+  // Ekranlar her yeniden çizimde (animasyonlarda saniyede onlarca kez) tüm
+  // tarifleri eşleştiriyordu. Sonuç, veri değişene ya da bir dakika
+  // geçene kadar (bozulma tarihleri için) saklanır.
+  final _matchCache = <QuickFilters, List<RecipeMatch>>{};
+  PantrySnapshot? _snapshotCache;
+  DateTime? _cacheTime;
+
+  bool get _cacheFresh =>
+      _cacheTime != null &&
+      DateTime.now().difference(_cacheTime!) < const Duration(minutes: 1);
+
+  @override
+  void notifyListeners() {
+    _matchCache.clear();
+    _snapshotCache = null;
+    _cacheTime = null;
+    super.notifyListeners();
+  }
+
   PantrySnapshot get snapshot {
+    if (_snapshotCache != null && _cacheFresh) return _snapshotCache!;
+    if (!_cacheFresh) _matchCache.clear();
+    _cacheTime = DateTime.now();
+    return _snapshotCache = _buildSnapshot();
+  }
+
+  PantrySnapshot _buildSnapshot() {
     final now = DateTime.now();
     final grams = <String, double>{};
     final expiring = <String>{};
@@ -317,8 +343,11 @@ class AppState extends ChangeNotifier {
       (repo.tryById(ingredientId)?.isStaple ?? false) &&
       !_profile.missingStaples.contains(ingredientId);
 
-  List<RecipeMatch> matches(QuickFilters filters) =>
-      matcher.rank(recipes, snapshot, _profile, filters);
+  List<RecipeMatch> matches(QuickFilters filters) {
+    final snap = snapshot; // süresi dolduysa önbelleği de temizler
+    return _matchCache[filters] ??=
+        List.unmodifiable(matcher.rank(recipes, snap, _profile, filters));
+  }
 
   // ---------------------------------------------------------------- Alışveriş listesi
 

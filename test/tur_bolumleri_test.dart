@@ -130,10 +130,12 @@ void main() {
       await r.capture(tester,
           title: 'Yalnızca atıştırmalıklar',
           action: '"Atıştırmalık" filtresine dokundum.',
-          result: 'Hazır atıştırmalık yoksa bunu açıkça söylüyor; altta biraz '
-              'alışverişle yapılabilecek atıştırmalıklar var.');
-      expect(find.textContaining('yapabileceğin atıştırmalıklar yok'),
-          findsOneWidget);
+          result:
+              'Patates ve yağla yapılabilecek atıştırmalıklar listeleniyor; '
+              'yemek ya da tatlı yok.');
+      expect(find.text('Patates Kızartması'), findsWidgets);
+      expect(find.text('Un Helvası'), findsNothing);
+      expect(find.text('Kıymalı Pilav'), findsNothing);
 
       await _chip(tester, r, 'Yemek');
       await tester.pumpAndSettle();
