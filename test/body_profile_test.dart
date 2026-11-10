@@ -14,6 +14,7 @@ void main() {
     // 1370 × 1,375 = 1884 → 1900; protein 65 × 1,0 = 65 g
     expect(b.targets.kcal, 1900);
     expect(b.targets.protein, 65);
+    expect(b.targets.fiber, 27); // 1900 × 14 / 1000 = 26,6
   });
 
   test('kilo vermek: %20 açık, protein en az 1,2 g/kg', () {
@@ -26,6 +27,7 @@ void main() {
         goal: WeightGoal.lose);
     expect(b.targets.kcal, 1500); // 1884 × 0,8 = 1507
     expect(b.targets.protein, 80); // 65 × 1,2 = 78 → 80
+    expect(b.targets.fiber, 21);
   });
 
   test('erkek, 25, 180 cm, 80 kg, hareketli: kas almak', () {
@@ -39,6 +41,7 @@ void main() {
     expect(b.bmr.round(), 1805);
     expect(b.targets.kcal, 3100); // 1805 × 1,55 + 300 = 3098
     expect(b.targets.protein, 110); // 80 × 1,4 = 112 → 110
+    expect(b.targets.fiber, 40, reason: '43 g üst sınırda kalır');
   });
 
   test('çok düşük kaloriye inilmez', () {

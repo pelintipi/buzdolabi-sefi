@@ -4,8 +4,10 @@
 /// Kalori: Mifflin-St Jeor formülüyle bazal metabolizma × hareket düzeyi
 /// (yetişkinler için en yaygın kullanılan tahmin), hedefe göre ayarlanır.
 /// Protein: kilogram başına öneri (hareketsiz yetişkinde 0,8 g/kg; spor ve
-/// kilo verirken kası korumak için daha fazla). Tahmindir, tıbbi tavsiye
-/// değildir; hamilelik, emzirme ve hastalıklarda ihtiyaç farklıdır.
+/// kilo verirken kası korumak için daha fazla).
+/// Lif: her 1000 kcal için 14 g (yetişkin önerisi), günde 20-40 g.
+/// Tahmindir, tıbbi tavsiye değildir; hamilelik, emzirme ve hastalıklarda
+/// ihtiyaç farklıdır.
 library;
 
 enum Sex {
@@ -42,7 +44,7 @@ enum WeightGoal {
   final String label;
 }
 
-typedef DailyTargets = ({double kcal, double protein});
+typedef DailyTargets = ({double kcal, double protein, double fiber});
 
 class BodyProfile {
   const BodyProfile({
@@ -95,9 +97,12 @@ class BodyProfile {
     // Kilo verirken kası korumak, kas alırken yapmak için daha fazla.
     if (goal == WeightGoal.lose && perKg < 1.2) perKg = 1.2;
     if (goal == WeightGoal.gain && perKg < 1.4) perKg = 1.4;
+    final roundedKcal = (kcal / 50).round() * 50.0;
     return (
-      kcal: (kcal / 50).round() * 50.0,
+      kcal: roundedKcal,
       protein: (weightKg * perKg / 5).round() * 5.0,
+      // Her 1000 kcal için 14 g lif (genel öneri); 20-40 g arasında.
+      fiber: (roundedKcal * 14 / 1000).roundToDouble().clamp(20.0, 40.0),
     );
   }
 

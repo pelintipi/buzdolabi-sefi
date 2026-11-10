@@ -231,6 +231,16 @@ class ProfileScreen extends StatelessWidget {
                   onChanged: (v) =>
                       state.updateProfile(p.copyWith(dailyProtein: v)),
                 ),
+                _TargetRow(
+                  label: 'Lif',
+                  unit: 'g',
+                  value: p.dailyFiber,
+                  step: 1,
+                  min: 10,
+                  max: 60,
+                  onChanged: (v) =>
+                      state.updateProfile(p.copyWith(dailyFiber: v)),
+                ),
               ],
             ),
           ),

@@ -130,6 +130,7 @@ class UserProfile {
     this.remindersOn = false,
     this.dailyKcal = 2000,
     this.dailyProtein = 50,
+    this.dailyFiber = 25,
     this.uiTheme = UiTheme.system,
     this.seenNavTour = false,
     this.body,
@@ -165,6 +166,9 @@ class UserProfile {
   final double dailyKcal;
   final double dailyProtein;
 
+  /// Günlük lif hedefi (g). Yetişkinler için genel öneri 25 g.
+  final double dailyFiber;
+
   /// Açık / koyu / sistem. Varsayılan: telefon ayarı.
   final UiTheme uiTheme;
 
@@ -182,6 +186,7 @@ class UserProfile {
         remindersOn: remindersOn,
         dailyKcal: dailyKcal,
         dailyProtein: dailyProtein,
+        dailyFiber: dailyFiber,
         uiTheme: uiTheme,
         seenNavTour: seenNavTour,
         body: body,
@@ -211,6 +216,7 @@ class UserProfile {
     bool? remindersOn,
     double? dailyKcal,
     double? dailyProtein,
+    double? dailyFiber,
     UiTheme? uiTheme,
     bool? seenNavTour,
     BodyProfile? body,
@@ -233,6 +239,7 @@ class UserProfile {
         remindersOn: remindersOn ?? this.remindersOn,
         dailyKcal: dailyKcal ?? this.dailyKcal,
         dailyProtein: dailyProtein ?? this.dailyProtein,
+        dailyFiber: dailyFiber ?? this.dailyFiber,
         uiTheme: uiTheme ?? this.uiTheme,
         seenNavTour: seenNavTour ?? this.seenNavTour,
         body: body ?? this.body,
@@ -256,6 +263,7 @@ class UserProfile {
         'remindersOn': remindersOn,
         'dailyKcal': dailyKcal,
         'dailyProtein': dailyProtein,
+        'dailyFiber': dailyFiber,
         'uiTheme': uiTheme.name,
         'seenNavTour': seenNavTour,
         if (body != null) 'body': body!.toJson(),
@@ -304,6 +312,7 @@ class UserProfile {
         remindersOn: j['remindersOn'] as bool? ?? false,
         dailyKcal: (j['dailyKcal'] as num?)?.toDouble() ?? 2000,
         dailyProtein: (j['dailyProtein'] as num?)?.toDouble() ?? 50,
+        dailyFiber: (j['dailyFiber'] as num?)?.toDouble() ?? 25,
         uiTheme: _enum(UiTheme.values, j['uiTheme']) ?? UiTheme.system,
         seenNavTour: j['seenNavTour'] as bool? ?? false,
         body: BodyProfile.fromJson(j['body']),

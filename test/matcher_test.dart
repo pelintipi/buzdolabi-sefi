@@ -69,6 +69,22 @@ void main() {
     }
   });
 
+  test('lif: her malzemede var, baklagil yemeği lifli, omlet değil', () {
+    final m = RecipeMatcher(IngredientRepository(ingredientCatalog));
+    Recipe r(String id) => recipeCatalog.firstWhere((x) => x.id == id);
+    final beans = m.factsOf(r('kuru_fasulye'));
+    final omelet = m.factsOf(r('peynirli_omlet'));
+    expect(beans.perServing.fiber, greaterThan(8));
+    expect(omelet.perServing.fiber, lessThan(1));
+    expect(beans.review.tips.join(' '), contains('Lif açısından zengin'));
+    expect(omelet.review.tips.join(' '), contains('Lifi az'));
+    // JSON'a yazılıp okununca lif kaybolmaz.
+    const n = Nutrition(100, 5, 3, 12, fiber: 4.5);
+    expect(Nutrition.fromJson(n.toJson()).fiber, 4.5);
+    expect((n + n).fiber, 9);
+    expect(n.scale(2).fiber, 9);
+  });
+
   test('"Diğer" alerjiler malzeme listesinde karşılık bulur', () {
     final m = RecipeMatcher(IngredientRepository(ingredientCatalog));
     const expected = {

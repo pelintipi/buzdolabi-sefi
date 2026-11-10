@@ -162,6 +162,13 @@ class NutritionReview {
       if (carbHeavy && !sweet)
         'Yanına bol yeşillikli bir salata ekle; lif ve sebze öğünü dengeler.',
       if (fatHeavy) 'Tarifteki yağı yarıya indirerek kaloriyi azaltabilirsin.',
+      // Lif: günlük 25 g'ın yaklaşık üçte biri bir öğünden gelirse iyi.
+      if (!sweet && !soup && n.kcal >= 200 && n.fiber < 3)
+        'Lifi az (${n.fiber.toStringAsFixed(1)} g). Yanına salata, bulgur, '
+            'tam buğday ekmek ya da bir baklagil ekle; lif tok tutar.',
+      if (!sweet && n.fiber >= 8)
+        'Lif açısından zengin (${n.fiber.round()} g); günlük ihtiyacın '
+            'üçte biri bu tabakta.',
       if (n.kcal >= 700)
         'Porsiyon oldukça doyurucu (${n.kcal.round()} kcal); günün diğer '
             'öğünlerini hafif tutabilirsin.',

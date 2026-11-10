@@ -265,6 +265,8 @@ class _TodayCard extends StatelessWidget {
                   Palette.tomato),
               bar('💪', 'Protein (g)', today.protein, p.dailyProtein,
                   Palette.basil),
+              bar('🌾', 'Lif (g)', today.fiber, p.dailyFiber,
+                  Palette.butterDeep),
               const SizedBox(height: 6),
               SizedBox(
                 height: 86,
@@ -301,7 +303,7 @@ class _TodayCard extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                   p.body == null
-                      ? '2000 kcal ve 50 g protein genel değerler; herkese '
+                      ? '2000 kcal, 50 g protein ve 25 g lif genel değerler; herkese '
                           'uymaz. Boyuna, kilona ve hedefine göre hesaplayalım.'
                       : 'Hedefin ${p.body!.heightCm.round()} cm, '
                           '${formatNumber(p.body!.weightKg, decimals: 1)} kg ve '

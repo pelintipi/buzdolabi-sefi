@@ -86,6 +86,7 @@ void main() {
           result: 'Önerilen 1500 kcal ve 80 g protein, nedeniyle birlikte.');
       expect(find.text('1500 kcal'), findsOneWidget);
       expect(find.text('80 g protein'), findsOneWidget);
+      expect(find.text('21 g lif'), findsOneWidget);
 
       final save = find.text('Hedefim bu olsun');
       await tester.ensureVisible(save);
@@ -99,6 +100,7 @@ void main() {
               'Kalori 1500, protein 80 g oldu; neye göre hesaplandığı yazıyor.');
       expect(state.profile.dailyKcal, 1500);
       expect(state.profile.dailyProtein, 80);
+      expect(state.profile.dailyFiber, 21);
       expect(state.profile.body?.goal, WeightGoal.lose);
       expect(
           find.textContaining('kilo vermek için hesaplandı'), findsOneWidget);

@@ -770,17 +770,20 @@ class _NutritionTable extends StatelessWidget {
   final RecipeFacts facts;
   final int servings;
 
-  // Genel yetişkin referansı (2000 kcal'lik beslenme).
-  static const _daily = (kcal: 2000.0, protein: 50.0, carbs: 260.0, fat: 70.0);
-
   @override
   Widget build(BuildContext context) {
     final n = facts.perServing;
+    // Kişinin kendi hedefleri (Profil > Günlük hedefler). Karbonhidrat ve
+    // yağ, 2000 kcal'lik genel referansın (260 g / 70 g) kalori hedefine
+    // göre ölçeklenmiş hâli.
+    final p = context.watch<AppState>().profile;
+    final k = p.dailyKcal / 2000;
     final rows = [
-      ('🔥', 'Enerji', n.kcal, 'kcal', _daily.kcal, Palette.tomato),
-      ('💪', 'Protein', n.protein, 'g', _daily.protein, Palette.basil),
-      ('🍞', 'Karbonhidrat', n.carbs, 'g', _daily.carbs, Palette.butterDeep),
-      ('🥑', 'Yağ', n.fat, 'g', _daily.fat, const Color(0xFF6E8B3D)),
+      ('🔥', 'Enerji', n.kcal, 'kcal', p.dailyKcal, Palette.tomato),
+      ('💪', 'Protein', n.protein, 'g', p.dailyProtein, Palette.basil),
+      ('🍞', 'Karbonhidrat', n.carbs, 'g', 260 * k, Palette.butterDeep),
+      ('🌾', 'Lif', n.fiber, 'g', p.dailyFiber, const Color(0xFF8A6A2E)),
+      ('🥑', 'Yağ', n.fat, 'g', 70 * k, const Color(0xFF6E8B3D)),
     ];
     final head = TextStyle(
         fontWeight: FontWeight.w800, fontSize: 12.5, color: Palette.inkSoft);

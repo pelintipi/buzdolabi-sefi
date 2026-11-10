@@ -68,8 +68,11 @@ class _BodyTargetsSheetState extends State<_BodyTargetsSheet> {
   void _save(BodyProfile body) {
     final state = context.read<AppState>();
     final t = body.targets;
-    state.updateProfile(state.profile
-        .copyWith(body: body, dailyKcal: t.kcal, dailyProtein: t.protein));
+    state.updateProfile(state.profile.copyWith(
+        body: body,
+        dailyKcal: t.kcal,
+        dailyProtein: t.protein,
+        dailyFiber: t.fiber));
     Navigator.of(context).pop();
   }
 
@@ -204,6 +207,7 @@ class _Result extends StatelessWidget {
               for (final (icon, text) in [
                 ('🔥', '${t.kcal.round()} kcal'),
                 ('💪', '${t.protein.round()} g protein'),
+                ('🌾', '${t.fiber.round()} g lif'),
               ])
                 Row(mainAxisSize: MainAxisSize.min, children: [
                   Sym(icon, size: 26),
@@ -228,7 +232,7 @@ class _Result extends StatelessWidget {
               WeightGoal.keep => 'Kilonu korumak için bu kadarı yeterli.',
               WeightGoal.gain =>
                 'Kilo/kas almak için günde yaklaşık 300 kcal fazlası önerilir.',
-            }} Protein kilogram başına ${perKg.toStringAsFixed(1)} g.',
+            }} Protein kilogram başına ${perKg.toStringAsFixed(1)} g; lif her 1000 kcal için 14 g.',
             style: theme.textTheme.bodySmall,
           ),
         ],

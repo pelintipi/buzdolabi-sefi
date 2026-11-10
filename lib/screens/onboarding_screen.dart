@@ -50,6 +50,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           remindersOn: _saved.remindersOn,
           dailyKcal: _saved.dailyKcal,
           dailyProtein: _saved.dailyProtein,
+          dailyFiber: _saved.dailyFiber,
           uiTheme: _saved.uiTheme,
           seenNavTour: _saved.seenNavTour,
         )

@@ -535,8 +535,9 @@ class AppState extends ChangeNotifier {
   }
 
   /// O gün yenenlerin toplam kalorisi ve proteini (kullanıcının porsiyonu).
-  ({double kcal, double protein, List<CookLog> logs}) intakeOn(DateTime day) {
-    var kcal = 0.0, protein = 0.0;
+  ({double kcal, double protein, double fiber, List<CookLog> logs}) intakeOn(
+      DateTime day) {
+    var kcal = 0.0, protein = 0.0, fiber = 0.0;
     final list = <CookLog>[];
     for (final l in _logs) {
       final d = l.cookedAt;
@@ -548,9 +549,10 @@ class AppState extends ChangeNotifier {
       final n = matcher.factsOf(r).perServing;
       kcal += n.kcal * l.portionsEaten;
       protein += n.protein * l.portionsEaten;
+      fiber += n.fiber * l.portionsEaten;
       list.add(l);
     }
-    return (kcal: kcal, protein: protein, logs: list);
+    return (kcal: kcal, protein: protein, fiber: fiber, logs: list);
   }
 
   /// Fotoğrafı olan pişirmeler, en yeni başta (yemek günlüğü).

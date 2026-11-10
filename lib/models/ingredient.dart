@@ -22,7 +22,8 @@ enum Allergen {
 enum FoodTag { meat, fish, animalProduct }
 
 class Nutrition {
-  const Nutrition(this.kcal, this.protein, this.fat, this.carbs);
+  const Nutrition(this.kcal, this.protein, this.fat, this.carbs,
+      {this.fiber = 0});
 
   static const zero = Nutrition(0, 0, 0, 0);
 
@@ -31,17 +32,22 @@ class Nutrition {
   final double fat;
   final double carbs;
 
+  /// Diyet lifi (g). Karbonhidratın içindedir, ayrıca gösterilir.
+  final double fiber;
+
   Nutrition operator +(Nutrition o) => Nutrition(
-      kcal + o.kcal, protein + o.protein, fat + o.fat, carbs + o.carbs);
+      kcal + o.kcal, protein + o.protein, fat + o.fat, carbs + o.carbs,
+      fiber: fiber + o.fiber);
 
   Nutrition scale(double f) =>
-      Nutrition(kcal * f, protein * f, fat * f, carbs * f);
+      Nutrition(kcal * f, protein * f, fat * f, carbs * f, fiber: fiber * f);
 
   Map<String, dynamic> toJson() => {
         'kcal': compactNum(kcal),
         'protein': compactNum(protein),
         'fat': compactNum(fat),
         'carbs': compactNum(carbs),
+        if (fiber != 0) 'fiber': compactNum(fiber),
       };
 
   factory Nutrition.fromJson(Map<String, dynamic> j) => Nutrition(
@@ -49,6 +55,7 @@ class Nutrition {
         readDouble(j['protein']),
         readDouble(j['fat']),
         readDouble(j['carbs']),
+        fiber: readDouble(j['fiber'], 0),
       );
 }
 
