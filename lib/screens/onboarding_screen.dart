@@ -218,7 +218,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           title: 'Alerjin var mı?',
           why:
               'Seçtiklerini içeren tarifler hiç çıkmaz. "Kuruyemiş" hepsini gizler; '
-              "yalnızca biri (ör. ceviz) içinse Diğer'e yaz. Yoksa boş bırak.",
+              "yalnızca biri (ör. ceviz) içinse Diğer'e yaz. Yoksa boş bırak. "
+              'Bu bilgi yalnızca telefonunda saklanır.',
           options: [
             for (final a in Allergen.values) _Option(a, a.label, a.emoji)
           ],
