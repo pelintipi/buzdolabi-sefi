@@ -230,6 +230,7 @@ class AppState extends ChangeNotifier {
         level: level,
         clearQuantity: quantity == null,
         clearLevel: level == null,
+        checkedAt: DateTime.now(),
       );
     } else {
       final now = DateTime.now();
@@ -290,7 +291,51 @@ class AppState extends ChangeNotifier {
   void updatePantryItem(PantryItem item) {
     final idx = _pantry.indexWhere((p) => p.id == item.id);
     if (idx < 0) return;
-    _pantry[idx] = item;
+    // Kullanıcı elle düzelttiyse bu malzeme "kontrol edilmiş" sayılır.
+    _pantry[idx] = item.copyWith(checkedAt: DateTime.now());
+    _changed();
+  }
+
+  // ---------------------------------------------------------------- Dolap kontrolü
+  //
+  // İnsanlar yemeklerin çoğunu uygulamayı açmadan pişirir; dolap zamanla
+  // gerçekten uzaklaşır. Bir haftadır dokunulmayan malzemeler tek dokunuşla
+  // "Hâlâ var / Azaldı / Bitti" diye sorulur.
+
+  static const staleAfter = Duration(days: 7);
+
+  /// Bir haftadır kontrol edilmeyen malzemeler, en eskisi önce.
+  List<PantryItem> get staleItems {
+    final now = DateTime.now();
+    return [
+      for (final p in _pantry)
+        if (now.difference(p.lastSeen) >= staleAfter) p
+    ]..sort((a, b) => a.lastSeen.compareTo(b.lastSeen));
+  }
+
+  void confirmPantryItem(String id) {
+    final idx = _pantry.indexWhere((p) => p.id == id);
+    if (idx < 0) return;
+    _pantry[idx] = _pantry[idx].copyWith(checkedAt: DateTime.now());
+    _changed();
+  }
+
+  /// "Azaldı": kesin miktar yarıya iner; yaklaşık seviye bir basamak düşer
+  /// (bol → biraz → az). Zaten "az" ise az kalır.
+  void reducePantryItem(String id) {
+    final idx = _pantry.indexWhere((p) => p.id == id);
+    if (idx < 0) return;
+    final p = _pantry[idx];
+    final now = DateTime.now();
+    if (p.quantity != null) {
+      _pantry[idx] = p.copyWith(quantity: p.quantity! / 2, checkedAt: now);
+    } else {
+      final next = switch (p.level ?? ApproxLevel.biraz) {
+        ApproxLevel.bol => ApproxLevel.biraz,
+        _ => ApproxLevel.az,
+      };
+      _pantry[idx] = p.copyWith(level: next, checkedAt: now);
+    }
     _changed();
   }
 
@@ -496,7 +541,9 @@ class AppState extends ChangeNotifier {
         _pantry.removeAt(idx);
       } else {
         _pantry[idx] = item.copyWith(
-            quantity: UnitConverter.gramsToBase(ing, left), clearLevel: true);
+            quantity: UnitConverter.gramsToBase(ing, left),
+            clearLevel: true,
+            checkedAt: now);
       }
     }
     return rescued;

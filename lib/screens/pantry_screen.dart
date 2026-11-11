@@ -11,6 +11,7 @@ import '../utils/format.dart';
 import '../widgets/amount_controls.dart';
 import '../widgets/ui.dart';
 import 'ingredient_input_screen.dart';
+import 'pantry_check_screen.dart';
 
 class PantryScreen extends StatelessWidget {
   const PantryScreen({super.key});
@@ -78,6 +79,7 @@ class PantryScreen extends StatelessWidget {
                   '${state.pantry.length} malzeme · dokunarak miktarı ve tarihi değiştir',
                   style: theme.textTheme.bodySmall,
                 ),
+                const PantryCheckBanner(),
                 if (expiringIds.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   const SectionTitle('Yakında bozulacak', icon: '⏳'),

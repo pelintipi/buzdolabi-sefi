@@ -20,6 +20,7 @@ class PantryItem {
     this.quantity,
     this.level,
     this.expiresAt,
+    this.checkedAt,
   });
 
   final String id;
@@ -31,6 +32,12 @@ class PantryItem {
   final DateTime? expiresAt;
   final DateTime addedAt;
 
+  /// Kullanıcının bu malzemeyi en son gördüğü/düzelttiği an (dolap kontrolü,
+  /// miktar değişikliği, pişirmede düşme). Yoksa eklenme anı sayılır.
+  final DateTime? checkedAt;
+
+  DateTime get lastSeen => checkedAt ?? addedAt;
+
   double baseAmount(Ingredient ing) =>
       quantity ?? (level ?? ApproxLevel.biraz).fraction * ing.packageAmount;
 
@@ -38,6 +45,7 @@ class PantryItem {
     double? quantity,
     ApproxLevel? level,
     DateTime? expiresAt,
+    DateTime? checkedAt,
     bool clearQuantity = false,
     bool clearLevel = false,
   }) =>
@@ -48,6 +56,7 @@ class PantryItem {
         quantity: clearQuantity ? null : (quantity ?? this.quantity),
         level: clearLevel ? null : (level ?? this.level),
         expiresAt: expiresAt ?? this.expiresAt,
+        checkedAt: checkedAt ?? this.checkedAt,
       );
 
   Map<String, dynamic> toJson() => {
@@ -57,6 +66,7 @@ class PantryItem {
         'level': level?.name,
         'expiresAt': expiresAt?.toIso8601String(),
         'addedAt': addedAt.toIso8601String(),
+        if (checkedAt != null) 'checkedAt': checkedAt!.toIso8601String(),
       };
 
   factory PantryItem.fromJson(Map<String, dynamic> j) => PantryItem(
@@ -70,5 +80,8 @@ class PantryItem {
             ? null
             : DateTime.parse(j['expiresAt'] as String),
         addedAt: DateTime.parse(j['addedAt'] as String),
+        checkedAt: j['checkedAt'] == null
+            ? null
+            : DateTime.parse(j['checkedAt'] as String),
       );
 }
