@@ -97,7 +97,8 @@ void main() {
       expect(s.planIds[1], isNot(before[1]));
     });
 
-    test('plan eksikleri dolap düşülerek alışveriş listesine eklenir', () async {
+    test('plan eksikleri dolap düşülerek alışveriş listesine eklenir',
+        () async {
       final s = await freshState();
       s.updateProfile(s.profile.copyWith(cookDaysPerWeek: 3, onboarded: true));
       // Boş dolap → plandaki tariflerin malzemeleri eksik kalır.

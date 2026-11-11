@@ -143,9 +143,9 @@ class CaptionRecipeExtractor {
         ? null
         : fallbackTitle;
     final foundTitle = _acceptableTitle(
-            (caps != null ? _cleanTitle(_titleCase(caps)) : null) ??
-                _cleanTitle(rawTitle) ??
-                _cleanTitle(fallback ?? ''));
+        (caps != null ? _cleanTitle(_titleCase(caps)) : null) ??
+            _cleanTitle(rawTitle) ??
+            _cleanTitle(fallback ?? ''));
 
     String withoutCaps(String part) => caps == null
         ? part
@@ -216,8 +216,7 @@ class CaptionRecipeExtractor {
 
     final all = TurkishText.fold(caption);
     final roled = _withRoles(items.values.toList());
-    final title =
-        foundTitle ?? _titleFromItems(roled) ?? 'Videodan tarif';
+    final title = foundTitle ?? _titleFromItems(roled) ?? 'Videodan tarif';
     final recipe = Recipe(
       id: id,
       title: title,

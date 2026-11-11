@@ -118,6 +118,10 @@ void main() {
           title: '5 · Alerjin var mı?',
           action: 'Alerji sorusuna geldim.',
           result: 'Listede olmayan alerji için en altta "Diğer" var.');
+      // Liste uzun; "Diğer" en altta, henüz çizilmemiş olabilir.
+      await tester.dragUntilVisible(
+          find.text('Diğer'), find.text('Süt').first, const Offset(0, -200));
+      await tester.pumpAndSettle();
       await tester.ensureVisible(find.text('Diğer'));
       await tester.pumpAndSettle();
       await r.tap(tester, find.text('Diğer'), 'Diğer');

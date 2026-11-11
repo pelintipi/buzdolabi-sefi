@@ -158,7 +158,9 @@ class VideoInfoClient {
         }).timeout(const Duration(seconds: 15));
         if (raw.statusCode != 200) return null;
         final decoded = jsonDecode(utf8.decode(raw.bodyBytes));
-        if (decoded is! Map || decoded['code'] != 0 || decoded['data'] is! Map) {
+        if (decoded is! Map ||
+            decoded['code'] != 0 ||
+            decoded['data'] is! Map) {
           return null;
         }
         final d = decoded['data'] as Map;

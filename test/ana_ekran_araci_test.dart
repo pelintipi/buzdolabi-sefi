@@ -104,7 +104,8 @@ void main() {
     final s = await _state();
     s.upsertPantry('yumurta', quantity: 2);
     expect(s.addPantryFromText('6 yumurta'), isEmpty);
-    expect(s.pantry.singleWhere((p) => p.ingredientId == 'yumurta').quantity, 8);
+    expect(
+        s.pantry.singleWhere((p) => p.ingredientId == 'yumurta').quantity, 8);
     expect(s.addPantryFromText('3 xyzabc'), ['3 xyzabc']);
   });
 
@@ -156,8 +157,7 @@ void main() {
           .handlePushRoute('buzdolabisefi://app/ekle?metin=6%20yumurta');
       await tester.pumpAndSettle();
       expect(find.byType(PantryScreen), findsWidgets);
-      final eggs =
-          s.pantry.where((p) => p.ingredientId == 'yumurta').single;
+      final eggs = s.pantry.where((p) => p.ingredientId == 'yumurta').single;
       expect(eggs.quantity, 8, reason: 'var olan 2 + eklenen 6');
       expect(find.textContaining('Dolaba eklendi'), findsOneWidget);
     });

@@ -295,7 +295,8 @@ class ProfileScreen extends StatelessWidget {
           group(
             'Alerjiler',
             '⚠',
-            'Bunları içeren tarifler sana hiç gösterilmez.',
+            'Bunları içeren tarifler sana hiç gösterilmez. "Kuruyemiş" tüm '
+                "kuruyemişleri gizler; yalnızca biri için Diğer'e yaz.",
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

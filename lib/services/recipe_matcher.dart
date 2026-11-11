@@ -348,16 +348,49 @@ class RecipeMatcher {
   Ingredient? allergyIngredient(String text) => _allergyLookup.putIfAbsent(
       TurkishText.fold(text), () => repo.findByName(text.trim()));
 
+  /// "Deniz ürünü", "kabuklu", "kuruyemiş", "süt ürünleri" gibi genel
+  /// kelimeler tek malzemeye değil, bir alerji grubuna denk gelir.
+  static Allergen? allergenGroupFor(String text) {
+    final t = TurkishText.fold(text);
+    bool has(List<String> words) => words.any(t.contains);
+    if (has(['deniz urun', 'kabuklu', 'shellfish', 'seafood', 'yumusakca'])) {
+      return Allergen.shellfish;
+    }
+    if (has(['kuruyemis', 'cerez', 'tree nut', 'nuts']))
+      return Allergen.treeNut;
+    if (has(['sut urun', 'laktoz', 'sutlu', 'dairy', 'lactose'])) {
+      return Allergen.milk;
+    }
+    if (has(['gluten', 'bugday', 'wheat', 'colyak'])) return Allergen.gluten;
+    if (has(['yer fistig', 'peanut'])) return Allergen.peanut;
+    if (t == 'balik' || has(['baliklar', 'fish'])) return Allergen.fish;
+    return null;
+  }
+
+  /// Ekranda: "X içeren tarifler gizlenir" cümlesindeki X; bulunamazsa null.
+  String? customAllergyLabel(String text) =>
+      allergenGroupFor(text)?.label ?? allergyIngredient(text)?.name;
+
   /// Tarifte kullanıcının yazdığı alerjilere denk gelen malzemeler.
   List<Ingredient> customAllergyHits(Recipe r, UserProfile profile) {
     if (profile.customAllergies.isEmpty) return const [];
-    final ids = {
-      for (final t in profile.customAllergies) allergyIngredient(t)?.id,
-    }..remove(null);
-    if (ids.isEmpty) return const [];
+    final groups = <Allergen>{};
+    final ids = <String>{};
+    for (final t in profile.customAllergies) {
+      final g = allergenGroupFor(t);
+      if (g != null) {
+        groups.add(g);
+      } else {
+        final id = allergyIngredient(t)?.id;
+        if (id != null) ids.add(id);
+      }
+    }
+    if (ids.isEmpty && groups.isEmpty) return const [];
     return [
       for (final i in r.items)
-        if (ids.contains(i.ingredientId)) repo.byId(i.ingredientId)
+        if (ids.contains(i.ingredientId) ||
+            repo.byId(i.ingredientId).allergens.any(groups.contains))
+          repo.byId(i.ingredientId)
     ];
   }
 

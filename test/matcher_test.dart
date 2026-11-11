@@ -13,6 +13,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'support/test_catalog.dart';
 
+// Alet yüzünden değil, yalnızca alerji yüzünden gizlensin diye.
+const _allTools = {
+  Appliance.ocak,
+  Appliance.firin,
+  Appliance.airfryer,
+  Appliance.blender,
+};
+
 void main() {
   final repo = IngredientRepository(ingredientCatalog);
   final matcher = RecipeMatcher(repo);
@@ -83,6 +91,48 @@ void main() {
     expect(Nutrition.fromJson(n.toJson()).fiber, 4.5);
     expect((n + n).fiber, 9);
     expect(n.scale(2).fiber, 9);
+  });
+
+  test('kabuklu deniz ürünleri ve genel kelimelerle alerji grupları', () {
+    final m = RecipeMatcher(IngredientRepository(ingredientCatalog));
+    Recipe r(String id) => recipeCatalog.firstWhere((x) => x.id == id);
+    for (final id in [
+      'karides',
+      'midye',
+      'kalamar',
+      'ahtapot',
+      'yengec',
+      'istakoz'
+    ]) {
+      expect(m.repo.byId(id).allergens, contains(Allergen.shellfish),
+          reason: id);
+    }
+    // Listeden seçilince: karides ve midye tarifleri gizlenir, levrek kalır.
+    const shell =
+        UserProfile(allergies: {Allergen.shellfish}, appliances: _allTools);
+    expect(m.passesProfile(r('tereyagli_karides'), shell), isFalse);
+    expect(m.passesProfile(r('midye_pilaki'), shell), isFalse);
+    expect(m.passesProfile(r('firinda_levrek'), shell), isTrue);
+
+    // "Diğer"e genel kelime yazılırsa grubun tamamı.
+    for (final word in ['deniz ürünü', 'Deniz ürünleri', 'kabuklu']) {
+      final p = UserProfile(customAllergies: [word]);
+      expect(m.passesProfile(r('kalamar_tava'), p), isFalse, reason: word);
+      expect(m.customAllergyLabel(word), 'Kabuklu deniz ürünleri');
+    }
+    expect(RecipeMatcher.allergenGroupFor('kuruyemiş'), Allergen.treeNut);
+    expect(RecipeMatcher.allergenGroupFor('süt ürünleri'), Allergen.milk);
+    expect(RecipeMatcher.allergenGroupFor('çilek'), isNull);
+
+    // Yalnızca ceviz yazan: cevizli tarif gizlenir, bademli kalır.
+    const walnut =
+        UserProfile(customAllergies: ['ceviz'], appliances: _allTools);
+    expect(m.passesProfile(r('gavurdagi'), walnut), isFalse);
+    expect(m.passesProfile(r('keskul'), walnut), isTrue);
+    // "Kuruyemiş" seçen: ikisi de gizlenir.
+    const nuts =
+        UserProfile(allergies: {Allergen.treeNut}, appliances: _allTools);
+    expect(m.passesProfile(r('keskul'), nuts), isFalse);
   });
 
   test('"Diğer" alerjiler malzeme listesinde karşılık bulur', () {

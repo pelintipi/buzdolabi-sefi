@@ -217,7 +217,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           emoji: '⚠',
           title: 'Alerjin var mı?',
           why:
-              'Seçtiklerini içeren tarifler hiç çıkmaz. Yoksa boş bırak, Devam.',
+              'Seçtiklerini içeren tarifler hiç çıkmaz. "Kuruyemiş" hepsini gizler; '
+              "yalnızca biri (ör. ceviz) içinse Diğer'e yaz. Yoksa boş bırak.",
           options: [
             for (final a in Allergen.values) _Option(a, a.label, a.emoji)
           ],

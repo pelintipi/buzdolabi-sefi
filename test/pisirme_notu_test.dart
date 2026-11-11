@@ -30,12 +30,14 @@ void main() {
     final back = CookLog.fromJson(log.toJson());
     expect(back.note, 'Tuzu azalttım');
     expect(back.rating, 4);
-    expect(CookLog.fromJson(CookLog(
-      recipeId: 'x',
-      cookedAt: DateTime(2026, 1, 1),
-      servings: 1,
-    ).toJson())
-        .note, isNull);
+    expect(
+        CookLog.fromJson(CookLog(
+          recipeId: 'x',
+          cookedAt: DateTime(2026, 1, 1),
+          servings: 1,
+        ).toJson())
+            .note,
+        isNull);
   });
 
   test('pişirme notu sonraki sefere hatırlatılır', () async {

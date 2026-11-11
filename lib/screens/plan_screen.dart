@@ -23,8 +23,8 @@ class PlanScreen extends StatelessWidget {
     final nights = state.planNights;
     // Dolap + önceki akşamların harcadıkları düşülmüş eksikler (tekrarsız).
     final missing = state.planner.missing(nights).toList()
-      ..sort((a, b) =>
-          state.repo.byId(a).name.compareTo(state.repo.byId(b).name));
+      ..sort(
+          (a, b) => state.repo.byId(a).name.compareTo(state.repo.byId(b).name));
     final start = state.planStart ?? DateTime.now();
     final readyCount = nights.where((n) => n.ready).length;
     final unlisted =

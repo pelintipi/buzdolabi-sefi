@@ -152,7 +152,7 @@ class _OtherAllergiesState extends State<OtherAllergies> {
           for (final v in widget.values) ...[
             const SizedBox(height: 8),
             Builder(builder: (_) {
-              final ing = matcher.allergyIngredient(v);
+              final label = matcher.customAllergyLabel(v);
               return Container(
                 padding: const EdgeInsets.fromLTRB(14, 8, 4, 8),
                 decoration: BoxDecoration(
@@ -170,12 +170,12 @@ class _OtherAllergiesState extends State<OtherAllergies> {
                               style:
                                   const TextStyle(fontWeight: FontWeight.w800)),
                           Text(
-                            ing != null
-                                ? '${ing.name} içeren tarifler gizlenir'
+                            label != null
+                                ? '$label içeren tarifler gizlenir'
                                 : 'Malzeme listemizde bulamadık; tariflerde '
                                     'kendin kontrol et',
                             style: theme.textTheme.bodySmall?.copyWith(
-                                color: ing != null
+                                color: label != null
                                     ? Palette.inkSoft
                                     : Palette.tomato),
                           ),

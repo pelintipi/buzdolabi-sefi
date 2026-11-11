@@ -10,7 +10,11 @@ enum Allergen {
   peanut('Yer fıstığı', '🥜'),
   treeNut('Kuruyemiş', '🌰'),
   fish('Balık', '🐟'),
-  sesame('Susam', '🫙');
+  sesame('Susam', '🫙'),
+  // Karides, yengeç, ıstakoz (kabuklular) ve midye, kalamar, ahtapot
+  // (yumuşakçalar). Avrupa listesinde iki ayrı grup; kullanıcı "deniz ürünü"
+  // diye düşündüğü için tek seçenek.
+  shellfish('Kabuklu deniz ürünleri', '🍤');
 
   const Allergen(this.label, this.emoji);
 

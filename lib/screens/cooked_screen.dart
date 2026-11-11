@@ -360,8 +360,7 @@ class _CookedScreenState extends State<CookedScreen> {
           label: 'Hikâyede paylaş',
           icon: '📲',
           tone: ChunkyTone.butter,
-          onPressed: () =>
-              showShareCard(context, _recipe, photoPath: _photo),
+          onPressed: () => showShareCard(context, _recipe, photoPath: _photo),
         ),
         const SizedBox(height: 10),
         ChunkyButton(
