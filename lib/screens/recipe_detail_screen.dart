@@ -347,10 +347,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 if (facts.allergens.isNotEmpty)
                   'İçerir: ${facts.allergens.map((a) => a.label).join(', ')}.',
                 'Tahmini değerlerdir; tıbbi tavsiye değildir. Günlük oranlar '
-                    '2000 kcal\'lik genel bir referansa göredir.',
+                    'Profil\'deki günlük hedeflerine göredir.',
               ].join(' '),
               style: theme.textTheme.bodySmall,
             ),
+            const _HowCalculated(),
           ],
         ],
       ),
@@ -908,6 +909,51 @@ class _Meta extends StatelessWidget {
                 fontSize: 14,
                 color: Palette.ink)),
       ],
+    );
+  }
+}
+
+/// "Bu değerler nasıl hesaplanıyor?": yöntemi ve sınırlarını açıkça söyler
+/// (kalori takibi yapan kullanıcı farkı görürse şaşırmasın).
+class _HowCalculated extends StatelessWidget {
+  const _HowCalculated();
+
+  static const lines = [
+    'Tarifteki her malzemenin çiğ hâlinin besin değerleri (USDA besin '
+        'tablolarına dayalı) toplanır ve porsiyon sayısına bölünür. '
+        'Diyetisyenlerin ve paketli ürünlerin kullandığı yöntem budur.',
+    'Pişerken su buharlaşır ve yemek hafifler ama kalori kaybolmaz; bu yüzden '
+        'porsiyon başı kalori pişince de geçerlidir. 100 g başına değerler '
+        'ise pişmiş yemekte daha yüksek görünür.',
+    'Kızartmalarda tavadaki yağın tamamı değil, yemeğin emdiği kadarı '
+        '(yaklaşık 3 yemek kaşığı) sayılır.',
+    'Fırında ya da ızgarada etten bir miktar yağ süzülür; yağlı etlerde '
+        'gerçek değer biraz daha düşük olabilir.',
+    'En büyük fark porsiyondan gelir: tencereyi tam eşit bölmezsen ya da '
+        'ürünün markası farklıysa değerler yaklaşık %10-20 değişebilir.',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Theme(
+      data: theme.copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        tilePadding: EdgeInsets.zero,
+        iconColor: Palette.accent,
+        collapsedIconColor: Palette.accent,
+        childrenPadding: const EdgeInsets.only(bottom: 8),
+        leading: Icon(Icons.info_outline_rounded, color: Palette.accent),
+        title: Text('Bu değerler nasıl hesaplanıyor?',
+            style: theme.textTheme.titleSmall),
+        children: [
+          for (final l in lines)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Text('• $l', style: theme.textTheme.bodySmall),
+            ),
+        ],
+      ),
     );
   }
 }

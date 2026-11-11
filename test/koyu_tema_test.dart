@@ -8,7 +8,17 @@ import 'package:buzdolabi_sefi/services/device_services.dart';
 import 'package:buzdolabi_sefi/services/ingredient_repository.dart';
 import 'package:buzdolabi_sefi/services/storage_service.dart';
 import 'package:buzdolabi_sefi/state/app_state.dart';
+import 'package:buzdolabi_sefi/screens/collections_screen.dart';
+import 'package:buzdolabi_sefi/screens/cooked_screen.dart';
+import 'package:buzdolabi_sefi/screens/cooking_mode_screen.dart';
+import 'package:buzdolabi_sefi/screens/leftover_screen.dart';
+import 'package:buzdolabi_sefi/screens/plan_screen.dart';
+import 'package:buzdolabi_sefi/screens/progress_screen.dart';
+import 'package:buzdolabi_sefi/screens/season_screen.dart';
+import 'package:buzdolabi_sefi/screens/sef_plus_screen.dart';
+import 'package:buzdolabi_sefi/theme/app_theme.dart';
 import 'package:buzdolabi_sefi/theme/palette.dart';
+import 'package:buzdolabi_sefi/widgets/share_card.dart';
 import 'package:buzdolabi_sefi/widgets/recipe_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -56,6 +66,105 @@ void main() {
           reason: '$name hardal rozet');
     }
     Palette.apply(Brightness.light);
+  });
+
+  testWidgets('koyu tema: diğer ekranlar', (tester) async {
+    tester.view.physicalSize = _screen * 3;
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+
+    SharedPreferences.setMockInitialValues({});
+    final s = AppState(
+      repo: IngredientRepository(ingredientCatalog),
+      recipes: recipeCatalog,
+      storage: StorageService(),
+    );
+    await s.load();
+    s.updateProfile(s.profile.copyWith(
+        onboarded: true,
+        seenNavTour: true,
+        allergyAsked: true,
+        appliancesAsked: true,
+        cookDaysPerWeek: 5,
+        uiTheme: UiTheme.dark));
+    s.upsertPantryAll([
+      (ingredientId: 'kiyma', quantity: 500, level: null),
+      (ingredientId: 'pirinc', quantity: 1000, level: null),
+      (ingredientId: 'yumurta', quantity: 10, level: null),
+      (ingredientId: 'domates', quantity: 4, level: null),
+      (ingredientId: 'sogan', quantity: 3, level: null),
+    ]);
+    final menemen = recipeCatalog.firstWhere((r) => r.id == 'menemen');
+    s.toggleFavorite('menemen');
+    s.recordCook(menemen, 2, const {}, rating: 4, note: 'Az tuz');
+    s.makePlan();
+    final r = ScreenshotReport('degisiklik_raporlari/2026-11-11_koyu-tema-2',
+        'Koyu tema · Diğer ekranlar');
+    final nav = GlobalKey<NavigatorState>();
+
+    Future<void> open(String title, Widget page) async {
+      nav.currentState!.push(MaterialPageRoute<void>(builder: (_) => page));
+      await tester.pumpAndSettle();
+      await r.capture(tester, title: title, action: '', result: '');
+      nav.currentState!.pop();
+      await tester.pumpAndSettle();
+    }
+
+    debugDisableShadows = false;
+    try {
+      await tester.pumpWidget(RepaintBoundary(
+        key: screenshotKey,
+        child: MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: s),
+            Provider.value(value: DeviceServices(cameraAvailable: false)),
+          ],
+          child: Builder(builder: (context) {
+            Palette.apply(Brightness.dark);
+            return MaterialApp(
+              navigatorKey: nav,
+              theme: buildAppTheme(Brightness.dark),
+              builder: (context, child) {
+                Palette.apply(Theme.of(context).brightness);
+                return child!;
+              },
+              home: const Scaffold(),
+            );
+          }),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      await open(
+          'Pişirme modu',
+          const CookingModeScreen(
+              recipeId: 'menemen', servings: 2, initialStep: 1));
+      await open(
+          'Afiyet olsun', const CookedScreen(recipeId: 'menemen', servings: 2));
+      await open('Haftalık plan', const PlanScreen());
+      await open('Koleksiyonlar', const CollectionsScreen());
+      await open('İlerleme', const ProgressScreen());
+      await open('Şef+', const SefPlusScreen());
+      await open('Mevsim', const SeasonScreen());
+      await open('Dünden kalan', const LeftoverScreen());
+      await open(
+          'Paylaşım kartı',
+          Scaffold(
+              body: Center(
+                  child: SizedBox(
+                      width: 300,
+                      child: AspectRatio(
+                          aspectRatio: 9 / 16,
+                          child: FittedBox(
+                              child: SizedBox(
+                                  width: 360,
+                                  height: 640,
+                                  child: ShareCard(recipe: menemen))))))));
+    } finally {
+      debugDisableShadows = true;
+      r.writeHtml();
+      r.writePrototypeJson(_screen);
+    }
   });
 
   testWidgets('koyu tema: ana ekranlar', (tester) async {
@@ -122,7 +231,19 @@ void main() {
       await r.tap(tester, find.textContaining('Besin').first, 'Besin değeri');
       await tester.pumpAndSettle();
       await r.capture(tester, title: 'Tarif · Besin', action: '', result: '');
-      Navigator.of(tester.element(find.textContaining('Besin').first)).pop();
+      final how = find.text('Bu değerler nasıl hesaplanıyor?');
+      await tester.scrollUntilVisible(how, 300, scrollable: _mainScroll);
+      await tester.pumpAndSettle();
+      await tester.tap(how);
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+          find.textContaining('En büyük fark porsiyondan'), 200,
+          scrollable: _mainScroll);
+      await tester.pumpAndSettle();
+      await r.capture(tester,
+          title: 'Nasıl hesaplanıyor?', action: '', result: '');
+      expect(find.textContaining('USDA'), findsOneWidget);
+      Navigator.of(tester.element(how)).pop();
       await tester.pumpAndSettle();
       Navigator.of(tester.element(find.text('Ne pişirsem?').first)).pop();
       await tester.pumpAndSettle();

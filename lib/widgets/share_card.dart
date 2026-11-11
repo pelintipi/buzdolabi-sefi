@@ -95,6 +95,10 @@ class _ShareSheetState extends State<_ShareSheet> {
   }
 }
 
+/// Paylaşılan görsel telefonun açık/koyu temasından bağımsız hep aynı
+/// görünür; temaya göre değişen Palette.ink burada kullanılmaz.
+const _cardInk = Color(0xFF1A1A17);
+
 class ShareCard extends StatelessWidget {
   const ShareCard({super.key, required this.recipe, this.photoPath});
 
@@ -116,14 +120,14 @@ class ShareCard extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Sym(icon, size: 20),
+              Sym(icon, size: 20, color: Palette.basil),
               const SizedBox(width: 4),
               Text(text,
                   style: TextStyle(
                       fontFamily: Fonts.display,
                       fontWeight: FontWeight.w800,
                       fontSize: 14,
-                      color: Palette.ink)),
+                      color: _cardInk)),
             ],
           ),
         );
@@ -154,7 +158,7 @@ class ShareCard extends StatelessWidget {
                           fontFamily: Fonts.display,
                           fontWeight: FontWeight.w800,
                           fontSize: 13,
-                          color: Palette.ink)),
+                          color: _cardInk)),
                 ),
                 const SizedBox(height: 14),
                 Expanded(
@@ -195,7 +199,7 @@ class ShareCard extends StatelessWidget {
                 const SizedBox(height: 16),
                 const Row(
                   children: [
-                    Sym('🧑‍🍳', size: 26),
+                    Sym('🧑‍🍳', size: 26, color: Color(0xFFD6EEDF)),
                     SizedBox(width: 6),
                     Expanded(
                       child: Column(
