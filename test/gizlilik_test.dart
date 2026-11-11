@@ -12,6 +12,13 @@ void main() {
   testWidgets('gizlilik ekranında sağlık ve alerji bölümü var', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: PrivacyScreen()));
     await tester.pumpAndSettle();
+    expect(find.textContaining('Hesap ve bulut yedeği yok'), findsOneWidget);
+    await tester.scrollUntilVisible(
+        find.text('Sağlık ve alerji bilgilerin'), 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.scrollUntilVisible(
+        find.textContaining('özel nitelikli kişisel veri'), 200,
+        scrollable: find.byType(Scrollable).first);
     expect(find.text('Sağlık ve alerji bilgilerin'), findsOneWidget);
     expect(find.textContaining('boyun, kilon, yaşın'), findsOneWidget);
     expect(find.textContaining('yalnızca bu telefonda'), findsOneWidget);

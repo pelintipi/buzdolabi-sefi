@@ -7,6 +7,7 @@ import '../models/user_profile.dart';
 import '../state/app_state.dart';
 import '../theme/palette.dart';
 import '../utils/format.dart';
+import '../widgets/backup_card.dart';
 import '../widgets/body_targets_sheet.dart';
 import '../widgets/other_allergies.dart';
 import '../widgets/recipe_image.dart';
@@ -416,6 +417,8 @@ class ProfileScreen extends StatelessWidget {
                     ],
                   ),
           ),
+          const BackupCard(),
+          const SizedBox(height: 14),
           SoftCard(
             onTap: () => _confirmReset(context),
             child: Row(

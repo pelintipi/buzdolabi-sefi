@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -74,6 +76,47 @@ class ShareService {
     } catch (e) {
       debugPrint('Paylaşılamadı: $e');
       return false;
+    }
+  }
+
+  /// Yedek dosyasını paylaşım menüsüyle verir (iCloud Drive'a / Dosyalar'a
+  /// kaydet, kendine gönder).
+  Future<bool> shareTextFile(String name, String content) async {
+    try {
+      final bytes = Uint8List.fromList(utf8.encode(content));
+      if (kIsWeb) {
+        await SharePlus.instance.share(ShareParams(
+          files: [
+            XFile.fromData(bytes, mimeType: 'application/json', name: name)
+          ],
+          fileNameOverrides: [name],
+        ));
+        return true;
+      }
+      final path = '${(await getTemporaryDirectory()).path}/$name';
+      await File(path).writeAsBytes(bytes, flush: true);
+      await SharePlus.instance.share(ShareParams(
+        files: [XFile(path, mimeType: 'application/json')],
+      ));
+      return true;
+    } catch (e) {
+      debugPrint('Dosya paylaşılamadı: $e');
+      return false;
+    }
+  }
+
+  /// Yedek dosyası seçtirir ve içeriğini verir; vazgeçilirse null.
+  Future<String?> pickTextFile() async {
+    try {
+      final file = await FilePicker.pickFile(
+        type: FileType.custom,
+        allowedExtensions: const ['json'],
+      );
+      if (file == null) return null;
+      return utf8.decode(await file.readAsBytes());
+    } catch (e) {
+      debugPrint('Dosya seçilemedi: $e');
+      return null;
     }
   }
 

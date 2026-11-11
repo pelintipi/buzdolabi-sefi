@@ -315,6 +315,9 @@ class RecipeMatcher {
   /// Tarif değiştiyse (videodan kaydedilen tarif düzenlendi) önbellekten çıkarır.
   void forget(String recipeId) => _factsCache.remove(recipeId);
 
+  /// Yedekten geri yüklenince (tarif kimlikleri değişmiş olabilir).
+  void clearCache() => _factsCache.clear();
+
   RecipeFacts _analyze(Recipe r) {
     var nutrition = Nutrition.zero;
     var cost = 0.0;

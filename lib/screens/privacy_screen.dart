@@ -62,6 +62,7 @@ class PrivacyScreen extends StatelessWidget {
             'Pişirme geçmişin, yediğin porsiyonlar, "Yaptım" fotoğrafların.',
             'Videodan kaydettiğin tarifler.',
             'Bunları biz göremeyiz. Uygulamayı silince ya da Profil\'deki "Tüm verilerimi sil" ile silinir.',
+            'Hesap ve bulut yedeği yok: telefon değişirse ya da uygulamayı silersen bu bilgiler kaybolur. Profil > Yedek ile yedek dosyası alabilirsin; dosya senin seçtiğin yere (iCloud Drive, Dosyalar) kaydedilir, bize gelmez. İçinde sağlık ve alerji bilgilerin de olduğu için dosyayı kimseyle paylaşma.',
           ]),
           section('🩺', 'Sağlık ve alerji bilgilerin', const [
             'Hangi bilgiler: boyun, kilon, yaşın, cinsiyetin, hareket düzeyin ve kilo hedefin (girdiysen); bunlardan hesaplanan günlük kalori, protein ve lif hedeflerin; alerjilerin (listeden seçtiklerin ve "Diğer"e yazdıkların); yediğin porsiyonlar, pişirme puanların ve notların.',

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -116,6 +117,81 @@ class AppState extends ChangeNotifier {
     final data = await _storage.load();
     if (data == null) return;
     try {
+      _apply(data);
+    } catch (e) {
+      debugPrint('Kayıtlı veri bozuk, sıfırdan başlanıyor: $e');
+      _pantry = [];
+      _profile = const UserProfile();
+      _logs = [];
+      _favorites = {};
+      _shopping = [];
+      _active = null;
+      _imported = [];
+      _allRecipes = null;
+    }
+    notifyListeners();
+  }
+
+  // ---------------------------------------------------------------- Yedek
+  //
+  // Hesap ve sunucu yok: veriler yalnızca telefonda. Uygulama silinir ya da
+  // telefon değişirse kaybolmasın diye kullanıcı yedek dosyası alır (iCloud
+  // Drive'a, Dosyalar'a kaydeder ya da kendine gönderir) ve geri yükler.
+
+  static const backupApp = 'buzdolabi-sefi';
+  static const backupVersion = 1;
+
+  DateTime? _lastBackupAt;
+
+  /// En son yedek alınan an (hiç alınmadıysa null).
+  DateTime? get lastBackupAt => _lastBackupAt;
+
+  /// Yedek dosyasının içeriği. Fotoğraflar dahil değildir (telefonda kalır).
+  String exportBackup() {
+    _lastBackupAt = DateTime.now();
+    _changed();
+    return const JsonEncoder.withIndent(' ').convert({
+      'app': backupApp,
+      'backupVersion': backupVersion,
+      'exportedAt': _lastBackupAt!.toIso8601String(),
+      'data': _toJson(),
+    });
+  }
+
+  /// Yedek dosyasını geri yükler; bu telefondaki verilerin yerine geçer.
+  /// Dosya bu uygulamanın değilse ya da bozuksa hiçbir şey değişmez ve
+  /// [FormatException] atılır.
+  void importBackup(String content) {
+    final Object? decoded;
+    try {
+      decoded = jsonDecode(content);
+    } catch (_) {
+      throw const FormatException('Bu bir yedek dosyası değil.');
+    }
+    if (decoded is! Map || decoded['app'] != backupApp) {
+      throw const FormatException('Bu dosya Buzdolabı Şefi yedeği değil.');
+    }
+    final version = decoded['backupVersion'];
+    if (version is! int || version > backupVersion) {
+      throw const FormatException(
+          'Bu yedek uygulamanın daha yeni bir sürümünden; önce güncelle.');
+    }
+    final data = decoded['data'];
+    if (data is! Map<String, dynamic>) {
+      throw const FormatException('Yedek dosyası eksik.');
+    }
+    final before = _toJson();
+    try {
+      _apply(data);
+    } catch (e) {
+      _apply(before); // bozuk yedek mevcut veriyi bozmasın
+      throw const FormatException('Yedek dosyası bozuk; verilerin korundu.');
+    }
+    _changed();
+  }
+
+  void _apply(Map<String, dynamic> data) {
+    {
       _pantry = [
         for (final j in (data['pantry'] as List? ?? const []))
           PantryItem.fromJson(j as Map<String, dynamic>)
@@ -150,19 +226,12 @@ class AppState extends ChangeNotifier {
       _planStart = plan?['start'] == null
           ? null
           : DateTime.parse(plan!['start'] as String);
+      _lastBackupAt = data['lastBackupAt'] == null
+          ? null
+          : DateTime.parse(data['lastBackupAt'] as String);
       _allRecipes = null;
-    } catch (e) {
-      debugPrint('Kayıtlı veri bozuk, sıfırdan başlanıyor: $e');
-      _pantry = [];
-      _profile = const UserProfile();
-      _logs = [];
-      _favorites = {};
-      _shopping = [];
-      _active = null;
-      _imported = [];
-      _allRecipes = null;
+      matcher.clearCache();
     }
-    notifyListeners();
   }
 
   /// Bozuk ya da artık kataloğumuzda olmayan malzemeli kayıtlar atlanır.
@@ -208,6 +277,8 @@ class AppState extends ChangeNotifier {
         'collections': [for (final c in _collections) c.toJson()],
         if (_plan.isNotEmpty)
           'plan': {'start': _planStart?.toIso8601String(), 'ids': _plan},
+        if (_lastBackupAt != null)
+          'lastBackupAt': _lastBackupAt!.toIso8601String(),
       };
 
   void _changed() {
