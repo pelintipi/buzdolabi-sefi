@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
+import 'deep_links.dart';
 import 'screens/home_screen.dart';
 import 'screens/import_recipe_screen.dart';
 import 'screens/onboarding_screen.dart';
@@ -41,6 +42,9 @@ class BuzdolabiSefiApp extends StatelessWidget {
       locale: const Locale('tr'),
       supportedLocales: const [Locale('tr')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      // Ana ekran aracından gelen bağlantılar (lib/deep_links.dart).
+      onGenerateRoute: DeepLinks.route,
+      onUnknownRoute: DeepLinks.unknown,
       // İlk açılışta kısa anket; bitince (ya da geçilince) ana ekran.
       home: Selector<AppState, bool>(
         selector: (_, s) => s.profile.onboarded,

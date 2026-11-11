@@ -44,6 +44,20 @@ tarif bulur; TikTok/Instagram/YouTube'dan tarif kaydeder; besin değeri
   bir dakika geçince yenilenir. Ekranlar her çizimde eşleştirme yapıyordu ve
   300 tarifte yavaşlıyordu.
 
+## Ana ekran aracı (iOS widget)
+
+- Kod: `ios/HomeWidget/HomeWidget.swift`. Xcode projesine elle eklenmez;
+  GitHub Actions derlemesinde `ios/scripts/add_share_extension.rb` ekler.
+- Veriyi uygulama yazar: `lib/state/digest.dart` → `Digest.widgetData()`
+  (hazır tarifler, bozulacak sayısı, "Kıymayı değerlendir" önerisi) →
+  `AppDelegate.swift` → ortak kutu (App Group) → araç okur.
+- Boyutlar: küçük, orta, kilit ekranı (dikdörtgen ve tek satır, iOS 16+).
+- Dokununca: `buzdolabisefi://app/ne-pisirsem` ve `buzdolabisefi://app/dolap`
+  (Info.plist → CFBundleURLSchemes, FlutterDeepLinkingEnabled). Flutter bunları
+  ekran adı olarak alır; `lib/deep_links.dart` ekrana çevirir.
+- Swift kodu Windows'ta derlenemez; ilk doğrulama GitHub Actions iOS
+  derlemesinde olur.
+
 ## Test modu (dikkat)
 
 `--dart-define=ANKET_HER_ACILISTA=true` ile çalışan sürümde her açılışta anket

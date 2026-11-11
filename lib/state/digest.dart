@@ -22,6 +22,27 @@ class Digest {
 
   late final expiring = state.expiringItems;
 
+  /// Bozulmak üzere olan malzemeyi kullanan tarif: önce hemen yapılabilen,
+  /// yoksa tek malzemesi eksik olan. ("Kıymayı değerlendir: Kıymalı Pilav")
+  late final ({RecipeMatch match, String ingredient})? useUp = () {
+    if (expiring.isEmpty) return null;
+    final ids = [for (final p in expiring) p.ingredientId];
+    final candidates = state
+        .matches(const QuickFilters())
+        .where((m) => m.usesExpiring && m.problems.length <= 1)
+        .toList()
+      ..sort((a, b) => a.problems.length.compareTo(b.problems.length));
+    for (final m in candidates) {
+      // En yakın tarihte bozulacak malzemeyi kullanan tarif öne çıkar.
+      for (final id in ids) {
+        if (m.recipe.items.any((i) => i.ingredientId == id)) {
+          return (match: m, ingredient: state.repo.byId(id).name);
+        }
+      }
+    }
+    return null;
+  }();
+
   /// iOS ana ekran aracına (WidgetKit) giden veri. ios/HomeWidget aynı
   /// anahtarları okur.
   Map<String, Object?> widgetData() => {
@@ -39,6 +60,7 @@ class Digest {
               'kcal': m.facts.perServing.kcal.round(),
             }
         ],
+        'expiringCount': expiring.length,
         'expiring': [
           for (final p in expiring.take(3))
             {
@@ -46,6 +68,13 @@ class Digest {
               'days': daysUntil(p.expiresAt!, now),
             }
         ],
+        if (useUp != null)
+          'useUp': {
+            'ingredient': useUp!.ingredient,
+            'title': useUp!.match.recipe.title,
+            'emoji': useUp!.match.recipe.emoji,
+            'ready': useUp!.match.problems.isEmpty,
+          },
       };
 
   static (int, int) _hourFor(PlanTime t) => switch (t) {
