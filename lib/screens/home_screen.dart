@@ -5,6 +5,7 @@ import '../models/recipe.dart';
 import '../models/user_profile.dart';
 import '../services/recipe_matcher.dart';
 import '../state/app_state.dart';
+import '../state/digest.dart';
 import '../theme/palette.dart';
 import '../utils/format.dart';
 import '../widgets/recipe_card.dart';
@@ -434,10 +435,15 @@ class _ExpiringCard extends StatelessWidget {
     final state = context.watch<AppState>();
     final now = DateTime.now();
     final items = state.expiringItems;
+    final tip = Digest(state, now).useUp;
     final names = [
       for (final p in items.take(3))
         '${state.repo.byId(p.ingredientId).name} (${expiryText(p.expiresAt, now).toLowerCase()})'
     ].join(', ');
+    final detail = tip == null
+        ? names
+        : '${tip.ingredient} → ${tip.match.recipe.title}'
+            '${items.length > 1 ? ' · $names' : ''}';
     return SoftCard(
       color: Palette.tomatoSoft,
       borderColor: Colors.transparent,
@@ -456,7 +462,7 @@ class _ExpiringCard extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                         fontSize: 14.5,
                         color: Palette.tomatoDeep)),
-                Text(names,
+                Text(detail,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

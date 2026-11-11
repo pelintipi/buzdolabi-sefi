@@ -151,6 +151,11 @@ class ProgressScreen extends StatelessWidget {
                                   style: theme.textTheme.titleMedium),
                               Text(formatDate(log.cookedAt),
                                   style: theme.textTheme.bodySmall),
+                              if (log.note case final note?)
+                                Text(note,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.bodySmall),
                             ],
                           ),
                         ),

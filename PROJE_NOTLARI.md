@@ -33,6 +33,10 @@ tarif bulur; TikTok/Instagram/YouTube'dan tarif kaydeder; besin değeri
   tabanlıdır, sunucu gerektirmez. Türkçe ("ekliyorum", "pişirip") ve İngilizce
   (Ingredients/Instructions, cup/tbsp/tsp/oz) açıklamaları anlar. Bulamadığını
   uydurmaz; tanınmayan malzemeleri kullanıcıya gösterir.
+- **Başlık:** "Yoğurt ve süt" gibi yalnızca malzemeden oluşan adlar reddedilir;
+  bilinen kombo (chia+süt → Chia puding), tek belirgin ana malzeme + "tarifi"
+  veya "Videodan tarif" kullanılır. Eski zayıf başlıklı kayıt yeniden
+  çıkarılır.
 - **Aynı video** kısa/uzun link ya da aynı açıklama ile tekrar kaydedilirse kopya
   oluşmaz (`AppState.videoKey`, `sameVideo`).
 - **Alerjiler:** listedekiler + "Diğer" ile serbest metin (`customAllergies`).
@@ -58,6 +62,48 @@ tarif bulur; TikTok/Instagram/YouTube'dan tarif kaydeder; besin değeri
 - Swift kodu Windows'ta derlenemez; ilk doğrulama GitHub Actions iOS
   derlemesinde olur.
 
+## Bozulmak üzere bildirimleri
+
+- `Digest.reminders()`: bozulmadan bir gün önce 10:00'da
+  "Kıyma yarın bozuluyor" + "Şunu yapabilirsin: Kıymalı Pilav"
+  (`tipForIngredient`). Hatırlatmalar açıksa uygulama her açılışta yeniler.
+- Ana sayfa kartı ve günlük "Bugün ne pişirsem?" bildirimi de aynı öneriyi
+  kullanır.
+
+## Haftalık plan → alışveriş listesi
+
+- `PlanScreen`: akşamlar sırayla değerlendirilir; bir akşamda kullanılan
+  dolaptan düşülür (`MealPlanner.evaluate` / `missing`).
+- "Bu haftaki planın için şunları al" listesi eksikleri gösterir;
+  "Alışveriş listesine ekle" → `AppState.addToShopping`.
+
+## Paylaşım kartı (ücretsiz reklam)
+
+- `lib/widgets/share_card.dart`: 9:16 hikâye görseli ("Dolabımdan bu çıktı").
+  Altında "Buzdolabı Şefi · App Store'da ücretsiz".
+- Pişirme sonrası (`CookedScreen`) ve tarif detayında paylaş.
+- Görsel geçici dosyaya yazılıp sistem paylaşımına verilir (Instagram hikâyesi
+  için metin eklenmez; Meta görsel+metinde sorun çıkarır).
+
+## Pişirme notu
+
+- Pişirme bitince (`CookedScreen`) yıldız + isteğe bağlı not
+  ("Tuzu azalttım"). `CookLog.note` cihazda saklanır.
+- Aynı tarif tekrar açılınca / pişirme modunda `AppState.lastCookMemory`
+  ile "Geçen sefer" hatırlatması gösterilir.
+
+## Siri ve Kısayollar (iOS 16+)
+
+- Kod: `ios/Runner/AppDelegate.swift` → `AddToPantryIntent` +
+  `BuzdolabiSefiShortcuts`. Uygulamayı
+  `buzdolabisefi://app/ekle?metin=6%20yumurta` ile açar; Flutter
+  `QuantityParser` ile malzeme tanır ve `AppState.addToPantry` ile **üstüne
+  ekler** (yerine yazmaz).
+- Siri cümlelerinde uygulama adı gerekir: örn. "Hey Siri, dolabıma 6 yumurta
+  ekle Buzdolabı Şefi". Kısayollar uygulamasından kısa bir özel cümle de
+  tanımlanabilir.
+- Yalnızca listedeki 125 malzeme; tanınmazsa Dolabım açılır ve uyarı gösterilir.
+
 ## Test modu (dikkat)
 
 `--dart-define=ANKET_HER_ACILISTA=true` ile çalışan sürümde her açılışta anket
@@ -82,6 +128,10 @@ Telefonda: `http://<bilgisayarın IP adresi>:8091` (IP adresi değişebilir;
 - `oembed_proxy.dart` TikTok açıklamasını getirir (tarayıcı doğrudan alamaz).
   Node.js sürümü (`.mjs`) bu bilgisayarın güvenlik duvarında engelli, Dart
   sürümünü kullan.
+- TikTok oEmbed çoğu videoda boş `title` + kapak verir. Proxy ve
+  `VideoInfoClient` boş başlığı kabul etmez; `tikwm` ile açıklamayı doldurur
+  (`/tikwm`). Proxy'yi değiştirdikten sonra `dart run tool/oembed_proxy.dart`
+  yeniden başlatılmalı.
 - Tarayıcıda "videodan sesi yazıya çevirme" yoktur; yalnızca iPhone
   uygulamasında çalışır (Apple Speech).
 

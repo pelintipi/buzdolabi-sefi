@@ -55,7 +55,9 @@ class CaptionRecipeExtractor {
   // Başlık sayılması için ardından ":" ya da satır sonu gelmeli; yoksa
   // "malzemeleri karıştırın" cümlesi de başlık sanılır.
   static final _ingredientsHeader = RegExp(
-      r'(malzemeler|malzeme listesi|gerekli malzemeler|ihtiyacınız olanlar|[iı]ngredients?|what you.?ll need|you.?ll need)\s*(?:[:：]|(?=\n))');
+      r'(malzemeler|malzeme listesi|gerekli malzemeler|ihtiyacınız olanlar|'
+      r'ihtiyacınız olan her şey|[iı]ngredients?|what you.?ll need|you.?ll need|'
+      r'everything you need)\s*(?:[:：|]|(?=\n)|$)');
   static final _stepsHeader = RegExp(
       r'(yapılışı|yapılış|hazırlanışı|hazırlanış|nasıl yapılır|yapımı|[iı]nstructions?|directions?|method|steps|how to make|preparation)\s*(?:[:：]|(?=\n))');
 
@@ -93,10 +95,19 @@ class CaptionRecipeExtractor {
     RecipeSource? source,
   }) {
     // Hashtag ve emojiler ayraç gibi davranır: "🥚 2 yumurta 🥛 süt".
+    // Çift dil satırları: "300 gr kıyma | 300 g lean beef" → Türkçe taraf.
     var text = caption
+        .replaceAll(RegExp(r'[\u2028\u2029]'), '\n')
+        .replaceAllMapped(
+            RegExp(r'([^|\n]{2,160}?)\s*\|\s*([^|\n]{2,160})'), (m) => m[1]!)
         .replaceAll(_hashtag, ' ')
         .replaceAll(_emoji, '\n')
         .replaceAll('\r', '\n');
+    // "köfte için:" / "for the meatballs:" bölüm başlıkları ayraçtır.
+    text = text.replaceAllMapped(
+        RegExp(r'(^|\n)\s*([^:\n|]{2,40}?)\s+için\s*[:：]?\s*',
+            caseSensitive: false),
+        (m) => '${m[1]}\n');
     text = text.replaceAllMapped(_bullet, (m) => '${m.group(1)}\n');
     if (_inlineBullet.allMatches(text).length >= 2) {
       text = text.replaceAll(_inlineBullet, '\n');
@@ -131,9 +142,10 @@ class CaptionRecipeExtractor {
             TurkishText.fold(fallbackTitle) == TurkishText.fold(caption)
         ? null
         : fallbackTitle;
-    final foundTitle = (caps != null ? _cleanTitle(_titleCase(caps)) : null) ??
-        _cleanTitle(rawTitle) ??
-        _cleanTitle(fallback ?? '');
+    final foundTitle = _acceptableTitle(
+            (caps != null ? _cleanTitle(_titleCase(caps)) : null) ??
+                _cleanTitle(rawTitle) ??
+                _cleanTitle(fallback ?? ''));
 
     String withoutCaps(String part) => caps == null
         ? part
@@ -205,7 +217,7 @@ class CaptionRecipeExtractor {
     final all = TurkishText.fold(caption);
     final roled = _withRoles(items.values.toList());
     final title =
-        foundTitle ?? _titleFromItems(roled, repo) ?? 'Videodan tarif';
+        foundTitle ?? _titleFromItems(roled) ?? 'Videodan tarif';
     final recipe = Recipe(
       id: id,
       title: title,
@@ -370,16 +382,80 @@ class CaptionRecipeExtractor {
     return '';
   }
 
-  /// Başlık bulunamazsa ana malzemelerden: "Yoğurt ve chia tohumu".
-  static String? _titleFromItems(
-      List<RecipeItem> items, IngredientRepository repo) {
+  /// Başlık yalnızca malzeme adlarından oluşmasın ("Yoğurt ve süt").
+  static const _stapleTitleIds = {
+    'sut',
+    'su',
+    'tuz',
+    'karabiber',
+    'zeytinyagi',
+    'tereyagi',
+    'un',
+  };
+
+  /// Bilinen malzeme çiftleri → tanıdık yemek adı.
+  static const _comboTitles = <String, String>{
+    'chia|sut': 'Chia puding',
+    'chia|yogurt': 'Chia puding',
+    'yumurta|sut|un': 'Pankek',
+    'kiyma|pirinc': 'Kıymalı pilav',
+  };
+
+  /// Eski kayıtlarda "Yoğurt ve süt" gibi başlıklar zayıf sayılır.
+  bool titleIsIngredientList(String title) => _isIngredientListTitle(title);
+
+  /// "Yoğurt ve süt" gibi salt malzeme listesini başlık sayma.
+  String? _acceptableTitle(String? title) {
+    if (title == null || title.isEmpty) return null;
+    if (_isIngredientListTitle(title)) return null;
+    return title;
+  }
+
+  bool _isIngredientListTitle(String title) {
+    final cleaned = title
+        .replaceAll(RegExp(r'\s+tarifi$', caseSensitive: false), '')
+        .trim();
+    final parts = cleaned
+        .split(RegExp(r'\s*(?:ve|and|&|/|,|\+)\s*', caseSensitive: false))
+        .map((p) => p.trim())
+        .where((p) => p.length >= 2)
+        .toList();
+    if (parts.isEmpty) return false;
+    // Tek kelime / tek parça: tam malzeme adıyla aynıysa zayıf başlık.
+    if (parts.length == 1) {
+      final hit = repo.findByName(parts.first);
+      return hit != null &&
+          TurkishText.fold(hit.name) == TurkishText.fold(parts.first);
+    }
+    var hits = 0;
+    for (final p in parts) {
+      if (repo.findByName(p) != null) hits++;
+    }
+    return hits >= parts.length;
+  }
+
+  /// Başlık yoksa: bilinen kombo, yoksa tek belirgin ana malzeme + "tarifi".
+  /// "A ve B" biçimi kullanılmaz (kullanıcı düzeltmek zorunda kalıyordu).
+  String? _titleFromItems(List<RecipeItem> items) {
     final mains = [
       for (final i in items)
-        if (i.isMain) repo.byId(i.ingredientId).name
+        if (i.isMain) repo.byId(i.ingredientId)
     ];
     if (mains.isEmpty) return null;
-    final t = mains.take(2).join(' ve ');
-    return _capitalize(TurkishText.lower(t));
+    final ids = [for (final m in mains) m.id]..sort();
+    final key = ids.join('|');
+    for (final entry in _comboTitles.entries) {
+      final need = entry.key.split('|')..sort();
+      if (need.every(ids.contains)) return entry.value;
+    }
+    final distinctive = [
+      for (final m in mains)
+        if (!_stapleTitleIds.contains(m.id)) m
+    ];
+    if (distinctive.length == 1) {
+      return '${distinctive.first.name} tarifi';
+    }
+    return null;
   }
 
   String? _cleanTitle(String raw) {

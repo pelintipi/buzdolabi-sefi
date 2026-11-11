@@ -15,6 +15,7 @@ import 'ui.dart';
 
 /// "Dolabımdan bu çıktı" kartı: TikTok/Instagram hikâyesine uygun 9:16 görsel.
 /// Önce önizleme gösterilir, kullanıcı "Paylaş" deyince görsel üretilir.
+/// Kartta uygulama adı durur → ücretsiz reklam.
 Future<void> showShareCard(BuildContext context, Recipe recipe,
     {String? photoPath}) {
   return showModalBottomSheet<void>(
@@ -48,11 +49,11 @@ class _ShareSheetState extends State<_ShareSheet> {
     final image = await boundary.toImage(pixelRatio: 3.6);
     final data = await image.toByteData(format: ui.ImageByteFormat.png);
     image.dispose();
-    if (data == null) return;
-    final ok = await services.share.shareImage(data.buffer.asUint8List(),
-        text:
-            '${widget.recipe.title} · Buzdolabı Şefi ile dolabımdakilerle yaptım '
-            '#buzdolabısefi #tarif');
+    if (data == null) {
+      if (mounted) setState(() => _busy = false);
+      return;
+    }
+    final ok = await services.share.shareImage(data.buffer.asUint8List());
     if (!mounted) return;
     setState(() => _busy = false);
     if (ok) Navigator.of(context).pop();
@@ -60,14 +61,20 @@ class _ShareSheetState extends State<_ShareSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Paylaşım kartı',
-                style: Theme.of(context).textTheme.titleLarge),
+            Text('Hikâye kartı', style: theme.textTheme.titleLarge),
+            const SizedBox(height: 4),
+            Text(
+              'Instagram veya TikTok hikâyesinde paylaş. Kartta uygulama adı görünür.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall,
+            ),
             const SizedBox(height: 12),
             RepaintBoundary(
               key: _key,
@@ -76,8 +83,7 @@ class _ShareSheetState extends State<_ShareSheet> {
             ),
             const SizedBox(height: 14),
             ChunkyButton(
-              label:
-                  _busy ? 'Hazırlanıyor…' : 'TikTok\'ta, Instagram\'da paylaş',
+              label: _busy ? 'Hazırlanıyor…' : 'Hikâyede paylaş',
               icon: '📲',
               tone: ChunkyTone.accent,
               onPressed: _busy ? null : _share,
@@ -191,12 +197,24 @@ class ShareCard extends StatelessWidget {
                   children: [
                     Sym('🧑‍🍳', size: 26),
                     SizedBox(width: 6),
-                    Text('Buzdolabı Şefi',
-                        style: TextStyle(
-                            fontFamily: Fonts.display,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 16,
-                            color: Colors.white)),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Buzdolabı Şefi',
+                              style: TextStyle(
+                                  fontFamily: Fonts.display,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
+                                  color: Colors.white)),
+                          Text('App Store\'da ücretsiz',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                  color: Color(0xFFD6EEDF))),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ],

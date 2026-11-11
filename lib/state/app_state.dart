@@ -9,6 +9,7 @@ import '../models/user_profile.dart';
 import '../services/collections.dart';
 import '../services/ingredient_repository.dart';
 import '../services/meal_planner.dart';
+import '../services/quantity_parser.dart';
 import '../services/recipe_matcher.dart';
 import '../services/storage_service.dart';
 import '../services/unit_converter.dart';
@@ -256,6 +257,36 @@ class AppState extends ChangeNotifier {
     _changed();
   }
 
+  /// Var olana miktar ekler ("6 yumurta ekle"); yoksa yeni satır açar.
+  void addToPantry(String ingredientId,
+      {double? quantity, ApproxLevel? level}) {
+    final ing = repo.byId(ingredientId);
+    final idx = _pantry.indexWhere((p) => p.ingredientId == ingredientId);
+    if (idx < 0) {
+      _upsert(ingredientId, quantity, level);
+    } else {
+      final added =
+          quantity ?? (level ?? ApproxLevel.biraz).fraction * ing.packageAmount;
+      _upsert(ingredientId, _pantry[idx].baseAmount(ing) + added, null);
+    }
+    _changed();
+  }
+
+  /// Siri / derin bağlantı: "6 yumurta" metnini dolaba ekler.
+  /// Tanınmayan parçaların ham metnini döner.
+  List<String> addPantryFromText(String text) {
+    final unknown = <String>[];
+    for (final e in QuantityParser(repo).parse(text)) {
+      final ing = e.ingredient;
+      if (ing == null) {
+        if (e.raw.trim().isNotEmpty) unknown.add(e.raw.trim());
+        continue;
+      }
+      addToPantry(ing.id, quantity: e.quantity, level: e.level);
+    }
+    return unknown;
+  }
+
   void updatePantryItem(PantryItem item) {
     final idx = _pantry.indexWhere((p) => p.id == item.id);
     if (idx < 0) return;
@@ -393,15 +424,18 @@ class AppState extends ChangeNotifier {
     int servings,
     Map<String, double> gramsByIngredient, {
     int? rating,
+    String? note,
   }) {
     final previous = List<PantryItem>.of(_pantry);
     var rescued = 0.0;
     gramsByIngredient.forEach((id, grams) => rescued += _deduct(id, grams));
+    final trimmed = note?.trim();
     _logs.add(CookLog(
       recipeId: recipe.id,
       cookedAt: DateTime.now(),
       servings: servings,
       rating: rating,
+      note: (trimmed == null || trimmed.isEmpty) ? null : trimmed,
       rescuedGrams: rescued,
     ));
     if (_active?.recipeId == recipe.id) _active = null;
@@ -412,6 +446,21 @@ class AppState extends ChangeNotifier {
       weeklyStreak: weeklyStreak,
       cooksThisWeek: cooksThisWeek,
     );
+  }
+
+  /// Bu tarifte en son yazılan not ve en son puan (sonraki sefere hatırlatma).
+  ({int? rating, String? note})? lastCookMemory(String recipeId) {
+    int? rating;
+    String? note;
+    for (final l in _logs.reversed) {
+      if (l.recipeId != recipeId) continue;
+      rating ??= l.rating;
+      final n = l.note?.trim();
+      if (note == null && n != null && n.isNotEmpty) note = n;
+      if (rating != null && note != null) break;
+    }
+    if (rating == null && note == null) return null;
+    return (rating: rating, note: note);
   }
 
   /// Önce tam eşleşen, sonra en erken bozulacak ürünlerden düşer.
@@ -555,7 +604,7 @@ class AppState extends ChangeNotifier {
 
   List<CookLog> get logs => List.unmodifiable(_logs);
 
-  /// Pişirme kaydını günceller (yenen porsiyon, fotoğraf, puan).
+  /// Pişirme kaydını günceller (yenen porsiyon, fotoğraf, puan, not).
   void updateLog(DateTime cookedAt, CookLog Function(CookLog) change) {
     final i = _logs.indexWhere((l) => l.cookedAt == cookedAt);
     if (i < 0) return;

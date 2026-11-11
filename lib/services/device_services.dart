@@ -78,13 +78,25 @@ class ShareService {
   }
 
   /// TikTok/Instagram hikâyesi için hazırlanan görseli paylaşır.
-  Future<bool> shareImage(Uint8List png, {required String text}) async {
+  /// Metin eklenmez: Instagram hikâyesinde görsel+metin çoğu telefonda bozulur;
+  /// marka kartın üzerinde yazılıdır.
+  Future<bool> shareImage(Uint8List png, {String? text}) async {
     try {
+      if (kIsWeb) {
+        await SharePlus.instance.share(ShareParams(
+          files: [
+            XFile.fromData(png,
+                mimeType: 'image/png', name: 'buzdolabi-sefi.png')
+          ],
+          fileNameOverrides: const ['buzdolabi-sefi.png'],
+          text: text,
+        ));
+        return true;
+      }
+      final path = '${(await getTemporaryDirectory()).path}/buzdolabi-sefi.png';
+      await File(path).writeAsBytes(png, flush: true);
       await SharePlus.instance.share(ShareParams(
-        text: text,
-        files: [
-          XFile.fromData(png, mimeType: 'image/png', name: 'buzdolabi-sefi.png')
-        ],
+        files: [XFile(path, mimeType: 'image/png')],
       ));
       return true;
     } catch (e) {

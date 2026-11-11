@@ -6,24 +6,30 @@ import 'screens/pantry_screen.dart';
 import 'screens/results_screen.dart';
 import 'state/app_state.dart';
 
-/// Ana ekran aracından (ios/HomeWidget) gelen bağlantılar:
+/// Ana ekran aracı ve Siri'den gelen bağlantılar:
 ///   buzdolabisefi://app/ne-pisirsem → "Ne pişirsem?" sonuçları
-///   buzdolabisefi://app/dolap       → Dolabım (bozulmak üzere olanlar üstte)
+///   buzdolabisefi://app/dolap       → Dolabım
+///   buzdolabisefi://app/ekle?metin=6%20yumurta → dolaba ekle, Dolabım'ı aç
 /// iOS bağlantıyı Flutter'a ekran adı olarak verir (Info.plist →
 /// FlutterDeepLinkingEnabled); burada ekrana çevrilir.
 abstract final class DeepLinks {
   static const whatToCook = '/ne-pisirsem';
   static const pantry = '/dolap';
+  static const addToPantry = '/ekle';
 
   static Route<void>? route(RouteSettings settings) {
     final name = settings.name ?? '';
-    final path = (Uri.tryParse(name)?.path ?? name).toLowerCase();
+    final uri = Uri.tryParse(name);
+    final path = (uri?.path ?? name).toLowerCase();
     final Widget page;
     switch (path) {
       case whatToCook:
         page = const _OnlyWhenOnboarded(child: _WhatToCook());
       case pantry:
         page = const _OnlyWhenOnboarded(child: PantryScreen());
+      case addToPantry:
+        page = _OnlyWhenOnboarded(
+            child: _AddFromSiri(text: uri?.queryParameters['metin'] ?? ''));
       default:
         return null;
     }
@@ -55,6 +61,51 @@ class _WhatToCook extends StatelessWidget {
         ? const IngredientInputScreen(openResultsAfter: true)
         : const ResultsScreen();
   }
+}
+
+/// Siri / Kısayollar: metni dolaba ekler, sonucu gösterir, Dolabım'a geçer.
+class _AddFromSiri extends StatefulWidget {
+  const _AddFromSiri({required this.text});
+
+  final String text;
+
+  @override
+  State<_AddFromSiri> createState() => _AddFromSiriState();
+}
+
+class _AddFromSiriState extends State<_AddFromSiri> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _apply());
+  }
+
+  void _apply() {
+    if (!mounted) return;
+    final nav = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final state = context.read<AppState>();
+    final text = widget.text.trim();
+    if (text.isEmpty) {
+      nav.pushReplacement(
+          MaterialPageRoute<void>(builder: (_) => const PantryScreen()));
+      return;
+    }
+    final unknown = state.addPantryFromText(text);
+    nav.pushReplacement(
+        MaterialPageRoute<void>(builder: (_) => const PantryScreen()));
+    final message = unknown.isEmpty
+        ? 'Dolaba eklendi: $text'
+        : (unknown.length == 1 && unknown.first == text
+            ? '"$text" listede yok; malzemeyi elle ekleyebilirsin.'
+            : 'Bir kısmı eklendi. Tanınmayan: ${unknown.join(", ")}');
+    messenger.showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  @override
+  Widget build(BuildContext context) => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
 }
 
 /// Açılış anketi bitmeden araçtan gelinirse sayfa açılmaz; anket görünür.

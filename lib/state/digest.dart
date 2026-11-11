@@ -22,22 +22,33 @@ class Digest {
 
   late final expiring = state.expiringItems;
 
+  /// Bozulmak üzere olan [ingredientId] için tarif: önce hemen yapılabilen,
+  /// yoksa tek malzemesi eksik olan.
+  RecipeMatch? tipForIngredient(String ingredientId) {
+    final hits = [
+      for (final m in state.matches(const QuickFilters()))
+        if (m.problems.length <= 1 &&
+            m.recipe.items.any((i) => i.ingredientId == ingredientId))
+          m
+    ]..sort((a, b) {
+        final byGap = a.problems.length.compareTo(b.problems.length);
+        if (byGap != 0) return byGap;
+        return a.recipe.minutes.compareTo(b.recipe.minutes);
+      });
+    return hits.firstOrNull;
+  }
+
   /// Bozulmak üzere olan malzemeyi kullanan tarif: önce hemen yapılabilen,
   /// yoksa tek malzemesi eksik olan. ("Kıymayı değerlendir: Kıymalı Pilav")
   late final ({RecipeMatch match, String ingredient})? useUp = () {
     if (expiring.isEmpty) return null;
-    final ids = [for (final p in expiring) p.ingredientId];
-    final candidates = state
-        .matches(const QuickFilters())
-        .where((m) => m.usesExpiring && m.problems.length <= 1)
-        .toList()
-      ..sort((a, b) => a.problems.length.compareTo(b.problems.length));
-    for (final m in candidates) {
-      // En yakın tarihte bozulacak malzemeyi kullanan tarif öne çıkar.
-      for (final id in ids) {
-        if (m.recipe.items.any((i) => i.ingredientId == id)) {
-          return (match: m, ingredient: state.repo.byId(id).name);
-        }
+    for (final p in expiring) {
+      final tip = tipForIngredient(p.ingredientId);
+      if (tip != null) {
+        return (
+          match: tip,
+          ingredient: state.repo.byId(p.ingredientId).name,
+        );
       }
     }
     return null;
@@ -84,21 +95,28 @@ class Digest {
         PlanTime.lastMinute => (18, 30),
       };
 
+  static String _tipBody(RecipeMatch tip) => tip.problems.isEmpty
+      ? 'Şunu yapabilirsin: ${tip.recipe.title}'
+      : 'Neredeyse hazır: ${tip.recipe.title}';
+
   /// Hatırlatmalar: her gün anketteki plan saatinde bir öneri, bozulacak ürün
-  /// varsa o gün sabah bir uyarı. Uygulama her açıldığında yeniden kurulur;
-  /// içerik o anki dolaba göredir.
+  /// varsa o gün sabah bir uyarı (+ tarif). Uygulama her açıldığında yeniden
+  /// kurulur; içerik o anki dolaba göredir.
   List<Reminder> reminders() {
     if (!state.profile.remindersOn) return const [];
     final out = <Reminder>[];
     final (h, m) = _hourFor(state.profile.planTime ?? PlanTime.evening);
     var at = DateTime(now.year, now.month, now.day, h, m);
     if (!at.isAfter(now)) at = at.add(const Duration(days: 1));
+    final dailyBody = useUp != null
+        ? '${useUp!.ingredient} bozulmak üzere — ${_tipBody(useUp!.match)}'
+        : ready.isEmpty
+            ? 'Dolabına bir bakalım, eksik bir malzemeyle açılan tarifler var.'
+            : 'Dolabındakilerle hazır: ${ready.map((r) => r.recipe.title).join(', ')}';
     out.add(Reminder(
       id: 1,
       title: 'Bugün ne pişirsem?',
-      body: ready.isEmpty
-          ? 'Dolabına bir bakalım, eksik bir malzemeyle açılan tarifler var.'
-          : 'Dolabındakilerle hazır: ${ready.map((m) => m.recipe.title).join(', ')}',
+      body: dailyBody,
       at: at,
       daily: true,
     ));
@@ -109,10 +127,14 @@ class Digest {
       // Bozulmadan bir gün önce sabah 10'da; o saat geçtiyse hiç.
       final warn = DateTime(expires.year, expires.month, expires.day - 1, 10);
       if (!warn.isAfter(now)) continue;
+      final tip = tipForIngredient(p.ingredientId);
+      // Uyarı bozulmadan bir gün önce gider; başlık her zaman "yarın".
       out.add(Reminder(
         id: id++,
         title: '${ing.name} yarın bozuluyor',
-        body: 'Değerlendiren tariflere bak, çöpe gitmesin.',
+        body: tip == null
+            ? 'Değerlendiren tariflere bak, çöpe gitmesin.'
+            : _tipBody(tip),
         at: warn,
       ));
     }

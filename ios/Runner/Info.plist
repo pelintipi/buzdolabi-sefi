@@ -38,8 +38,8 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
-	<!-- Ana ekran aracı buzdolabisefi://app/ne-pisirsem ve /dolap ile uygulamayı
-	     açar; Flutter bağlantıyı ekran adı olarak alır (lib/deep_links.dart). -->
+	<!-- Ana ekran aracı ve Siri: ne-pisirsem, /dolap, /ekle?metin=…
+	     Flutter bağlantıyı ekran adı olarak alır (lib/deep_links.dart). -->
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -53,6 +53,14 @@
 	</array>
 	<key>FlutterDeepLinkingEnabled</key>
 	<true/>
+	<!-- Paylaşım sayfasında Instagram / TikTok görünsün diye. -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>instagram</string>
+		<string>instagram-stories</string>
+		<string>tiktok</string>
+		<string>snssdk1233</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>

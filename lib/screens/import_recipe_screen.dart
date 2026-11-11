@@ -76,7 +76,9 @@ class _ImportRecipeScreenState extends State<ImportRecipeScreen> {
     // düzeltmeler korunur.
     final weakBefore = existing != null &&
         (existing.steps.length < 2 ||
-            (existing.source?.unmatched.isNotEmpty ?? false));
+            (existing.source?.unmatched.isNotEmpty ?? false) ||
+            CaptionRecipeExtractor(state.repo)
+                .titleIsIngredientList(existing.title));
     if (existing != null && payload.text == null && !weakBefore) {
       _openRecipe(existing, 'Bu videoyu daha önce kaydetmiştin');
       return;

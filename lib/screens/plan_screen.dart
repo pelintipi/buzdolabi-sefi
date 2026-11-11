@@ -8,6 +8,7 @@ import '../widgets/recipe_card.dart';
 import '../widgets/recipe_image.dart';
 import '../widgets/ui.dart';
 import 'recipe_detail_screen.dart';
+import 'shopping_screen.dart';
 
 const _dayShort = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 
@@ -20,7 +21,10 @@ class PlanScreen extends StatelessWidget {
     final state = context.watch<AppState>();
     final theme = Theme.of(context);
     final nights = state.planNights;
-    final missing = state.planner.missing(nights);
+    // Dolap + önceki akşamların harcadıkları düşülmüş eksikler (tekrarsız).
+    final missing = state.planner.missing(nights).toList()
+      ..sort((a, b) =>
+          state.repo.byId(a).name.compareTo(state.repo.byId(b).name));
     final start = state.planStart ?? DateTime.now();
     final readyCount = nights.where((n) => n.ready).length;
     final unlisted =
@@ -127,11 +131,52 @@ class PlanScreen extends StatelessWidget {
                     );
                   }),
                 const SizedBox(height: 6),
-                if (missing.isNotEmpty)
+                if (missing.isNotEmpty) ...[
+                  const SectionTitle('Bu haftaki planın için şunları al',
+                      icon: '🛒'),
+                  Text(
+                    'Dolabındakiler ve önceki akşamlarda kullanılanlar düşüldü.',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 10),
+                  SoftCard(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                    child: Column(
+                      children: [
+                        for (var i = 0; i < missing.length; i++) ...[
+                          if (i > 0) const Divider(height: 1),
+                          Builder(builder: (_) {
+                            final ing = state.repo.byId(missing.elementAt(i));
+                            final listed = state.isOnShoppingList(ing.id);
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Row(
+                                children: [
+                                  FoodIcon(ing.emoji, size: 36),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(ing.name,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 16)),
+                                  ),
+                                  if (listed)
+                                    const Pill('Listede',
+                                        icon: '✓', bordered: false),
+                                ],
+                              ),
+                            );
+                          }),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   ChunkyButton(
                     label: unlisted.isEmpty
-                        ? 'Eksikler listende'
-                        : 'Eksikleri listeye ekle (${unlisted.length})',
+                        ? 'Hepsi alışveriş listende'
+                        : 'Alışveriş listesine ekle (${unlisted.length})',
                     icon: '📝',
                     tone: ChunkyTone.accent,
                     onPressed: unlisted.isEmpty
@@ -139,9 +184,34 @@ class PlanScreen extends StatelessWidget {
                         : () {
                             final added = state.addToShopping(unlisted);
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content:
-                                    Text('$added malzeme listene eklendi')));
+                              content: Text(
+                                  '$added malzeme alışveriş listene eklendi'),
+                              action: SnackBarAction(
+                                label: 'Listeye git',
+                                onPressed: () => Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                      builder: (_) => const ShoppingScreen()),
+                                ),
+                              ),
+                            ));
                           },
+                  ),
+                  const SizedBox(height: 10),
+                ] else
+                  SoftCard(
+                    color: Palette.basilSoft,
+                    borderColor: Palette.basil,
+                    child: Row(
+                      children: [
+                        const Sym('✅', size: 40),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                              'Bu plan için alınacak ekstra malzeme yok; dolabın yetiyor.',
+                              style: theme.textTheme.titleSmall),
+                        ),
+                      ],
+                    ),
                   ),
                 const SizedBox(height: 10),
                 ChunkyButton(

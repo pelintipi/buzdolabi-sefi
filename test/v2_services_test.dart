@@ -96,6 +96,18 @@ void main() {
       expect(s.planIds[2], before[2]);
       expect(s.planIds[1], isNot(before[1]));
     });
+
+    test('plan eksikleri dolap düşülerek alışveriş listesine eklenir', () async {
+      final s = await freshState();
+      s.updateProfile(s.profile.copyWith(cookDaysPerWeek: 3, onboarded: true));
+      // Boş dolap → plandaki tariflerin malzemeleri eksik kalır.
+      s.makePlan();
+      final missing = s.planner.missing(s.planNights);
+      expect(missing, isNotEmpty);
+      expect(s.addToShopping(missing), missing.length);
+      expect(s.shoppingList.toSet(), missing);
+      expect(s.addToShopping(missing), 0, reason: 'ikinci kez eklenmez');
+    });
   });
 
   group('fiş', () {

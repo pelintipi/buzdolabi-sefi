@@ -68,7 +68,7 @@ class _FakeShare extends ShareService {
   }
 
   @override
-  Future<bool> shareImage(Uint8List png, {required String text}) async => true;
+  Future<bool> shareImage(Uint8List png, {String? text}) async => true;
 }
 
 class _FakeReminders extends ReminderService {
@@ -217,13 +217,19 @@ void main() {
           result: 'Sadece o akşam değişti, diğerleri yerinde kaldı.',
           ok: state.planIds[1] != before);
 
-      await tester.scrollUntilVisible(find.text('Yeniden planla'), 200,
+      await tester.scrollUntilVisible(
+          find.text('Bu haftaki planın için şunları al'), 200,
           scrollable: _mainScroll);
       await r.capture(tester,
           title: 'Eksikler tek listede',
           action: 'Aşağı kaydırdım.',
           result:
-              'Bütün haftanın eksikleri tek butonla alışveriş listesine eklenebiliyor.');
+              '"Bu haftaki planın için şunları al" listesi dolaptakiler düşülerek '
+              'çıkıyor; tek butonla alışveriş listesine ekleniyor.',
+          ok: state.planner.missing(state.planNights).isNotEmpty);
+      expect(find.text('Bu haftaki planın için şunları al'), findsOneWidget);
+      await tester.scrollUntilVisible(find.text('Yeniden planla'), 200,
+          scrollable: _mainScroll);
       Navigator.of(tester.element(find.text('Yeniden planla'))).pop();
       await tester.pumpAndSettle();
 

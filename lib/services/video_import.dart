@@ -72,6 +72,8 @@ class VideoInfo {
   final String? caption;
   final String? author;
   final String? thumbnailUrl;
+
+  bool get hasCaption => caption != null && caption!.trim().isNotEmpty;
 }
 
 /// Video linkinden açıklama, hesap adı ve kapak görselini getirir.
@@ -88,23 +90,40 @@ class VideoInfoClient {
   ///
   /// Web'de tarayıcı CORS TikTok'u engeller; oEmbed isteği açık proxy üzerinden
   /// gider. Yerelde (mobil/desktop) doğrudan çağrılır.
+  ///
+  /// TikTok oEmbed çoğu videoda boş "title" + kapak döner; açıklama için
+  /// tikwm yedeği denenir. Boş açıklamalı yanıt erken kabul edilmez.
   Future<VideoInfo?> fetch(String url) async {
     final platform = SocialPlatform.of(url);
     if (platform != SocialPlatform.tiktok &&
         platform != SocialPlatform.youtube) {
       return null;
     }
-    // Önce verilen adresi dene (vt.tiktok.com oEmbed'de çoğu zaman yeter);
-    // olmazsa kısa linki açıp tekrar dene.
     final candidates = <String>[url];
     final resolved = await _resolve(url);
     if (resolved != url) candidates.add(resolved);
 
+    VideoInfo? best;
     for (final candidate in candidates) {
       final info = await _oembed(candidate, platform);
-      if (info != null) return info;
+      if (info == null) continue;
+      if (info.hasCaption) return info;
+      best ??= info;
     }
-    return null;
+    // oEmbed başlık vermediyse (sık) tikwm ile açıklamayı dene.
+    if (platform == SocialPlatform.tiktok && !(best?.hasCaption ?? false)) {
+      for (final candidate in candidates) {
+        final tip = await _tikwm(candidate);
+        if (tip == null || !tip.hasCaption) continue;
+        return VideoInfo(
+          url: tip.url,
+          caption: tip.caption,
+          author: tip.author ?? best?.author,
+          thumbnailUrl: tip.thumbnailUrl ?? best?.thumbnailUrl,
+        );
+      }
+    }
+    return best;
   }
 
   Future<VideoInfo?> _oembed(String url, SocialPlatform platform) async {
@@ -119,31 +138,75 @@ class VideoInfoClient {
     try {
       final res = await _getJson(endpoint);
       if (res == null) return null;
-      String? str(String k) {
-        final v = res[k];
-        if (v is! String) return null;
-        final t = _unescape(v).trim();
-        return t.isEmpty ? null : t;
-      }
-
-      return VideoInfo(
-        url: url,
-        caption: str('title'),
-        author: str('author_unique_id') ?? str('author_name'),
-        thumbnailUrl: str('thumbnail_url'),
-      );
+      return _infoFromMap(url, res);
     } catch (e) {
       debugPrint('Video bilgisi alınamadı: $e');
       return null;
     }
   }
 
-  /// Web'de yerel oembed_proxy (tool/oembed_proxy.mjs :8787); native'de doğrudan.
+  /// tikwm: oEmbed'in boş bıraktığı TikTok açıklamasını doldurur.
+  Future<VideoInfo?> _tikwm(String url) async {
+    try {
+      final Map<String, dynamic>? res;
+      if (kIsWeb) {
+        res = await _getJson(_proxyEndpoint('/tikwm', url));
+      } else {
+        final raw = await _client
+            .get(Uri.https('www.tikwm.com', '/api/', {'url': url}), headers: {
+          'User-Agent': 'Mozilla/5.0'
+        }).timeout(const Duration(seconds: 15));
+        if (raw.statusCode != 200) return null;
+        final decoded = jsonDecode(utf8.decode(raw.bodyBytes));
+        if (decoded is! Map || decoded['code'] != 0 || decoded['data'] is! Map) {
+          return null;
+        }
+        final d = decoded['data'] as Map;
+        final title = '${d['title'] ?? d['desc'] ?? ''}'.trim();
+        if (title.isEmpty) return null;
+        final author = d['author'] is Map ? d['author'] as Map : const {};
+        res = {
+          'title': title,
+          'author_unique_id': author['unique_id'] ?? author['nickname'],
+          'author_name': author['nickname'],
+          'thumbnail_url': d['cover'] ?? d['origin_cover'],
+        };
+      }
+      if (res == null) return null;
+      return _infoFromMap(url, res);
+    } catch (e) {
+      debugPrint('tikwm açıklaması alınamadı: $e');
+      return null;
+    }
+  }
+
+  VideoInfo? _infoFromMap(String url, Map<String, dynamic> res) {
+    String? str(String k) {
+      final v = res[k];
+      if (v is! String) return null;
+      final t = _unescape(v).trim();
+      return t.isEmpty ? null : t;
+    }
+
+    final caption = str('title') ?? str('desc');
+    final thumb = str('thumbnail_url');
+    final author = str('author_unique_id') ?? str('author_name');
+    if (caption == null && thumb == null && author == null) return null;
+    return VideoInfo(
+        url: url, caption: caption, author: author, thumbnailUrl: thumb);
+  }
+
+  /// Web'de yerel oembed_proxy; native'de doğrudan.
   Future<Map<String, dynamic>?> _getJson(Uri endpoint) async {
-    final target = kIsWeb
-        ? _proxyUri('/oembed', endpoint.queryParameters['url'] ?? '')
-        : endpoint;
-    final res = await _client.get(target).timeout(const Duration(seconds: 12));
+    final Uri target;
+    if (!kIsWeb) {
+      target = endpoint;
+    } else if (endpoint.port == 8787) {
+      target = endpoint;
+    } else {
+      target = _proxyEndpoint('/oembed', endpoint.queryParameters['url'] ?? '');
+    }
+    final res = await _client.get(target).timeout(const Duration(seconds: 15));
     if (res.statusCode != 200) return null;
     final body = utf8.decode(res.bodyBytes).trim();
     if (body.isEmpty) return null;
@@ -152,7 +215,7 @@ class VideoInfoClient {
   }
 
   /// Web tarayıcısından LAN'daki proxy: aynı host, port 8787.
-  static Uri _proxyUri(String path, String videoUrl) {
+  static Uri _proxyEndpoint(String path, String videoUrl) {
     final base = Uri.base;
     return Uri(
       scheme: base.scheme.isEmpty ? 'http' : base.scheme,
@@ -173,7 +236,7 @@ class VideoInfoClient {
     try {
       if (kIsWeb) {
         final res = await _client
-            .get(_proxyUri('/resolve', url))
+            .get(_proxyEndpoint('/resolve', url))
             .timeout(const Duration(seconds: 8));
         if (res.statusCode == 200) {
           final j = jsonDecode(utf8.decode(res.bodyBytes));

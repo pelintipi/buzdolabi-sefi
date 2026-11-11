@@ -184,6 +184,31 @@ void main() {
     expect(p.parseChunk('a pinch of salt').measure, Measure.tutam);
   });
 
+  test('başlık yalnızca malzeme adı olmaz: Yoğurt ve süt → yedek ad', () {
+    final x = run('Malzemeler:\n'
+        '1 su bardağı yoğurt\n'
+        '1 su bardağı süt\n'
+        '2 yemek kaşığı chia\n'
+        'Yapılışı: Karıştırıp buzdolabında bekletin.');
+    expect(x.recipe.title.toLowerCase(), isNot(contains('ve süt')));
+    expect(x.recipe.title.toLowerCase(), isNot(equals('yoğurt ve süt')));
+    // Chia + süt/yoğurt → tanıdık ad; yoksa "… tarifi" / Videodan tarif.
+    expect(
+        x.recipe.title == 'Chia puding' ||
+            x.recipe.title.endsWith('tarifi') ||
+            x.recipe.title == 'Videodan tarif',
+        isTrue,
+        reason: 'bulunan: ${x.recipe.title}');
+  });
+
+  test('malzeme listesi satırı başlık sanılmaz', () {
+    final x = run('yoğurt ve süt\n'
+        'Malzemeler: 1 yoğurt, 1 su bardağı süt, 2 yk bal\n'
+        'Yapılışı: Karıştırın.');
+    expect(extractor.titleIsIngredientList('Yoğurt ve süt'), isTrue);
+    expect(x.recipe.title.toLowerCase(), isNot(equals('yoğurt ve süt')));
+  });
+
   test('tarif yazmayan açıklama kullanılabilir sayılmaz', () {
     final x = run('Bu tarif çok tuttu 😍 denemeyen kalmasın #keşfet #fyp');
     expect(x.isUsable, isFalse);
@@ -253,6 +278,65 @@ void main() {
     final failing = VideoInfoClient(
         client: MockClient((_) async => http.Response('yok', 404)));
     expect(await failing.fetch('https://www.tiktok.com/x'), isNull);
+  });
+
+  test('oEmbed boş title + kapak olunca tikwm açıklamayı doldurur', () async {
+    final urls = <String>[];
+    final client = VideoInfoClient(
+      client: MockClient((req) async {
+        urls.add(req.url.host + req.url.path);
+        if (req.url.host.contains('tikwm')) {
+          return http.Response.bytes(
+              utf8.encode(jsonEncode({
+                'code': 0,
+                'data': {
+                  'title':
+                      'ihtiyacınız olan her şey | everything you need: 300 gr yağsız kıyma | 300 g lean, 1 yumurta | 1 egg',
+                  'author': {'unique_id': 'dogaozbay'},
+                  'cover': 'https://cdn.example/kapak.jpg',
+                },
+              })),
+              200);
+        }
+        // TikTok oEmbed: kapak var, yazı yok (sık görülen durum).
+        return http.Response.bytes(
+            utf8.encode(jsonEncode({
+              'title': '',
+              'author_name': 'Doga',
+              'thumbnail_url': 'https://cdn.example/kapak.jpg',
+            })),
+            200);
+      }),
+    );
+    final info =
+        await client.fetch('https://www.tiktok.com/@dogaozbay/video/770');
+    expect(info, isNotNull);
+    expect(info!.hasCaption, isTrue);
+    expect(info.caption, contains('300 gr yağsız kıyma'));
+    expect(info.thumbnailUrl, isNotNull);
+    expect(urls.any((u) => u.contains('tikwm')), isTrue);
+  });
+
+  test('çift dilli TikTok açıklamasından malzemeler çıkar', () {
+    // tikwm/TikTok çoğu zaman satırları U+2028 ile ayırır.
+    const sep = '\u2028';
+    const caption =
+        'köfte & pesto soslu patates salatası | meatballs & potato salad$sep'
+        'ihtiyacınız olan her şey | everything you need:$sep'
+        'köfte için | for the meatballs:$sep'
+        '300 gr yağsız kıyma | 300 g lean ground beef$sep'
+        '½ soğan veya 1 küçük soğan, rendelenmiş | ½ onion$sep'
+        '1 yumurta | 1 egg$sep'
+        '1 yk galeta unu | 1 tbsp breadcrumbs$sep'
+        'ince kıyılmış maydanoz | finely chopped parsley$sep'
+        'tuz, karabiber, kimyon | salt, pepper, cumin$sep'
+        'zeytinyağı | olive oil$sep'
+        'patates salatası için | for the potato salad:$sep'
+        '5 orta boy haşlanmış patates | 5 medium boiled potatoes';
+    final x = run(caption);
+    expect(x.isUsable, isTrue);
+    final ids = x.recipe.items.map((i) => i.ingredientId).toSet();
+    expect(ids, containsAll(['kiyma', 'sogan', 'yumurta', 'patates', 'tuz']));
   });
 
   test('aynı video farklı linkle kaydedilince kopya oluşmaz', () async {

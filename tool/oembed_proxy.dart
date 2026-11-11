@@ -1,6 +1,6 @@
 // Yerel CORS proxy (oembed_proxy.mjs'nin Dart karşılığı): TikTok/YouTube
-// oEmbed + kısa link. Node'u engelleyen güvenlik duvarlarında da çalışsın
-// diye Flutter ile gelen Dart ile çalışır:
+// oEmbed + kısa link + tikwm (oEmbed çoğu videoda boş title verir).
+// Node'u engelleyen güvenlik duvarlarında da çalışsın diye Dart ile çalışır:
 //   dart run tool/oembed_proxy.dart
 import 'dart:convert';
 import 'dart:io';
@@ -8,6 +8,13 @@ import 'dart:io';
 const port = 8787;
 
 final _client = HttpClient()..userAgent = 'Mozilla/5.0 BuzdolabiSefiProxy/1.0';
+
+bool _isShortTikTok(String url) {
+  final host = (Uri.tryParse(url)?.host ?? '').toLowerCase();
+  return host == 'vm.tiktok.com' ||
+      host == 'vt.tiktok.com' ||
+      (host == 'www.tiktok.com' && url.contains('/t/'));
+}
 
 Future<({int status, String text, Uri url})> _get(String url) async {
   final req = await _client.getUrl(Uri.parse(url));
@@ -30,6 +37,22 @@ Map<String, dynamic>? _json(String text) {
   }
 }
 
+String? _nonEmpty(dynamic v) {
+  if (v is! String) return null;
+  final t = v.trim();
+  return t.isEmpty ? null : t;
+}
+
+Future<String> _resolveUrl(String videoUrl) async {
+  if (!_isShortTikTok(videoUrl)) return videoUrl;
+  try {
+    final r = await _get(videoUrl);
+    return r.url.toString();
+  } catch (_) {
+    return videoUrl;
+  }
+}
+
 Future<Map<String, dynamic>?> _tikwm(String videoUrl) async {
   final r = await _get(
       'https://www.tikwm.com/api/?url=${Uri.encodeComponent(videoUrl)}');
@@ -38,8 +61,8 @@ Future<Map<String, dynamic>?> _tikwm(String videoUrl) async {
     return null;
   }
   final d = j['data'] as Map;
-  final title = ((d['title'] ?? d['desc'] ?? '') as String).trim();
-  if (title.isEmpty) return null;
+  final title = _nonEmpty(d['title']) ?? _nonEmpty(d['desc']);
+  if (title == null) return null;
   final author = d['author'] is Map ? d['author'] as Map : const {};
   return {
     'version': '1.0',
@@ -53,14 +76,35 @@ Future<Map<String, dynamic>?> _tikwm(String videoUrl) async {
   };
 }
 
-Future<Map<String, dynamic>?> _tiktok(String videoUrl) async {
+Future<Map<String, dynamic>?> _oembedRaw(String videoUrl) async {
   final r = await _get(
       'https://www.tiktok.com/oembed?url=${Uri.encodeComponent(videoUrl)}');
-  final j = _json(r.text);
-  final title = j?['title'];
-  if (r.status == 200 && title is String && title.trim().isNotEmpty) return j;
-  // oEmbed çoğu videoda başlık vermiyor → tikwm.
-  return await _tikwm(videoUrl) ?? j;
+  if (r.status != 200) return null;
+  return _json(r.text);
+}
+
+/// oEmbed çoğu videoda boş title + kapak verir → tikwm ile açıklama doldurulur.
+Future<Map<String, dynamic>?> _tiktok(String videoUrl) async {
+  final resolved = await _resolveUrl(videoUrl);
+  final oembed = await _oembedRaw(resolved) ??
+      (resolved == videoUrl ? null : await _oembedRaw(videoUrl));
+  final oembedTitle = _nonEmpty(oembed?['title']);
+  if (oembedTitle != null) return oembed;
+
+  final tikwm = await _tikwm(resolved) ??
+      (resolved == videoUrl ? null : await _tikwm(videoUrl));
+  if (tikwm != null) {
+    // Kapak oEmbed'de varsa birleştir.
+    if (tikwm['thumbnail_url'] == null && oembed?['thumbnail_url'] != null) {
+      tikwm['thumbnail_url'] = oembed!['thumbnail_url'];
+    }
+    if (tikwm['author_name'] == null && oembed?['author_name'] != null) {
+      tikwm['author_name'] = oembed!['author_name'];
+    }
+    return tikwm;
+  }
+  // Son çare: yalnızca kapak (açıklama yok).
+  return oembed;
 }
 
 void _send(HttpResponse res, int status, String body) {
@@ -99,6 +143,17 @@ Future<void> main() async {
             final info = await _tiktok(target);
             info == null
                 ? _send(res, 404, '{"error":"no info"}')
+                : _send(res, 200, jsonEncode(info));
+          }
+        case '/tikwm':
+          if (target == null) {
+            _send(res, 400, '{"error":"url required"}');
+          } else {
+            final resolved = await _resolveUrl(target);
+            final info = await _tikwm(resolved) ??
+                (resolved == target ? null : await _tikwm(target));
+            info == null
+                ? _send(res, 404, '{"error":"no caption"}')
                 : _send(res, 200, jsonEncode(info));
           }
         case '/resolve':

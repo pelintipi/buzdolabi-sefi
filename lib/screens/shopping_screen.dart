@@ -55,8 +55,8 @@ class ShoppingScreen extends StatelessWidget {
                       children: [
                         Text('Listen boş', style: theme.textTheme.titleMedium),
                         Text(
-                          'Bir tarifte "Eksikleri listeye ekle" de ya da aşağıdaki '
-                          'önerilerden seç.',
+                          'Haftalık planda "Alışveriş listesine ekle" de, bir tarifte '
+                          'eksikleri ekle ya da aşağıdaki önerilerden seç.',
                           style: theme.textTheme.bodySmall,
                         ),
                       ],

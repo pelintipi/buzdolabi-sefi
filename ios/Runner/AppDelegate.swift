@@ -1,3 +1,4 @@
+import AppIntents
 import AVFoundation
 import Flutter
 import Speech
@@ -191,5 +192,76 @@ final class NativeBridgePlugin: NSObject, FlutterPlugin {
     defaults.set(json, forKey: "widgetData")
     WidgetCenter.shared.reloadAllTimelines()
     result(true)
+  }
+}
+
+// MARK: - Siri / Kısayollar (iOS 16+)
+// "Hey Siri, 6 yumurta ekle Buzdolabı Şefi" → uygulamayı
+// buzdolabisefi://app/ekle?metin=6%20yumurta ile açar (lib/deep_links.dart).
+
+@available(iOS 16.0, *)
+struct AddToPantryIntent: AppIntent {
+  static var title: LocalizedStringResource = "Dolaba malzeme ekle"
+  static var description = IntentDescription(
+    "Buzdolabı Şefi dolabına miktar ve malzeme ekler.")
+
+  @Parameter(title: "Miktar")
+  var quantity: Double?
+
+  @Parameter(title: "Malzeme")
+  var ingredient: String
+
+  static var parameterSummary: some ParameterSummary {
+    Summary("Dolabıma \(\.$quantity) \(\.$ingredient) ekle") {
+      \.$quantity
+      \.$ingredient
+    }
+  }
+
+  func perform() async throws -> some IntentResult & OpensIntent & ProvidesDialog {
+    let name = ingredient.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !name.isEmpty else {
+      throw $ingredient.needsValueError("Hangi malzemeyi ekleyeyim?")
+    }
+    let phrase: String
+    if let quantity {
+      let amount = quantity == quantity.rounded()
+        ? String(Int(quantity))
+        : String(quantity)
+      phrase = "\(amount) \(name)"
+    } else {
+      phrase = name
+    }
+    var parts = URLComponents()
+    parts.scheme = "buzdolabisefi"
+    parts.host = "app"
+    parts.path = "/ekle"
+    parts.queryItems = [URLQueryItem(name: "metin", value: phrase)]
+    guard let url = parts.url else {
+      throw NSError(
+        domain: "BuzdolabiSefi", code: 1,
+        userInfo: [NSLocalizedDescriptionKey: "Bağlantı oluşturulamadı"])
+    }
+    return .result(
+      dialog: IntentDialog("Tamam, \(phrase) dolaba ekleniyor."),
+      opensIntent: OpenURLIntent(url))
+  }
+}
+
+@available(iOS 16.0, *)
+struct BuzdolabiSefiShortcuts: AppShortcutsProvider {
+  static var shortcutTileColor: ShortcutTileColor { .mint }
+
+  static var appShortcuts: [AppShortcut] {
+    AppShortcut(
+      intent: AddToPantryIntent(),
+      phrases: [
+        "Dolabıma \(\.$quantity) \(\.$ingredient) ekle \(.applicationName)",
+        "\(\.$quantity) \(\.$ingredient) ekle \(.applicationName)",
+        "\(\.$ingredient) ekle \(.applicationName)",
+        "Dolabıma \(\.$ingredient) ekle \(.applicationName)",
+      ],
+      shortTitle: "Dolaba ekle",
+      systemImageName: "refrigerator")
   }
 }

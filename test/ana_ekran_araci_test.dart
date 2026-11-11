@@ -76,6 +76,38 @@ void main() {
     expect(data.containsKey('useUp'), isFalse);
   });
 
+  test('bozulma bildiriminde tarif önerisi var', () async {
+    final s = await _state();
+    s.updateProfile(s.profile.copyWith(remindersOn: true));
+    s.upsertPantryAll([
+      (ingredientId: 'kiyma', quantity: 500, level: null),
+      (ingredientId: 'pirinc', quantity: 1000, level: null),
+      (ingredientId: 'sogan', quantity: 4, level: null),
+    ]);
+    final now = DateTime(2026, 11, 11, 12);
+    final item = s.pantry.firstWhere((p) => p.ingredientId == 'kiyma');
+    // 13'ünde bitiyor → uyarı 12'si sabah 10'da (yarın).
+    s.updatePantryItem(item.copyWith(expiresAt: DateTime(2026, 11, 13)));
+
+    final reminders = Digest(s, now).reminders();
+    final warn =
+        reminders.where((r) => r.title.contains('yarın bozuluyor')).toList();
+    expect(warn, isNotEmpty);
+    expect(warn.first.title, 'Kıyma yarın bozuluyor');
+    expect(warn.first.body, contains('yapabilirsin'));
+    final tipTitle = warn.first.body.split(': ').last;
+    final tip = recipeCatalog.firstWhere((r) => r.title == tipTitle);
+    expect(tip.items.any((i) => i.ingredientId == 'kiyma'), isTrue);
+  });
+
+  test('Siri metni var olana miktar ekler, bilinmeyeni döner', () async {
+    final s = await _state();
+    s.upsertPantry('yumurta', quantity: 2);
+    expect(s.addPantryFromText('6 yumurta'), isEmpty);
+    expect(s.pantry.singleWhere((p) => p.ingredientId == 'yumurta').quantity, 8);
+    expect(s.addPantryFromText('3 xyzabc'), ['3 xyzabc']);
+  });
+
   group('araçtan gelen bağlantılar', () {
     Future<void> pump(WidgetTester tester, AppState s) async {
       await tester.pumpWidget(MultiProvider(
@@ -113,6 +145,21 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(PantryScreen), findsWidgets);
       expect(find.byType(BackButton), findsOneWidget);
+    });
+
+    testWidgets('ekle bağlantısı malzemeyi dolaba ekler ve Dolabım açar',
+        (tester) async {
+      final s = await _state();
+      s.upsertPantry('yumurta', quantity: 2);
+      await pump(tester, s);
+      await tester.binding
+          .handlePushRoute('buzdolabisefi://app/ekle?metin=6%20yumurta');
+      await tester.pumpAndSettle();
+      expect(find.byType(PantryScreen), findsWidgets);
+      final eggs =
+          s.pantry.where((p) => p.ingredientId == 'yumurta').single;
+      expect(eggs.quantity, 8, reason: 'var olan 2 + eklenen 6');
+      expect(find.textContaining('Dolaba eklendi'), findsOneWidget);
     });
 
     testWidgets('bilinmeyen bağlantı hiçbir şey açmaz, çökmez', (tester) async {

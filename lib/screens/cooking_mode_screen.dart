@@ -298,6 +298,27 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
       ),
       body: Column(
         children: [
+          if (context.read<AppState>().lastCookMemory(_recipe.id)?.note
+              case final tip?)
+            Container(
+              margin: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+              decoration: BoxDecoration(
+                color: Palette.butterSoft,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Palette.butter, width: 1.5),
+              ),
+              child: Row(
+                children: [
+                  const Sym('📝', size: 26),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text('Hatırlatma: $tip',
+                        maxLines: 2, overflow: TextOverflow.ellipsis),
+                  ),
+                ],
+              ),
+            ),
           if (_voice)
             Container(
               margin: const EdgeInsets.fromLTRB(20, 0, 20, 10),

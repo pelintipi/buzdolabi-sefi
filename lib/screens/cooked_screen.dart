@@ -27,7 +27,7 @@ class _Deduction {
   final double grams;
 }
 
-/// Döngüyü kapatan ekran: dolap güncellemesi (geri alınabilir), puan ve ödül.
+/// Döngüyü kapatan ekran: dolap güncellemesi (geri alınabilir), puan, not ve ödül.
 class CookedScreen extends StatefulWidget {
   const CookedScreen(
       {super.key, required this.recipeId, required this.servings});
@@ -43,11 +43,18 @@ class _CookedScreenState extends State<CookedScreen> {
   late final Recipe _recipe;
   late final List<_Deduction> _deductions;
   final _selected = <String>{};
+  final _note = TextEditingController();
   _DeductMode _mode = _DeductMode.all;
   int? _rating;
   CookOutcome? _outcome;
   double _portions = 1;
   String? _photo;
+
+  @override
+  void dispose() {
+    _note.dispose();
+    super.dispose();
+  }
 
   /// Az önce kaydedilen pişirme (porsiyon ve fotoğraf buna yazılır).
   DateTime? get _logTime => context.read<AppState>().logs.lastOrNull?.cookedAt;
@@ -114,8 +121,8 @@ class _CookedScreenState extends State<CookedScreen> {
       }
       grams[d.ingredientId] = (grams[d.ingredientId] ?? 0) + _gramsFor(d);
     }
-    final outcome =
-        state.recordCook(_recipe, widget.servings, grams, rating: _rating);
+    final outcome = state.recordCook(_recipe, widget.servings, grams,
+        rating: _rating, note: _note.text);
     setState(() => _outcome = outcome);
 
     messenger.showSnackBar(SnackBar(
@@ -259,6 +266,16 @@ class _CookedScreenState extends State<CookedScreen> {
               ),
           ],
         ),
+        const SizedBox(height: 14),
+        TextField(
+          controller: _note,
+          maxLines: 2,
+          textInputAction: TextInputAction.done,
+          decoration: const InputDecoration(
+            labelText: 'Not (sonraki sefere)',
+            hintText: 'Örn. Tuzu azalttım',
+          ),
+        ),
         const SizedBox(height: 24),
         ChunkyButton(label: 'Kaydet', icon: '✅', onPressed: _save),
       ],
@@ -340,6 +357,14 @@ class _CookedScreenState extends State<CookedScreen> {
           ),
         const SizedBox(height: 14),
         ChunkyButton(
+          label: 'Hikâyede paylaş',
+          icon: '📲',
+          tone: ChunkyTone.butter,
+          onPressed: () =>
+              showShareCard(context, _recipe, photoPath: _photo),
+        ),
+        const SizedBox(height: 10),
+        ChunkyButton(
           label: 'Ana sayfaya dön',
           icon: '🏠',
           onPressed: () =>
@@ -415,7 +440,7 @@ extension on _CookedScreenState {
               const SizedBox(width: 10),
               Expanded(
                 child: ChunkyButton(
-                  label: 'Paylaş',
+                  label: 'Hikâye',
                   icon: '📲',
                   tone: ChunkyTone.butter,
                   height: 48,

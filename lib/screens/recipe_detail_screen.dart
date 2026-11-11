@@ -184,6 +184,36 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           ),
           const SizedBox(height: 4),
           Text(recipe.title, style: theme.textTheme.headlineMedium),
+          if (state.lastCookMemory(recipe.id) case final memory?) ...[
+            const SizedBox(height: 12),
+            SoftCard(
+              color: Palette.butterSoft,
+              borderColor: Palette.butter,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Sym('📝', size: 32),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          [
+                            'Geçen sefer',
+                            if (memory.rating != null) '${memory.rating}⭐',
+                          ].join(' · '),
+                          style: theme.textTheme.titleSmall,
+                        ),
+                        if (memory.note != null)
+                          Text(memory.note!, style: theme.textTheme.bodyMedium),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           // Süre, kalori, protein ve alet: tek sade satır.
           Wrap(
