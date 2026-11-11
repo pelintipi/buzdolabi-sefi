@@ -29,7 +29,8 @@ class _RoundButton extends StatelessWidget {
             width: 38,
             height: 38,
             child: Icon(icon,
-                size: 22, color: enabled ? Palette.basilDeep : Palette.inkSoft),
+                size: 22,
+                color: enabled ? Palette.accentDeep : Palette.inkSoft),
           ),
         ),
       ),
@@ -127,7 +128,12 @@ class LevelSelector extends StatelessWidget {
                       width: 10,
                       height: 10,
                       decoration: BoxDecoration(
-                        color: level == value ? Colors.white : _dots[level],
+                        color: level == value
+                            ? Colors.white
+                            // Koyu temada koyu yeşil okunmaz; yazı yeşili.
+                            : (level == ApproxLevel.bol
+                                ? Palette.accent
+                                : _dots[level]),
                         shape: BoxShape.circle,
                       ),
                     ),

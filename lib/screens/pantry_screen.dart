@@ -145,7 +145,7 @@ class _PantryTile extends StatelessWidget {
             if (expiry.isNotEmpty)
               Pill(expiry,
                   color: soon ? Palette.tomatoSoft : Palette.basilSoft,
-                  fg: soon ? Palette.tomatoDeep : Palette.basilDeep,
+                  fg: soon ? Palette.tomatoText : Palette.accentDeep,
                   border: null),
           ],
         ),
@@ -248,7 +248,7 @@ class _PantryEditSheetState extends State<_PantryEditSheet> {
                 children: [
                   Pill('Şu an: ${formatBase(ing, _quantity!)}',
                       color: Palette.basilSoft,
-                      fg: Palette.basilDeep,
+                      fg: Palette.accentDeep,
                       border: null),
                   TextButton(
                     onPressed: () => setState(() {
@@ -289,7 +289,7 @@ class _PantryEditSheetState extends State<_PantryEditSheet> {
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
                 ),
-                Icon(Icons.edit_calendar_rounded, color: Palette.basil),
+                Icon(Icons.edit_calendar_rounded, color: Palette.accent),
               ],
             ),
           ),
@@ -332,9 +332,8 @@ class _PantryEditSheetState extends State<_PantryEditSheet> {
                   Navigator.of(context).pop();
                 },
                 icon: Icon(Icons.delete_outline_rounded,
-                    color: Palette.tomatoDeep),
-                label: const Text('Sil',
-                    style: TextStyle(color: Palette.tomatoDeep)),
+                    color: Palette.tomatoText),
+                label: Text('Sil', style: TextStyle(color: Palette.tomatoText)),
               ),
               const SizedBox(width: 12),
               Expanded(child: ChunkyButton(label: 'Kaydet', onPressed: _save)),

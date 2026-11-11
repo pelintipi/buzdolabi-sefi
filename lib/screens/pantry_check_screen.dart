@@ -128,7 +128,7 @@ class _PantryCheckScreenState extends State<PantryCheckScreen> {
                                   child: OutlinedButton(
                                     style: OutlinedButton.styleFrom(
                                       foregroundColor: key == 'bitti'
-                                          ? Palette.tomatoDeep
+                                          ? Palette.tomatoText
                                           : Palette.ink,
                                       visualDensity: VisualDensity.compact,
                                       padding: const EdgeInsets.symmetric(

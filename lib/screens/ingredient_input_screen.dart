@@ -255,7 +255,7 @@ class _IngredientInputScreenState extends State<IngredientInputScreen> {
                     icon: Icon(_listening
                         ? Icons.stop_circle_outlined
                         : Icons.mic_none_rounded),
-                    color: _listening ? Palette.tomato : Palette.basil,
+                    color: _listening ? Palette.tomato : Palette.accent,
                     tooltip: _listening ? 'Dinlemeyi bitir' : 'Sesle ekle',
                     onPressed: _toggleMic,
                   ),
@@ -417,7 +417,7 @@ class _QuickTile extends StatelessWidget {
             color: selected ? Palette.basilSoft : Palette.surface,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-                color: selected ? Palette.basil : Palette.line, width: 2),
+                color: selected ? Palette.accent : Palette.line, width: 2),
           ),
           child: Stack(
             clipBehavior: Clip.none,
@@ -532,7 +532,7 @@ class _DraftTile extends StatelessWidget {
         spacing: 4,
         children: [
           Pill(formatBase(ing, quantity),
-              color: Palette.basilSoft, fg: Palette.basilDeep, border: null),
+              color: Palette.basilSoft, fg: Palette.accentDeep, border: null),
           TextButton(
             onPressed: () {
               draft

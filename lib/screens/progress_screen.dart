@@ -96,9 +96,8 @@ class ProgressScreen extends StatelessWidget {
                         children: [
                           SymBubble(t.emoji,
                               size: 48,
-                              color: count > 0
-                                  ? Palette.basilSoft
-                                  : const Color(0xFFF0F3EE)),
+                              color:
+                                  count > 0 ? Palette.basilSoft : Palette.sand),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
@@ -269,7 +268,7 @@ class _TodayCard extends StatelessWidget {
               bar('🔥', 'Kalori (kcal)', today.kcal, p.dailyKcal,
                   Palette.tomato),
               bar('💪', 'Protein (g)', today.protein, p.dailyProtein,
-                  Palette.basil),
+                  Palette.accent),
               bar('🌾', 'Lif (g)', today.fiber, p.dailyFiber,
                   Palette.butterDeep),
               const SizedBox(height: 6),

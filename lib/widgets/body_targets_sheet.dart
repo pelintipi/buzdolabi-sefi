@@ -160,7 +160,7 @@ class _BodyTargetsSheetState extends State<_BodyTargetsSheet> {
             const SizedBox(height: 10),
             Text('Hedefin ne?', style: theme.textTheme.titleSmall),
             const SizedBox(height: 6),
-            segment(WeightGoal.values, _goal, (g) => g.label, (v) => _goal = v),
+            segment(WeightGoal.values, _goal, (g) => g.short, (v) => _goal = v),
             const SizedBox(height: 18),
             if (body != null)
               _Result(body: body)

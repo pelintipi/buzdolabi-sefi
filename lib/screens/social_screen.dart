@@ -184,9 +184,8 @@ class _FilterChip extends StatelessWidget {
                   width: 8,
                   height: 8,
                   decoration: BoxDecoration(
-                      color: selected && dot == const Color(0xFF1A1A17)
-                          ? Colors.white
-                          : dot,
+                      color:
+                          selected && dot == Palette.ink ? Colors.white : dot,
                       shape: BoxShape.circle),
                 ),
                 const SizedBox(width: 6),
@@ -226,11 +225,11 @@ class _HowTo extends StatelessWidget {
                 decoration:
                     BoxDecoration(color: Palette.sand, shape: BoxShape.circle),
                 child: Text(n,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontFamily: Fonts.body,
                         fontWeight: FontWeight.w800,
                         fontSize: 13,
-                        color: Palette.basil)),
+                        color: Palette.accent)),
               ),
               const SizedBox(width: 10),
               Expanded(child: Text(text, style: theme.textTheme.bodyMedium)),

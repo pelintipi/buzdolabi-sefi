@@ -624,12 +624,14 @@ class ChunkyProgress extends StatelessWidget {
   const ChunkyProgress(
       {super.key,
       required this.value,
-      this.color = Palette.basil,
+      this.color,
       this.track,
       this.height = 12});
 
   final double value;
-  final Color color;
+
+  /// Verilmezse yazı yeşili (koyu temada açık nane; koyu zeminde görünsün).
+  final Color? color;
   final Color? track;
   final double height;
 
@@ -647,7 +649,7 @@ class ChunkyProgress extends StatelessWidget {
               widthFactor: value.clamp(0.0, 1.0).toDouble(),
               child: Container(
                 decoration: BoxDecoration(
-                  color: color,
+                  color: color ?? Palette.accent,
                   borderRadius: BorderRadius.circular(height),
                 ),
               ),

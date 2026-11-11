@@ -250,9 +250,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     child: Text(
                       'Bu tarif alerjin olan şunları içeriyor: '
                       '${conflicts.join(', ')}',
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontWeight: FontWeight.w800,
-                          color: Palette.tomatoDeep),
+                          color: Palette.tomatoText),
                     ),
                   ),
                 ],
@@ -381,7 +381,7 @@ class _ServingStepper extends StatelessWidget {
         IconButton.filledTonal(
           style: IconButton.styleFrom(
               backgroundColor: Palette.basilSoft,
-              foregroundColor: Palette.basilDeep,
+              foregroundColor: Palette.accentDeep,
               minimumSize: const Size(36, 36)),
           icon: Icon(icon, size: 20),
           tooltip: tip,
@@ -451,8 +451,7 @@ class _FactsRow extends StatelessWidget {
         tile('🥑', '${formatNumber(n.fat, decimals: 0)} g', 'yağ',
             Palette.butterSoft),
         gap,
-        tile('💰', formatMoney(facts.costPerServing), 'maliyet',
-            const Color(0xFFE8EEF6)),
+        tile('💰', formatMoney(facts.costPerServing), 'maliyet', Palette.sand),
       ],
     );
   }
@@ -520,12 +519,12 @@ class _IngredientRow extends StatelessWidget {
     final amount = item.amount * scale;
     final hint = halfPieceHint(amount, item.measure);
     final (badge, color) = switch (check.state) {
-      ItemState.enough => ('Var', Palette.basil),
-      ItemState.short => ('Az', Palette.butterDeep),
+      ItemState.enough => ('Var', Palette.accent),
+      ItemState.short => ('Az', Palette.butterText),
       ItemState.missing => item.optional
           ? ('İsteğe bağlı', Palette.inkSoft)
           : ('Yok', Palette.tomato),
-      ItemState.substituted => ('Alternatif', Palette.basil),
+      ItemState.substituted => ('Alternatif', Palette.accent),
       ItemState.staple => ('Evde var', Palette.inkSoft),
     };
     final subtitle = <String>[
@@ -686,7 +685,7 @@ class _DietitianCard extends StatelessWidget {
 
   final NutritionReview review;
 
-  static const _protein = Palette.basil;
+  static Color get _protein => Palette.accent;
   static const _carb = Palette.butter;
   static const _fat = Color(0xFF6E8B3D);
 
@@ -776,10 +775,10 @@ class _DietitianCard extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.only(top: 2),
                       child: Icon(Icons.lightbulb_outline_rounded,
-                          size: 17, color: Palette.butterDeep),
+                          size: 17, color: Palette.butterText),
                     ),
                     const SizedBox(width: 8),
                     Expanded(child: Text(t, style: theme.textTheme.bodySmall)),
@@ -810,7 +809,7 @@ class _NutritionTable extends StatelessWidget {
     final k = p.dailyKcal / 2000;
     final rows = [
       ('🔥', 'Enerji', n.kcal, 'kcal', p.dailyKcal, Palette.tomato),
-      ('💪', 'Protein', n.protein, 'g', p.dailyProtein, Palette.basil),
+      ('💪', 'Protein', n.protein, 'g', p.dailyProtein, Palette.accent),
       ('🍞', 'Karbonhidrat', n.carbs, 'g', 260 * k, Palette.butterDeep),
       ('🌾', 'Lif', n.fiber, 'g', p.dailyFiber, const Color(0xFF8A6A2E)),
       ('🥑', 'Yağ', n.fat, 'g', 70 * k, const Color(0xFF6E8B3D)),

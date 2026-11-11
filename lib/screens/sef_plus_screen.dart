@@ -21,7 +21,7 @@ class SefPlusBadge extends StatelessWidget {
           color: Palette.butter,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
-              color: onDark ? Colors.white : Palette.butterDeep, width: 1.5),
+              color: onDark ? Colors.white : Palette.butterText, width: 1.5),
         ),
         child: Text(
           firstReleaseFree ? 'Şef+ · şimdilik ücretsiz' : 'Şef+',
@@ -103,10 +103,10 @@ class SefPlusScreen extends StatelessWidget {
                           if (f.freeMonthly > 0)
                             Text(
                                 'Abonelik açılınca ücretsiz: ayda ${f.freeMonthly}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                     fontWeight: FontWeight.w800,
                                     fontSize: 12.5,
-                                    color: Palette.basilDeep)),
+                                    color: Palette.accentDeep)),
                         ],
                       ),
                     ),
@@ -134,8 +134,8 @@ class SefPlusScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Row(
                       children: [
-                        const Icon(Icons.check_circle_rounded,
-                            color: Palette.basil, size: 20),
+                        Icon(Icons.check_circle_rounded,
+                            color: Palette.accent, size: 20),
                         const SizedBox(width: 8),
                         Expanded(
                             child: Text(line,

@@ -834,7 +834,7 @@ class _OptionTile extends StatelessWidget {
               color: selected ? Palette.basilSoft : Palette.surface,
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                  color: selected ? Palette.basil : Palette.line,
+                  color: selected ? Palette.accent : Palette.line,
                   width: selected ? 1.6 : 1),
               boxShadow: const [
                 BoxShadow(

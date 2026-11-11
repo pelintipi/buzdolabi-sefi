@@ -456,12 +456,12 @@ class _ExpiringCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Yakında bozulacaklar',
+                Text('Yakında bozulacaklar',
                     style: TextStyle(
                         fontFamily: Fonts.body,
                         fontWeight: FontWeight.w700,
                         fontSize: 14.5,
-                        color: Palette.tomatoDeep)),
+                        color: Palette.tomatoText)),
                 Text(detail,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,

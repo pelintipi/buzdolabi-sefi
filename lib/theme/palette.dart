@@ -15,6 +15,8 @@ class BrandColors {
     required this.butterSoft,
     required this.accent,
     required this.accentDeep,
+    required this.tomatoText,
+    required this.butterText,
   });
 
   final Color ink;
@@ -32,6 +34,10 @@ class BrandColors {
   final Color accent;
   final Color accentDeep;
 
+  /// Kiremit ve hardal yazı (rozet, uyarı). Koyu temada açık ton.
+  final Color tomatoText;
+  final Color butterText;
+
   static const light = BrandColors(
     ink: Color(0xFF1A1A17),
     inkSoft: Color(0xFF6E6C66),
@@ -45,6 +51,8 @@ class BrandColors {
     butterSoft: Color(0xFFF6F0E3),
     accent: Color(0xFF1F3B2D),
     accentDeep: Color(0xFF13261C),
+    tomatoText: Color(0xFF8F3E21),
+    butterText: Color(0xFF7A5A16),
   );
 
   static const dark = BrandColors(
@@ -60,6 +68,8 @@ class BrandColors {
     butterSoft: Color(0xFF2A2418),
     accent: Color(0xFF9ED4AE),
     accentDeep: Color(0xFFB6E3C4),
+    tomatoText: Color(0xFFF0A88C),
+    butterText: Color(0xFFE6C47A),
   );
 
   static BrandColors forBrightness(Brightness b) =>
@@ -89,10 +99,16 @@ abstract final class Palette {
   static const tomatoDeep = Color(0xFF8F3E21);
   static Color get tomatoSoft => _c.tomatoSoft;
 
+  /// Zemin ya da soft rozet üstünde kiremit yazı (koyu temada açık).
+  static Color get tomatoText => _c.tomatoText;
+
   /// Durum: aşı boyası ("Az", en iyi değer).
   static const butter = Color(0xFFC99A3C);
   static const butterDeep = Color(0xFF946E22);
   static Color get butterSoft => _c.butterSoft;
+
+  /// Zemin ya da soft rozet üstünde hardal yazı (koyu temada açık).
+  static Color get butterText => _c.butterText;
 
   static Color get ink => _c.ink;
   static Color get inkSoft => _c.inkSoft;

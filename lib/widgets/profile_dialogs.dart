@@ -15,7 +15,7 @@ Widget _choice(String icon, String label, bool selected,
       label: Text(label),
       selected: selected,
       side:
-          BorderSide(color: selected ? Palette.basil : Palette.line, width: 2),
+          BorderSide(color: selected ? Palette.accent : Palette.line, width: 2),
       onSelected: onChanged,
     );
 

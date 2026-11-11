@@ -342,10 +342,10 @@ class CollectionDetailScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                         color: Palette.tomatoSoft,
                         borderRadius: BorderRadius.circular(24)),
-                    child: const Text('Çıkar',
+                    child: Text('Çıkar',
                         style: TextStyle(
                             fontWeight: FontWeight.w800,
-                            color: Palette.tomatoDeep)),
+                            color: Palette.tomatoText)),
                   ),
                   onDismissed: (_) =>
                       state.toggleInCollection(user.id, m.recipe.id),
@@ -425,10 +425,10 @@ class CookedHistoryScreen extends StatelessWidget {
                                             fontWeight: FontWeight.w800,
                                             fontSize: 13)),
                                     Text('${c.times} kez',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                             fontWeight: FontWeight.w800,
                                             fontSize: 12,
-                                            color: Palette.basilDeep)),
+                                            color: Palette.accentDeep)),
                                   ],
                                 ),
                               ),
@@ -623,7 +623,7 @@ class _CollectionDialogState extends State<_CollectionDialog> {
                           e == _emoji ? Palette.basilSoft : Colors.transparent,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                          color: e == _emoji ? Palette.basil : Palette.line,
+                          color: e == _emoji ? Palette.accent : Palette.line,
                           width: 2),
                     ),
                     child: Sym(e, size: 28),

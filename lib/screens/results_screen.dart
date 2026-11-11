@@ -373,7 +373,7 @@ class _CompareCard extends StatelessWidget {
                                   fontWeight: FontWeight.w700,
                                   fontSize: 12,
                                   color: m.group == MatchGroup.almost
-                                      ? Palette.tomatoDeep
+                                      ? Palette.tomatoText
                                       : reviewColor(m.facts.review.tone))),
                         ],
                       ),
@@ -573,7 +573,7 @@ class _FilterBar extends StatelessWidget {
             selected: selected,
             selectedColor: Palette.basilSoft,
             side: BorderSide(
-                color: selected ? Palette.basil : Palette.line, width: 2),
+                color: selected ? Palette.accent : Palette.line, width: 2),
             onSelected: (on) => onChanged(apply(on)),
           ),
         );

@@ -83,7 +83,7 @@ class ProfileScreen extends StatelessWidget {
           label: Text(label),
           selected: selected,
           side: BorderSide(
-              color: selected ? Palette.basil : Palette.line, width: 2),
+              color: selected ? Palette.accent : Palette.line, width: 2),
           onSelected: onChanged,
         );
 
@@ -420,17 +420,16 @@ class ProfileScreen extends StatelessWidget {
             onTap: () => _confirmReset(context),
             child: Row(
               children: [
-                const Icon(Icons.delete_forever_rounded,
-                    color: Palette.tomatoDeep),
+                Icon(Icons.delete_forever_rounded, color: Palette.tomatoText),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Tüm verilerimi sil',
+                      Text('Tüm verilerimi sil',
                           style: TextStyle(
                               fontWeight: FontWeight.w800,
-                              color: Palette.tomatoDeep)),
+                              color: Palette.tomatoText)),
                       Text('Bütün verilerin yalnızca bu cihazda saklanır.',
                           style: theme.textTheme.bodySmall),
                     ],

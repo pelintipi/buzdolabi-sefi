@@ -41,7 +41,7 @@ class PlanScreen extends StatelessWidget {
               children: [
                 SoftCard(
                   color: Palette.basilSoft,
-                  borderColor: Palette.basil,
+                  borderColor: Palette.accent,
                   child: Row(
                     children: [
                       const Sym('🗓', size: 48),
@@ -83,11 +83,11 @@ class PlanScreen extends StatelessWidget {
                               child: Column(
                                 children: [
                                   Text(_dayShort[day.weekday - 1],
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                           fontFamily: Fonts.display,
                                           fontWeight: FontWeight.w800,
                                           fontSize: 16,
-                                          color: Palette.basilDeep)),
+                                          color: Palette.accentDeep)),
                                   Text('${day.day}',
                                       style: const TextStyle(
                                           fontFamily: Fonts.display,
@@ -200,7 +200,7 @@ class PlanScreen extends StatelessWidget {
                 ] else
                   SoftCard(
                     color: Palette.basilSoft,
-                    borderColor: Palette.basil,
+                    borderColor: Palette.accent,
                     child: Row(
                       children: [
                         const Sym('✅', size: 40),

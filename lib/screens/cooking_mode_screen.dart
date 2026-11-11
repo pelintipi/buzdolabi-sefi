@@ -338,10 +338,10 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                           : 'Duydum: "$_heard"',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 13.5,
-                          color: Palette.tomatoDeep),
+                          color: Palette.tomatoText),
                     ),
                   ),
                 ],
@@ -358,7 +358,7 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                       margin:
                           EdgeInsets.only(right: i == steps.length - 1 ? 0 : 6),
                       decoration: BoxDecoration(
-                        color: i <= _step ? Palette.basil : Palette.basilSoft,
+                        color: i <= _step ? Palette.accent : Palette.basilSoft,
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
@@ -484,11 +484,11 @@ class _StepPage extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text('Adım ${index + 1}/$total',
-                style: const TextStyle(
+                style: TextStyle(
                     fontFamily: Fonts.display,
                     fontWeight: FontWeight.w800,
                     fontSize: 16,
-                    color: Palette.basilDeep)),
+                    color: Palette.accentDeep)),
           ),
           const SizedBox(height: 20),
           Text(step.text,

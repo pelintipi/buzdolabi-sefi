@@ -232,7 +232,7 @@ class _CookedScreenState extends State<CookedScreen> {
                           else
                             Pill('− $amount',
                                 color: Palette.tomatoSoft,
-                                fg: Palette.tomatoDeep,
+                                fg: Palette.tomatoText,
                                 border: null),
                         ],
                       ),

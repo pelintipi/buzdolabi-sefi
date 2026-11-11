@@ -12,9 +12,9 @@ import 'ui.dart';
 
 /// Diyetisyen değerlendirmesinin rengi.
 Color reviewColor(ReviewTone t) => switch (t) {
-      ReviewTone.good => Palette.basil,
+      ReviewTone.good => Palette.accent,
       ReviewTone.ok => Palette.inkSoft,
-      ReviewTone.caution => const Color(0xFF8A6500),
+      ReviewTone.caution => Palette.butterText,
     };
 
 typedef MatchStatus = ({String icon, String text, Color color, Color soft});
@@ -27,7 +27,7 @@ MatchStatus matchStatus(RecipeMatch m, IngredientRepository repo) {
         text: m.maxServings < m.recipe.servings
             ? 'Hemen yapabilirsin · ${formatNumber(m.maxServings)} porsiyon çıkar'
             : 'Hemen yapabilirsin',
-        color: Palette.basilDeep,
+        color: Palette.accentDeep,
         soft: Palette.basilSoft,
       );
     case MatchGroup.substitute:
@@ -37,7 +37,7 @@ MatchStatus matchStatus(RecipeMatch m, IngredientRepository repo) {
         icon: '🔄',
         text: '${repo.byId(c.item.ingredientId).name} yerine '
             '${repo.byId(c.substitute!.ingredientId).name}',
-        color: Palette.basilDeep,
+        color: Palette.accentDeep,
         soft: Palette.basilSoft,
       );
     case MatchGroup.almost:
@@ -51,14 +51,14 @@ MatchStatus matchStatus(RecipeMatch m, IngredientRepository repo) {
       return (
         icon: '🤏',
         text: text,
-        color: const Color(0xFF8A6500),
+        color: Palette.butterText,
         soft: Palette.butterSoft,
       );
     case MatchGroup.far:
       return (
         icon: '🛒',
         text: '${m.problems.length} malzeme eksik',
-        color: Palette.tomatoDeep,
+        color: Palette.tomatoText,
         soft: Palette.tomatoSoft,
       );
   }

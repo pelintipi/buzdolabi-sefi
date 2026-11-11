@@ -78,7 +78,7 @@ void main() {
       await tester.enterText(fields.at(1), '165');
       await tester.enterText(fields.at(2), '65');
       await tester.pumpAndSettle();
-      await r.tap(tester, find.text('Kilo vermek'), 'Kilo vermek');
+      await r.tap(tester, find.text('Kilo ver'), 'Kilo ver');
       await tester.pumpAndSettle();
       await r.capture(tester,
           title: 'Bilgilerimi yazdım',

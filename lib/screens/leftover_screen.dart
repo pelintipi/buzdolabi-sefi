@@ -154,7 +154,7 @@ class _LeftoverTile extends StatelessWidget {
           color: selected ? Palette.basilSoft : Palette.surface,
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
-              color: selected ? Palette.basil : Palette.line, width: 2),
+              color: selected ? Palette.accent : Palette.line, width: 2),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -167,11 +167,11 @@ class _LeftoverTile extends StatelessWidget {
                 style: const TextStyle(
                     fontWeight: FontWeight.w800, fontSize: 13, height: 1.1)),
             if (inPantry)
-              const Text('dolabında',
+              Text('dolabında',
                   style: TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 11,
-                      color: Palette.basilDeep)),
+                      color: Palette.accentDeep)),
           ],
         ),
       ),

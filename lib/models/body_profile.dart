@@ -36,12 +36,15 @@ enum ActivityLevel {
 }
 
 enum WeightGoal {
-  lose('Kilo vermek'),
-  keep('Kilomu korumak'),
-  gain('Kilo / kas almak');
+  lose('Kilo vermek', 'Kilo ver'),
+  keep('Kilomu korumak', 'Kilomu koru'),
+  gain('Kilo / kas almak', 'Kilo al');
 
-  const WeightGoal(this.label);
+  const WeightGoal(this.label, this.short);
   final String label;
+
+  /// Seçim düğmesindeki kısa ad (uzunu iki satıra kırılıyordu).
+  final String short;
 }
 
 typedef DailyTargets = ({double kcal, double protein, double fiber});

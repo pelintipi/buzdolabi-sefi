@@ -178,7 +178,8 @@ class PlatformBadge extends StatelessWidget {
   final bool onDark;
 
   static Color dotColor(SocialPlatform p) => switch (p) {
-        SocialPlatform.tiktok => const Color(0xFF1A1A17),
+        // TikTok siyahı koyu temada görünmez; yazı rengi (açıkta siyah).
+        SocialPlatform.tiktok => Palette.ink,
         SocialPlatform.instagram => const Color(0xFFC13584),
         SocialPlatform.youtube => const Color(0xFFD32F2F),
         SocialPlatform.other => Palette.inkSoft,

@@ -32,14 +32,24 @@ abstract final class RecipePhotos {
 }
 
 /// Yemek türüne göre yer tutucu tonları (fotoğraf yokken).
-Color _tint(RecipeCategory c) => switch (c) {
-      RecipeCategory.kahvalti => const Color(0xFFF3EEDF),
-      RecipeCategory.corba => const Color(0xFFF2E8DE),
-      RecipeCategory.anaYemek => const Color(0xFFEEEAE2),
-      RecipeCategory.salata => const Color(0xFFE8EEE4),
-      RecipeCategory.atistirmalik => const Color(0xFFF1EBE1),
-      RecipeCategory.tatli => const Color(0xFFF2E8E7),
-    };
+/// Koyu temada aynı tonların koyu karşılıkları (açık kutular parlamasın).
+Color _tint(RecipeCategory c, Brightness b) {
+  final dark = b == Brightness.dark;
+  return switch (c) {
+    RecipeCategory.kahvalti =>
+      dark ? const Color(0xFF2B2A22) : const Color(0xFFF3EEDF),
+    RecipeCategory.corba =>
+      dark ? const Color(0xFF2C2722) : const Color(0xFFF2E8DE),
+    RecipeCategory.anaYemek =>
+      dark ? const Color(0xFF282824) : const Color(0xFFEEEAE2),
+    RecipeCategory.salata =>
+      dark ? const Color(0xFF232A24) : const Color(0xFFE8EEE4),
+    RecipeCategory.atistirmalik =>
+      dark ? const Color(0xFF2A2722) : const Color(0xFFF1EBE1),
+    RecipeCategory.tatli =>
+      dark ? const Color(0xFF2C2425) : const Color(0xFFF2E8E7),
+  };
+}
 
 /// Fotoğraf yokken türün ince çizgi ikonu (3D emoji yerine; tutarlı ve sade).
 IconData _iconFor(RecipeCategory c) => switch (c) {
@@ -70,7 +80,8 @@ class RecipeImage extends StatelessWidget {
     final photo = RecipePhotos.pathFor(recipe.id);
     final shortest = width < h ? width : h;
     final placeholder = DecoratedBox(
-      decoration: BoxDecoration(color: _tint(categoryOf(recipe))),
+      decoration: BoxDecoration(
+          color: _tint(categoryOf(recipe), Theme.of(context).brightness)),
       child: Center(
         child: iconAssetFor(recipe.emoji) != null
             ? FoodIcon(recipe.emoji, size: shortest * 0.62)

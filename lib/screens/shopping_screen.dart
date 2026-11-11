@@ -191,10 +191,10 @@ class _WhatToBuy extends StatelessWidget {
                           Text(s.ingredient.name,
                               style: theme.textTheme.titleMedium),
                           Text('+${s.recipeCount} tarif açılır',
-                              style: const TextStyle(
+                              style: TextStyle(
                                   fontWeight: FontWeight.w800,
                                   fontSize: 13.5,
-                                  color: Palette.basilDeep)),
+                                  color: Palette.accentDeep)),
                           Text(examples(s.ingredient.id).take(2).join(', '),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,

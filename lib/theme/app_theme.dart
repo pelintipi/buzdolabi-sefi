@@ -178,7 +178,7 @@ ThemeData buildAppTheme(Brightness brightness) {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
-        borderSide: const BorderSide(color: Palette.basil, width: 2),
+        borderSide: BorderSide(color: c.accent, width: 2),
       ),
     ),
     dialogTheme: DialogThemeData(

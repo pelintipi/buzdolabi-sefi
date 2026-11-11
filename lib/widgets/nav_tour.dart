@@ -138,7 +138,7 @@ class _NavTourSheetState extends State<_NavTourSheet> {
                             duration: const Duration(milliseconds: 180),
                             height: 4,
                             decoration: BoxDecoration(
-                              color: i <= _i ? Palette.basil : Palette.line,
+                              color: i <= _i ? Palette.accent : Palette.line,
                               borderRadius: BorderRadius.circular(99),
                             ),
                           ),
