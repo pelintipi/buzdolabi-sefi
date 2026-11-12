@@ -210,15 +210,6 @@ class _TodayCard extends StatelessWidget {
     final now = DateTime.now();
     final today = state.intakeOn(now);
     final p = state.profile;
-    final week = [
-      for (var i = 6; i >= 0; i--)
-        (
-          day: DateTime(now.year, now.month, now.day - i),
-          kcal: state.intakeOn(DateTime(now.year, now.month, now.day - i)).kcal,
-        )
-    ];
-    final maxKcal = [p.dailyKcal, ...week.map((w) => w.kcal)]
-        .reduce((a, b) => a > b ? a : b);
     final photos = state.photoLogs;
 
     Widget bar(
@@ -272,38 +263,7 @@ class _TodayCard extends StatelessWidget {
               bar('🌾', 'Lif (g)', today.fiber, p.dailyFiber,
                   Palette.butterDeep),
               const SizedBox(height: 6),
-              SizedBox(
-                height: 86,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    for (final w in week)
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Container(
-                              height: 4 + 56 * (w.kcal / maxKcal),
-                              margin: const EdgeInsets.symmetric(horizontal: 5),
-                              decoration: BoxDecoration(
-                                color: w.day.day == now.day
-                                    ? Palette.tomato
-                                    : Palette.tomatoSoft,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(_weekdays[w.day.weekday - 1],
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 11.5,
-                                    color: Palette.inkSoft)),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ),
+              const _WeekChart(),
               const SizedBox(height: 6),
               Text(
                   p.body == null
@@ -353,6 +313,160 @@ class _TodayCard extends StatelessWidget {
             ],
           ),
         ],
+      ],
+    );
+  }
+}
+
+enum _Metric {
+  kcal('Kalori', 'kcal'),
+  protein('Protein', 'g'),
+  fiber('Lif', 'g');
+
+  const _Metric(this.label, this.unit);
+  final String label;
+  final String unit;
+
+  /// Üstteki "Bugün yediklerin" çubuklarıyla aynı renk.
+  Color get color => switch (this) {
+        _Metric.kcal => Palette.tomato,
+        _Metric.protein => Palette.accent,
+        _Metric.fiber => Palette.butterDeep,
+      };
+}
+
+/// Son 7 gün: kalori, protein ya da lif; kesikli çizgi günlük hedef.
+class _WeekChart extends StatefulWidget {
+  const _WeekChart();
+
+  @override
+  State<_WeekChart> createState() => _WeekChartState();
+}
+
+class _WeekChartState extends State<_WeekChart> {
+  var _metric = _Metric.kcal;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
+    final p = state.profile;
+    final now = DateTime.now();
+    final target = switch (_metric) {
+      _Metric.kcal => p.dailyKcal,
+      _Metric.protein => p.dailyProtein,
+      _Metric.fiber => p.dailyFiber,
+    };
+    final week = [
+      for (var i = 6; i >= 0; i--)
+        () {
+          final day = DateTime(now.year, now.month, now.day - i);
+          final t = state.intakeOn(day);
+          return (
+            day: day,
+            value: switch (_metric) {
+              _Metric.kcal => t.kcal,
+              _Metric.protein => t.protein,
+              _Metric.fiber => t.fiber,
+            },
+          );
+        }()
+    ];
+    // Üstte pay: hedef çizgisi ve en yüksek çubuk kutunun dışına taşmasın.
+    final maxValue =
+        [target, ...week.map((w) => w.value)].reduce((a, b) => a > b ? a : b) *
+            1.15;
+    const barArea = 70.0;
+    final color = _metric.color;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            for (final m in _Metric.values) ...[
+              ChoiceChip(
+                label: Text(m.label),
+                selected: m == _metric,
+                showCheckmark: false,
+                visualDensity: VisualDensity.compact,
+                selectedColor: m.color.withValues(alpha: 0.18),
+                side: BorderSide(
+                    color: m == _metric ? m.color : Palette.line, width: 1.5),
+                labelStyle: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    color: m == _metric ? m.color : Palette.inkSoft),
+                onSelected: (_) => setState(() => _metric = m),
+              ),
+              const SizedBox(width: 6),
+            ],
+          ],
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: barArea + 22,
+          child: Stack(
+            children: [
+              // Hedef çizgisi
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 22 + 4 + (barArea - 4) * (target / maxValue),
+                child: Row(
+                  children: [
+                    for (var i = 0; i < 40; i++)
+                      Expanded(
+                        child: Container(
+                          height: 1.5,
+                          margin: const EdgeInsets.symmetric(horizontal: 2),
+                          color: i.isEven
+                              ? Palette.ink.withValues(alpha: 0.55)
+                              : Colors.transparent,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  for (final w in week)
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Container(
+                            height: 4 + (barArea - 4) * (w.value / maxValue),
+                            margin: const EdgeInsets.symmetric(horizontal: 5),
+                            decoration: BoxDecoration(
+                              color: w.day.day == now.day
+                                  ? color
+                                  : color.withValues(alpha: 0.3),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          SizedBox(
+                            height: 18,
+                            child: Text(_weekdays[w.day.weekday - 1],
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 11.5,
+                                    color: Palette.inkSoft)),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Text(
+          'Kesikli çizgi: günlük hedefin (${target.round()} ${_metric.unit}).',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
       ],
     );
   }
