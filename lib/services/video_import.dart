@@ -276,7 +276,7 @@ class VideoInfoClient {
     final Uri target;
     if (!kIsWeb) {
       target = endpoint;
-    } else if (endpoint.port == 8787) {
+    } else if (endpoint.path.startsWith('/proxy/')) {
       target = endpoint;
     } else {
       target = _proxyEndpoint('/oembed', endpoint.queryParameters['url'] ?? '');
@@ -289,14 +289,15 @@ class VideoInfoClient {
     return decoded is Map<String, dynamic> ? decoded : null;
   }
 
-  /// Web tarayıcısından LAN'daki proxy: aynı host, port 8787.
+  /// Web: sayfayı sunan serve_web.dart /proxy/... isteklerini yerel video
+  /// proxy'sine iletir. Aynı adres olduğu için https sayfada da çalışır.
   static Uri _proxyEndpoint(String path, String videoUrl) {
     final base = Uri.base;
     return Uri(
       scheme: base.scheme.isEmpty ? 'http' : base.scheme,
       host: base.host.isEmpty ? '127.0.0.1' : base.host,
-      port: 8787,
-      path: path,
+      port: base.hasPort ? base.port : null,
+      path: '/proxy$path',
       queryParameters: {'url': videoUrl},
     );
   }

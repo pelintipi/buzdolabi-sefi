@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
@@ -326,6 +327,14 @@ class _NoCamera extends StatelessWidget {
             SizedBox(height: 8),
             Text('Kamera burada açılamıyor',
                 style: TextStyle(fontWeight: FontWeight.w800)),
+            if (kIsWeb)
+              Padding(
+                padding: EdgeInsets.fromLTRB(24, 6, 24, 0),
+                child: Text(
+                    'Tarayıcı kamerayı yalnızca güvenli (https) adreste açar. '
+                    'iPhone uygulamasında doğrudan çalışır.',
+                    textAlign: TextAlign.center),
+              ),
           ],
         ),
       );

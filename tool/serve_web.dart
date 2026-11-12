@@ -5,19 +5,29 @@
 // Flutter'ın geliştirme sunucusu bunların ikisini de yapmıyor.
 //   flutter build web --release --dart-define=ANKET_HER_ACILISTA=true
 //   dart run tool/serve_web.dart 8091
+// iPhone'da kamera/paylaş için https gerekir (Safari http'de kapatır):
+//   dart run tool/serve_web.dart 8443 --https
+// Sertifika yoksa tool/certs altında kendinden imzalı biri üretilir.
+// /proxy/... istekleri yerel video proxy'sine (8787) iletilir; böylece
+// https sayfası http proxy'ye takılmaz.
 import 'dart:io';
 
 Future<void> main(List<String> args) async {
-  final port = args.isNotEmpty ? int.parse(args.first) : 8091;
+  final https = args.contains('--https');
+  final nums = args.where((a) => int.tryParse(a) != null);
+  final port = nums.isNotEmpty ? int.parse(nums.first) : (https ? 8443 : 8091);
   final root = Directory('build/web').absolute;
   if (!root.existsSync()) {
     stderr.writeln('build/web yok; önce: flutter build web --release');
     exit(1);
   }
-  final server = await HttpServer.bind(InternetAddress.anyIPv4, port);
+  final server = https
+      ? await HttpServer.bindSecure(
+          InternetAddress.anyIPv4, port, await _certContext())
+      : await HttpServer.bind(InternetAddress.anyIPv4, port);
   // gzip'i dart:io kendisi yapar (Accept-Encoding: gzip gelirse).
   server.autoCompress = true;
-  stdout.writeln('build/web sunuluyor: http://0.0.0.0:$port');
+  stdout.writeln('build/web sunuluyor: ${https ? 'https' : 'http'}://0.0.0.0:$port');
 
   await for (final req in server) {
     try {
@@ -54,6 +64,7 @@ const _types = {
 
 Future<void> _handle(HttpRequest req, Directory root) async {
   final res = req.response;
+  if (req.uri.path.startsWith('/proxy/')) return _forward(req);
   var path = Uri.decodeComponent(req.uri.path);
   if (path.endsWith('/')) path = '${path}index.html';
   final file =
@@ -102,4 +113,60 @@ Future<void> _send(HttpRequest req, File file) async {
   if (req.method == 'HEAD') return res.close();
   await res.addStream(file.openRead());
   await res.close();
+}
+
+final _proxyClient = HttpClient();
+
+/// /proxy/oembed?url=… → http://127.0.0.1:8787/oembed?url=…
+Future<void> _forward(HttpRequest req) async {
+  final res = req.response;
+  res.headers.set('Access-Control-Allow-Origin', '*');
+  try {
+    final target = req.uri.replace(
+        scheme: 'http',
+        host: '127.0.0.1',
+        port: 8787,
+        path: req.uri.path.substring('/proxy'.length));
+    final up = await (await _proxyClient.getUrl(target)).close();
+    res.statusCode = up.statusCode;
+    res.headers.contentType = ContentType.json;
+    await res.addStream(up);
+  } catch (e) {
+    res.statusCode = HttpStatus.badGateway;
+    res.write('{"error":"video proxy kapalı: dart run tool/oembed_proxy.dart"}');
+  }
+  await res.close();
+}
+
+/// tool/certs/cert.pem + key.pem; yoksa openssl ile bu bilgisayarın yerel
+/// IP'leri için üretilir. Kendinden imzalıdır: telefonda bir kez
+/// "Ayrıntıları göster → Web sitesini ziyaret et" demek gerekir.
+Future<SecurityContext> _certContext() async {
+  final dir = Directory('tool/certs')..createSync(recursive: true);
+  final cert = File('${dir.path}/cert.pem');
+  final key = File('${dir.path}/key.pem');
+  if (!cert.existsSync() || !key.existsSync()) {
+    final ips = <String>['127.0.0.1'];
+    for (final ni in await NetworkInterface.list(
+        type: InternetAddressType.IPv4)) {
+      ips.addAll(ni.addresses.map((a) => a.address));
+    }
+    final san = [
+      'DNS:localhost',
+      for (final ip in ips.toSet()) 'IP:$ip',
+    ].join(',');
+    final r = await Process.run('openssl', [
+      'req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-days', '365',
+      '-keyout', key.path, '-out', cert.path,
+      '-subj', '/CN=Buzdolabi Sefi yerel',
+      '-addext', 'subjectAltName=$san',
+    ]);
+    if (r.exitCode != 0) {
+      stderr.writeln('Sertifika üretilemedi (openssl): ${r.stderr}');
+      exit(1);
+    }
+  }
+  return SecurityContext()
+    ..useCertificateChain(cert.path)
+    ..usePrivateKey(key.path);
 }

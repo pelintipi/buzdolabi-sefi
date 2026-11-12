@@ -61,3 +61,6 @@ app.*.map.json
 
 # Ekran testlerinin ürettiği raporlar ve görüntüler (her test çalışmasında yeniden oluşur)
 /degisiklik_raporlari/
+
+# Yerel https sertifikası (gizli anahtar)
+tool/certs/
