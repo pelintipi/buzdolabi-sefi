@@ -413,8 +413,39 @@ class CaptionRecipeExtractor {
     if (title == null || title.isEmpty) return null;
     if (_isIngredientListTitle(title)) return null;
     if (_isMetaLine(title)) return null;
+    if (isClickbaitTitle(title)) return null;
     return title;
   }
+
+  /// "Sevdiğini mutlu etmek isteyenler bu tarifi…", "Bunu denemeyen
+  /// kalmasın" gibi yemek adı olmayan giriş cümleleri.
+  static final _clickbait = RegExp(
+      r'(isteyen|denemeyen|bilmeyen|yapmayan|kaçırma|mutlu et|sevdiğin|'
+      r'\bbu tarif|\bbunu\b|\bşunu\b|\bsiz(?:in|e)?\b|\bsen(?:in|i)?\b|'
+      r'\bben(?:im)?\b|\bhiç\b|\bkimse|\bherkes|\bartık\b|\bgel(?:in)?\b|'
+      r'\bbakın|\bizle|takip|\bbeğen|kaydet|\byorum|\bpaylaş|'
+      r'\byaptım|\bdenedim|inanamayacak|bayılacak|şok)',
+      caseSensitive: false);
+
+  static bool isClickbaitTitle(String title) {
+    final t = TurkishText.lower(title);
+    if (t.endsWith('…') || t.endsWith('...') || t.contains('?')) return true;
+    if (t.split(RegExp(r'\s+')).length > 7) return true;
+    return _clickbait.hasMatch(t);
+  }
+
+  /// Yemeğe adını veren yan malzeme: tavuk + krema → "Kremalı tavuk".
+  static const _modifiers = <String, String>{
+    'krema': 'Kremalı',
+    'kasar': 'Kaşarlı',
+    'mantar': 'Mantarlı',
+    'yogurt': 'Yoğurtlu',
+    'patates': 'Patatesli',
+    'sebze': 'Sebzeli',
+    'salca': 'Soslu',
+    'domates': 'Domatesli',
+    'biber': 'Biberli',
+  };
 
   /// "6-8 kişilik Hazırlama: 20 Dakika Pişirme: 15 dakika", "Servings: 4",
   /// "Süre: 30 dk" gibi porsiyon/süre satırları yemek adı değildir.
@@ -471,7 +502,14 @@ class CaptionRecipeExtractor {
     // En ağır belirgin ana malzeme (roller ağırlığa göre verilir):
     // "Tavuk göğsü tarifi".
     if (distinctive.isNotEmpty) {
-      return '${distinctive.first.name} tarifi';
+      final main = distinctive.first;
+      final all = {for (final i in items) i.ingredientId};
+      for (final m in _modifiers.entries) {
+        if (m.key != main.id && all.contains(m.key)) {
+          return '${m.value} ${TurkishText.lower(main.name)}';
+        }
+      }
+      return '${main.name} tarifi';
     }
     return null;
   }
@@ -483,6 +521,7 @@ class CaptionRecipeExtractor {
     final bad = t.isEmpty ||
         t == 'Videodan tarif' ||
         _isMetaLine(t) ||
+        isClickbaitTitle(t) ||
         _isIngredientListTitle(t);
     if (!bad) return null;
     final better = _titleFromItems(r.items);
