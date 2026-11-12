@@ -11,6 +11,7 @@ import 'package:buzdolabi_sefi/state/app_state.dart';
 import 'package:buzdolabi_sefi/theme/app_theme.dart';
 import 'package:buzdolabi_sefi/theme/palette.dart';
 import 'package:buzdolabi_sefi/widgets/share_card.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -30,6 +31,7 @@ class _FakeShare extends ShareService {
 }
 
 void main() {
+  instagramTests();
   setUpAll(loadRealFonts);
 
   testWidgets('hikâye kartı: koyu temada okunur, paylaş PNG üretir',
@@ -99,4 +101,73 @@ void main() {
       r.writeHtml();
     }
   });
+}
+
+class _FakeNative extends NativeBridge {
+  _FakeNative(this.installed);
+  final bool installed;
+  int calls = 0;
+  @override
+  Future<bool> shareInstagramStory(Uint8List png) async {
+    calls++;
+    return installed;
+  }
+}
+
+Future<void> _instagramCase(WidgetTester tester, {required bool installed}) async {
+  SharedPreferences.setMockInitialValues({});
+  final state = AppState(
+    repo: IngredientRepository(ingredientCatalog),
+    recipes: recipeCatalog,
+    storage: StorageService(),
+  );
+  await state.load();
+  final share = _FakeShare();
+  final native = _FakeNative(installed);
+  tester.view.physicalSize = const Size(393 * 3, 852 * 3);
+  tester.view.devicePixelRatio = 3;
+  addTearDown(tester.view.reset);
+  debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+  try {
+    await tester.pumpWidget(MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: state),
+        Provider.value(
+            value: DeviceServices(
+                cameraAvailable: false, share: share, native: native)),
+      ],
+      child: MaterialApp(
+        home: Builder(
+          builder: (c) => Scaffold(
+            body: TextButton(
+                onPressed: () => showShareCard(c, state.recipeById('menemen')),
+                child: const Text('aç')),
+          ),
+        ),
+      ),
+    ));
+    await tester.tap(find.text('aç'));
+    await tester.pumpAndSettle();
+    expect(find.text('Instagram hikâyesi'), findsOneWidget);
+    await tester.runAsync(() async {
+      await tester.tap(find.text('Instagram hikâyesi'));
+      for (var i = 0; i < 50 && native.calls == 0; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        await tester.pump();
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    });
+    expect(native.calls, 1);
+    // Instagram yoksa paylaş menüsüne düşer.
+    expect(share.got == null, installed);
+  } finally {
+    debugDefaultTargetPlatformOverride = null;
+  }
+}
+
+void instagramTests() {
+  testWidgets('Instagram yüklüyse doğrudan hikâyeye gider',
+      (t) => _instagramCase(t, installed: true));
+  testWidgets('Instagram yoksa paylaş menüsü açılır',
+      (t) => _instagramCase(t, installed: false));
 }

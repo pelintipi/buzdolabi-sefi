@@ -40,7 +40,11 @@ class _ShareSheetState extends State<_ShareSheet> {
   final _key = GlobalKey();
   bool _busy = false;
 
-  Future<void> _share() async {
+  /// Instagram düğmesi yalnızca iPhone uygulamasında (tarayıcı açamaz).
+  bool get _canInstagram =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+
+  Future<void> _share({bool instagram = false}) async {
     setState(() => _busy = true);
     final services = DeviceServices.of(context);
     final boundary =
@@ -53,7 +57,10 @@ class _ShareSheetState extends State<_ShareSheet> {
       if (mounted) setState(() => _busy = false);
       return;
     }
-    final ok = await services.share.shareImage(data.buffer.asUint8List());
+    final png = data.buffer.asUint8List();
+    // Instagram yoksa ya da açılamazsa paylaş menüsüne düşülür.
+    final ok = (instagram && await services.native.shareInstagramStory(png)) ||
+        await services.share.shareImage(png);
     if (!mounted) return;
     setState(() => _busy = false);
     if (ok) {
@@ -72,7 +79,7 @@ class _ShareSheetState extends State<_ShareSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -91,10 +98,23 @@ class _ShareSheetState extends State<_ShareSheet> {
                   ShareCard(recipe: widget.recipe, photoPath: widget.photoPath),
             ),
             const SizedBox(height: 14),
+            if (_canInstagram) ...[
+              ChunkyButton(
+                label: _busy ? 'Hazırlanıyor…' : 'Instagram hikâyesi',
+                icon: '📸',
+                tone: ChunkyTone.accent,
+                onPressed: _busy ? null : () => _share(instagram: true),
+              ),
+              const SizedBox(height: 10),
+            ],
             ChunkyButton(
-              label: _busy ? 'Hazırlanıyor…' : 'Hikâyede paylaş',
+              label: _busy
+                  ? 'Hazırlanıyor…'
+                  : _canInstagram
+                      ? 'Diğer uygulamalar (TikTok, WhatsApp…)'
+                      : 'Hikâyede paylaş',
               icon: '📲',
-              tone: ChunkyTone.accent,
+              tone: _canInstagram ? ChunkyTone.soft : ChunkyTone.accent,
               onPressed: _busy ? null : _share,
             ),
           ],

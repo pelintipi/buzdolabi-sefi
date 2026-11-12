@@ -413,6 +413,17 @@ class NativeBridge {
     return best;
   }
 
+  /// Meta geliştirici hesabındaki uygulama kimliği (gizli değil):
+  /// flutter build ios --dart-define=FB_APP_ID=123…
+  static const fbAppId = String.fromEnvironment('FB_APP_ID');
+
+  /// Kartı doğrudan Instagram hikâye düzenleyicisinde açar (yalnızca iPhone
+  /// uygulamasında; Instagram yüklü değilse false).
+  Future<bool> shareInstagramStory(Uint8List png) async =>
+      await _call<bool>(
+          'shareInstagramStory', {'image': png, 'appId': fbAppId}) ??
+      false;
+
   Future<void> updateWidget(Map<String, Object?> data) async {
     await _call<bool>('updateWidget', data);
   }

@@ -82,6 +82,12 @@ final class NativeBridgePlugin: NSObject, FlutterPlugin {
       transcribe(path: path, locale: args["locale"] as? String ?? "tr-TR", result: result)
     case "updateWidget":
       updateWidget(args, result: result)
+    case "shareInstagramStory":
+      guard let data = (args["image"] as? FlutterStandardTypedData)?.data else {
+        result(false)
+        return
+      }
+      shareInstagramStory(data, appId: args["appId"] as? String ?? "", result: result)
     default:
       result(FlutterMethodNotImplemented)
     }
@@ -179,6 +185,26 @@ final class NativeBridgePlugin: NSObject, FlutterPlugin {
     export.exportAsynchronously {
       completion(export.status == .completed ? out : nil)
     }
+  }
+
+  // MARK: - Instagram hikâyesi
+  // Görsel panoya Instagram'ın beklediği anahtarla konur, Instagram hikâye
+  // düzenleyicisi doğrudan açılır. Instagram yüklü değilse false döner.
+
+  private func shareInstagramStory(_ image: Data, appId: String, result: @escaping FlutterResult) {
+    guard let url = URL(string: "instagram-stories://share?source_application=\(appId)"),
+          UIApplication.shared.canOpenURL(url) else {
+      result(false)
+      return
+    }
+    UIPasteboard.general.setItems(
+      [[
+        "com.instagram.sharedSticker.backgroundImage": image,
+        "com.instagram.sharedSticker.backgroundTopColor": "#1F3B2D",
+        "com.instagram.sharedSticker.backgroundBottomColor": "#1F3B2D",
+      ]],
+      options: [.expirationDate: Date().addingTimeInterval(300)])
+    UIApplication.shared.open(url, options: [:]) { ok in result(ok) }
   }
 
   // MARK: - Ana ekran aracı
