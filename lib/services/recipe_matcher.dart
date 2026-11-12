@@ -1,3 +1,4 @@
+import 'price_index.dart';
 import 'dart:math' as math;
 
 import '../models/ingredient.dart';
@@ -334,7 +335,7 @@ class RecipeMatcher {
     }
     return RecipeFacts(
       perServing: nutrition.scale(1 / r.servings),
-      costPerServing: cost / r.servings,
+      costPerServing: cost * PriceIndex.factor() / r.servings,
       allergens: allergens,
       isVegetarian:
           !tags.contains(FoodTag.meat) && !tags.contains(FoodTag.fish),
