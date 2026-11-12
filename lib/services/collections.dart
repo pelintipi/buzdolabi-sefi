@@ -9,7 +9,7 @@ RecipeCategory guessCategory(Recipe r) {
   if (title.contains('corba')) return RecipeCategory.corba;
   if (r.tags.contains('kahvalti')) return RecipeCategory.kahvalti;
   if (r.tags.contains('tatli') ||
-      RegExp(r'kek|tatli|kurabiye|helva|puding|muhallebi|sutlac|brownie|cheesecake')
+      RegExp(r'kek|tatli|kurabiye|helva|puding|muhallebi|sutlac|brownie|cheesecake|spoonful|pasta|tiramisu')
           .hasMatch(title)) {
     return RecipeCategory.tatli;
   }

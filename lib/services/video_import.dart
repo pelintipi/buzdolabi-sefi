@@ -64,7 +64,11 @@ enum SocialPlatform {
 /// TikTok ve YouTube'un herkese açık oEmbed servisinden gelen video bilgisi.
 class VideoInfo {
   const VideoInfo(
-      {required this.url, this.caption, this.author, this.thumbnailUrl});
+      {required this.url,
+      this.caption,
+      this.author,
+      this.thumbnailUrl,
+      this.title});
 
   final String url;
 
@@ -72,6 +76,9 @@ class VideoInfo {
   final String? caption;
   final String? author;
   final String? thumbnailUrl;
+
+  /// Videonun kendi başlığı (YouTube); açıklamadan ayrı gelir.
+  final String? title;
 
   bool get hasCaption => caption != null && caption!.trim().isNotEmpty;
 }
@@ -110,6 +117,21 @@ class VideoInfoClient {
       if (info.hasCaption) return info;
       best ??= info;
     }
+    // YouTube oEmbed yalnızca başlığı verir; tarif açıklamadadır.
+    if (platform == SocialPlatform.youtube) {
+      final desc = await _youTubeDescription(url);
+      if (desc != null) {
+        final title = best?.caption;
+        return VideoInfo(
+          url: url,
+          caption: desc,
+          title: title,
+          author: best?.author,
+          thumbnailUrl: best?.thumbnailUrl,
+        );
+      }
+      return best;
+    }
     // oEmbed başlık vermediyse (sık) tikwm ile açıklamayı dene.
     if (platform == SocialPlatform.tiktok && !(best?.hasCaption ?? false)) {
       for (final candidate in candidates) {
@@ -141,6 +163,57 @@ class VideoInfoClient {
       return _infoFromMap(url, res);
     } catch (e) {
       debugPrint('Video bilgisi alınamadı: $e');
+      return null;
+    }
+  }
+
+  /// youtu.be/ID, watch?v=ID, shorts/ID → ID.
+  static String? youTubeId(String url) {
+    final u = Uri.tryParse(url);
+    if (u == null) return null;
+    final host = u.host.toLowerCase();
+    if (host.endsWith('youtu.be')) {
+      return u.pathSegments.isEmpty ? null : u.pathSegments.first;
+    }
+    final v = u.queryParameters['v'];
+    if (v != null && v.isNotEmpty) return v;
+    final seg = u.pathSegments;
+    final i = seg.indexWhere((s) => s == 'shorts' || s == 'live' || s == 'embed');
+    return i >= 0 && i + 1 < seg.length ? seg[i + 1] : null;
+  }
+
+  /// İzleme sayfasındaki "shortDescription" JSON metni.
+  static String? parseYouTubeDescription(String html) {
+    final m = RegExp(r'"shortDescription":"((?:[^"\\]|\\.)*)"').firstMatch(html);
+    if (m == null) return null;
+    try {
+      final s = (jsonDecode('"${m.group(1)}"') as String).trim();
+      return s.isEmpty ? null : s;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<String?> _youTubeDescription(String url) async {
+    final id = youTubeId(url);
+    if (id == null) return null;
+    try {
+      if (kIsWeb) {
+        final j = await _getJson(_proxyEndpoint('/ytdesc', url));
+        final d = j?['description'];
+        return d is String && d.trim().isNotEmpty ? d.trim() : null;
+      }
+      final res = await _client.get(
+          Uri.https('www.youtube.com', '/watch', {'v': id, 'hl': 'tr'}),
+          headers: const {
+            'User-Agent': 'Mozilla/5.0',
+            'Accept-Language': 'tr-TR,tr;q=0.9',
+            'Cookie': 'CONSENT=YES+1',
+          }).timeout(const Duration(seconds: 15));
+      if (res.statusCode != 200) return null;
+      return parseYouTubeDescription(utf8.decode(res.bodyBytes));
+    } catch (e) {
+      debugPrint('YouTube açıklaması alınamadı: $e');
       return null;
     }
   }

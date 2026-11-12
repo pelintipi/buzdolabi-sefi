@@ -135,6 +135,19 @@ class _ImportRecipeScreenState extends State<ImportRecipeScreen> {
       }
     }
     extracted ??= extractor.extract('', id: id, source: source);
+    // YouTube başlığı ayrı gelir; açıklamanın ilk cümlesinden iyi bir addır.
+    final videoTitle = _info?.title == null
+        ? null
+        : extractor.titleFromVideoTitle(_info!.title!);
+    if (videoTitle != null) {
+      extracted = ExtractedRecipe(
+        recipe: Recipe.fromJson(
+            {...extracted.recipe.toJson(), 'title': videoTitle}),
+        unmatched: extracted.unmatched,
+        foundIngredientSection: extracted.foundIngredientSection,
+        foundStepSection: extracted.foundStepSection,
+      );
+    }
 
     // Şef+: kural tabanlı çıkarma zayıf kaldıysa (tarif yok, tanınmayan
     // malzeme var, adımlar yok) yapay zekaya sor. Sunucu ayarlı değilse atlanır.
@@ -243,14 +256,14 @@ class _ImportRecipeScreenState extends State<ImportRecipeScreen> {
                             const Sym('📋', size: 34),
                             const SizedBox(width: 10),
                             Expanded(
-                              child: Text('TikTok açıklamasını yapıştır',
+                              child: Text('Tarifin açıklamasını yapıştır',
                                   style: theme.textTheme.titleMedium),
                             ),
                           ],
                         ),
                         const SizedBox(height: 4),
                         Text(
-                            'Videoda … → Açıklama → Kopyala, sonra aşağıdaki kutuya '
+                            'Videonun açıklamasındaki tarifi kopyala, aşağıdaki kutuya '
                             'yapıştırıp tekrar Kaydet. Malzemeler yazıyorsa tarif çıkar.',
                             style: theme.textTheme.bodySmall),
                         const SizedBox(height: 10),
@@ -424,15 +437,15 @@ class _NoRecipeCard extends StatelessWidget {
     final body = !hadLink
         ? 'Malzemeleri "2 yumurta, 1 su bardağı süt" gibi miktarlarıyla yaz.'
         : info == null
-            ? 'Linkten otomatik okuyamadım. TikTok’ta Açıklama → Kopyala, '
-                'aşağıdaki kutuya yapıştırıp tekrar Kaydet.'
+            ? 'Linkten otomatik okuyamadım. videonun açıklamasını kopyalayıp '
+                'aşağıdaki kutuya yapıştır, tekrar Kaydet.'
             : caption.isEmpty
                 ? 'Kapak geldi ama yazı yok. Açıklamayı kopyalayıp aşağıya yapıştır.'
                 : pastedText != null
                     ? 'Yapıştırdığın metinde de yeterli malzeme yok. '
                         '"Malzemeler:" satırını da kopyala.'
                     : 'Videoda kısa bir yazı var, tarif listesi yok. '
-                        'Tam açıklamayı TikTok’tan kopyalayıp aşağıya yapıştır.';
+                        'Tarifin açıklamasını videodan kopyalayıp aşağıya yapıştır.';
     return SoftCard(
       color: Palette.butterSoft,
       borderColor: Palette.butter,

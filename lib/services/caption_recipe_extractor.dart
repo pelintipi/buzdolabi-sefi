@@ -217,10 +217,13 @@ class CaptionRecipeExtractor {
     final all = TurkishText.fold(caption);
     final roled = _withRoles(items.values.toList());
     final title = foundTitle ?? _titleFromItems(roled) ?? 'Videodan tarif';
+    final dessert = _isDessert(all, items.keys.toSet());
     final recipe = Recipe(
       id: id,
       title: title,
-      emoji: _emojiFor(items.values),
+      emoji: dessert
+          ? (items.keys.any(const {'cikolata', 'kakao'}.contains) ? '🍫' : '🍰')
+          : _emojiFor(items.values),
       minutes: _minutes(lower, steps),
       difficulty: steps.length <= 4
           ? Difficulty.kolay
@@ -234,7 +237,7 @@ class CaptionRecipeExtractor {
       steps: steps,
       appliances: _appliances(all),
       techniques: _techniques(all),
-      tags: const {'videodan'},
+      tags: {'videodan', if (dessert) 'tatli'},
       source: source == null
           ? null
           : RecipeSource(
@@ -370,6 +373,8 @@ class CaptionRecipeExtractor {
   /// Başlığa karışan reklam cümleleri: "15 dakikada hazır!", "çok kolay".
   static final _titleNoise = RegExp(
       r'\s*\d+\s*(dakikada|dk.?da)\s*(hazır|bitiyor|tamam)\S*|'
+      r'\s*[!.]*\s*(mutlaka|hemen|siz de|kesinlikle)\s+(deneyin|yapın|deneyiniz)\S*|'
+      r'^\s*(viral|trend|efsane)\s+|'
       r'\s+(tarifi|çok kolay|kolay|pratik|nefis)\s*$',
       caseSensitive: false);
 
@@ -486,7 +491,22 @@ class CaptionRecipeExtractor {
 
   /// Kayıtlı tarifin görseli süt/su gibi sıradan bir malzemeyse, başlıktaki
   /// belirgin ana malzemenin görseli; iyiyse null.
+  /// Videonun kendi başlığından tarif adı: "Viral Tatlı Spoonful Tarifi 🥄
+  /// Mutlaka Deneyin! ✅" → "Tatlı Spoonful". Kullanılamazsa null.
+  String? titleFromVideoTitle(String raw) {
+    final noEmoji = raw.replaceAll(_emoji, ' ').replaceAll(_hashtag, ' ');
+    final t = _cleanTitle(noEmoji.split(RegExp(r'\s+[|–-]\s+')).first);
+    return t == null ? null : _acceptableTitle(t);
+  }
+
   String? repairedEmoji(Recipe r) {
+    final ids = {for (final i in r.items) i.ingredientId};
+    if (r.source != null &&
+        (r.tags.contains('tatli') ||
+            _isDessert(TurkishText.fold(r.title), ids))) {
+      final want = ids.any(const {'cikolata', 'kakao'}.contains) ? '🍫' : '🍰';
+      return r.emoji == want ? null : want;
+    }
     final mains = [
       for (final i in r.items)
         if (i.isMain &&
@@ -628,6 +648,19 @@ class CaptionRecipeExtractor {
     final timers = steps.fold<int>(0, (s, st) => s + (st.timerMinutes ?? 0));
     final total = timers + steps.length * 3 + 5;
     return math.max(10, (total / 5).round() * 5);
+  }
+
+  /// "Tatlı", "muhallebi" gibi sözcükler ya da şeker + un/nişasta +
+  /// çikolata/krema bileşimi: tatlı.
+  static bool _isDessert(String folded, Set<String> ids) {
+    if (RegExp(r'\b(tatli|tatlisi|tatlilar\w*|muhallebi\w*|puding|pasta|kek|'
+            r'spoonful|cheesecake|brownie|kurabiye|sutlac|helva|tiramisu)\b')
+        .hasMatch(folded)) {
+      return true;
+    }
+    return ids.contains('seker') &&
+        (ids.contains('un') || ids.contains('nisasta')) &&
+        ids.any(const {'cikolata', 'kakao', 'krema'}.contains);
   }
 
   String _emojiFor(Iterable<_Item> items) {

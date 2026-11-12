@@ -28,6 +28,28 @@ Future<({int status, String text, Uri url})> _get(String url) async {
   return (status: res.statusCode, text: text, url: finalUrl);
 }
 
+String? _youTubeId(String url) {
+  final u = Uri.tryParse(url);
+  if (u == null) return null;
+  if (u.host.toLowerCase().endsWith('youtu.be')) {
+    return u.pathSegments.isEmpty ? null : u.pathSegments.first;
+  }
+  final v = u.queryParameters['v'];
+  if (v != null && v.isNotEmpty) return v;
+  final seg = u.pathSegments;
+  final i = seg.indexWhere((s) => s == 'shorts' || s == 'live' || s == 'embed');
+  return i >= 0 && i + 1 < seg.length ? seg[i + 1] : null;
+}
+
+Future<String> _getYt(String url) async {
+  final req = await _client.getUrl(Uri.parse(url));
+  req.headers
+    ..set('Accept-Language', 'tr-TR,tr;q=0.9')
+    ..set('Cookie', 'CONSENT=YES+1');
+  final res = await req.close().timeout(const Duration(seconds: 15));
+  return res.transform(utf8.decoder).join();
+}
+
 Map<String, dynamic>? _json(String text) {
   try {
     final v = jsonDecode(text);
@@ -155,6 +177,20 @@ Future<void> main() async {
             info == null
                 ? _send(res, 404, '{"error":"no caption"}')
                 : _send(res, 200, jsonEncode(info));
+          }
+        case '/ytdesc':
+          final id = target == null ? null : _youTubeId(target);
+          if (id == null) {
+            _send(res, 400, '{"error":"youtube url required"}');
+          } else {
+            final r = await _getYt('https://www.youtube.com/watch?v=$id&hl=tr');
+            final m = RegExp(r'"shortDescription":"((?:[^"\\]|\\.)*)"')
+                .firstMatch(r);
+            final desc =
+                m == null ? null : jsonDecode('"${m.group(1)}"') as String;
+            desc == null || desc.trim().isEmpty
+                ? _send(res, 404, '{"error":"no description"}')
+                : _send(res, 200, jsonEncode({'description': desc}));
           }
         case '/resolve':
           if (target == null) {
