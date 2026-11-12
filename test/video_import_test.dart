@@ -212,6 +212,12 @@ void main() {
     expect(x.recipe.title.toLowerCase(), isNot(equals('yoğurt ve süt')));
   });
 
+  test('görsel süt değil, tarifin ana malzemesi', () {
+    final x = run('Malzemeler: 300 gr tavuk göğsü, 1 litre süt, 1 soğan\n'
+        'Yapılışı: Tavuğu sütle pişirin.');
+    expect(x.recipe.emoji, repo.byId('tavuk_gogsu').emoji);
+  });
+
   test('"6-8 kişilik Hazırlama: 20 Dakika" başlık olmaz', () {
     for (final caption in const [
       '6-8 kişilik Hazırlama: 20 Dakika Pişirme: 15 dakika\n'
@@ -263,6 +269,7 @@ void main() {
           .recipe
           .toJson(),
       'title': '6-8 kişilik Hazırlama: 20 Dakika Pişirme: 15…',
+      'emoji': '🥛',
     });
     a.saveImported(bad);
     await Future<void>.delayed(Duration.zero);
@@ -270,6 +277,7 @@ void main() {
     final b = AppState(repo: repo, recipes: recipeCatalog, storage: storage);
     await b.load();
     expect(b.importedRecipes.single.title, 'Tavuk göğsü tarifi');
+    expect(b.importedRecipes.single.emoji, repo.byId('tavuk_gogsu').emoji);
   });
 
   testWidgets('kartın başlığı tarifin adı, altında hesap', (tester) async {

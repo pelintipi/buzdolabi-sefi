@@ -253,8 +253,13 @@ class AppState extends ChangeNotifier {
     final extractor = CaptionRecipeExtractor(repo);
     for (var i = 0; i < result.length; i++) {
       final better = extractor.repairedTitle(result[i]);
-      if (better != null) {
-        result[i] = Recipe.fromJson({...result[i].toJson(), 'title': better});
+      final emoji = extractor.repairedEmoji(result[i]);
+      if (better != null || emoji != null) {
+        result[i] = Recipe.fromJson({
+          ...result[i].toJson(),
+          if (better != null) 'title': better,
+          if (emoji != null) 'emoji': emoji,
+        });
       }
     }
     // Eski sürümlerde aynı video farklı linkle iki kez kaydedilebiliyordu;

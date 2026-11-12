@@ -484,6 +484,27 @@ class CaptionRecipeExtractor {
     return better == null || better == t ? null : better;
   }
 
+  /// Kayıtlı tarifin görseli süt/su gibi sıradan bir malzemeyse, başlıktaki
+  /// belirgin ana malzemenin görseli; iyiyse null.
+  String? repairedEmoji(Recipe r) {
+    final mains = [
+      for (final i in r.items)
+        if (i.isMain &&
+            !_stapleTitleIds.contains(i.ingredientId) &&
+            repo.tryById(i.ingredientId) != null)
+          repo.byId(i.ingredientId)
+    ];
+    if (mains.isEmpty) return null;
+    final current = [
+      for (final i in r.items)
+        if (repo.tryById(i.ingredientId)?.emoji == r.emoji) i.ingredientId
+    ];
+    final bland = r.emoji == '🍽️' ||
+        current.every(_stapleTitleIds.contains);
+    if (!bland || mains.first.emoji == r.emoji) return null;
+    return mains.first.emoji;
+  }
+
   String? _cleanTitle(String raw) {
     var t = raw.replaceAll(RegExp(r'\s+'), ' ').trim();
     t = t.replaceAll(_servingsNoise, '').trim();
@@ -610,7 +631,10 @@ class CaptionRecipeExtractor {
   }
 
   String _emojiFor(Iterable<_Item> items) {
-    final main = items.where((i) => !i.ingredient.isStaple).toList()
+    final main = items
+        .where((i) =>
+            !i.ingredient.isStaple && !_stapleTitleIds.contains(i.ingredient.id))
+        .toList()
       ..sort((a, b) => UnitConverter.toGrams(b.ingredient, b.amount, b.measure)
           .compareTo(UnitConverter.toGrams(a.ingredient, a.amount, a.measure)));
     return main.isEmpty ? '🍽️' : main.first.ingredient.emoji;
