@@ -129,9 +129,9 @@ void main() {
           ok: saved != null);
       expect(saved, isNotNull);
       expect(find.text('Buzdolabı Şefi\'ne kaydedildi'), findsOneWidget);
-      expect(find.text('@evdesef'), findsOneWidget);
+      expect(find.textContaining('@evdesef'), findsOneWidget);
 
-      r.mark(tester, find.text('@evdesef'), 'Aşağı kaydır');
+      r.mark(tester, find.textContaining('@evdesef').first, 'Aşağı kaydır');
       await tester.scrollUntilVisible(
           find.text('Tanıyamadığım malzemeler'), 200,
           scrollable: _mainScroll);
