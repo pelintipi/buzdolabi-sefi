@@ -344,7 +344,7 @@ void main() {
           action: 'Profil\x27de "İlerlemem"e dokundum.',
           result:
               'Haftalık seri, toplam pişirme, beceri ağacı ve son pişirilen Menemen.');
-      await tester.scrollUntilVisible(find.textContaining('Sote').first, 300,
+      await tester.scrollUntilVisible(find.textContaining('Sote'), 300,
           scrollable: _mainScroll);
       await tester.pumpAndSettle();
       expect(find.textContaining('Sote'), findsWidgets);
