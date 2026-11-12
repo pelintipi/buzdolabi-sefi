@@ -700,6 +700,40 @@ class CaptionRecipeExtractor {
     ];
   }
 
+  /// "Sos için:", "Hamuru için:", "Üzeri:" gibi bölüm başlıkları.
+  static bool _isHeader(String s) {
+    final t = s.trim();
+    return RegExp(r':\s*\.?$').hasMatch(t) &&
+        t.split(RegExp(r'\s+')).length <= 4;
+  }
+
+  /// Eski kayıtlarda tek başına duran "Sos için:." adımlarını sonrakine
+  /// katar; değişiklik yoksa null.
+  List<Map<String, dynamic>>? repairedSteps(Recipe r) {
+    final out = <RecipeStep>[];
+    String? header;
+    var changed = false;
+    for (final st in r.steps) {
+      if (_isHeader(st.text)) {
+        header = st.text.replaceAll(RegExp(r'[\s:.]+$'), '');
+        changed = true;
+        continue;
+      }
+      if (header != null) {
+        final t = st.text;
+        out.add(RecipeStep(
+            '$header: ${TurkishText.lower(t.substring(0, 1))}${t.substring(1)}',
+            timerMinutes: st.timerMinutes,
+            timerLabel: st.timerLabel));
+        header = null;
+      } else {
+        out.add(st);
+      }
+    }
+    if (!changed || out.isEmpty) return null;
+    return [for (final s in out) s.toJson()];
+  }
+
   List<RecipeStep> _steps(String part) {
     var text = part.replaceAll(RegExp(r'[ \t]+'), ' ').trim();
     if (text.isEmpty) return const [];
@@ -711,8 +745,19 @@ class CaptionRecipeExtractor {
         s.replaceAll(RegExp(r'[^\p{L}]', unicode: true), '').length >= 6);
 
     final steps = <RecipeStep>[];
-    for (final p in pieces.take(12)) {
+    String? header;
+    for (final p in pieces) {
+      if (steps.length >= 20) break;
       var s = p.replaceAll(RegExp(r'^[^\p{L}\d]+', unicode: true), '');
+      // "Sos için:" tek başına adım değil; sonraki adımın başına eklenir.
+      if (_isHeader(s)) {
+        header = s.replaceAll(RegExp(r'[\s:.]+$'), '');
+        continue;
+      }
+      if (header != null) {
+        s = '$header: ${TurkishText.lower(s.substring(0, 1))}${s.substring(1)}';
+        header = null;
+      }
       s = _capitalize(s);
       if (!RegExp(r'[.!?]$').hasMatch(s)) s = '$s.';
       final timer = _timer.firstMatch(TurkishText.lower(s));

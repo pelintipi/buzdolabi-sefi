@@ -255,12 +255,14 @@ class AppState extends ChangeNotifier {
       final better = extractor.repairedTitle(result[i]);
       final emoji = extractor.repairedEmoji(result[i]);
       final items = extractor.repairedItems(result[i]);
-      if (better != null || emoji != null || items != null) {
+      final steps = extractor.repairedSteps(result[i]);
+      if (better != null || emoji != null || items != null || steps != null) {
         result[i] = Recipe.fromJson({
           ...result[i].toJson(),
           if (better != null) 'title': better,
           if (emoji != null) 'emoji': emoji,
           if (items != null) 'items': items,
+          if (steps != null) 'steps': steps,
         });
       }
     }
