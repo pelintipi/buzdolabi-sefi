@@ -29,7 +29,7 @@ class SefPlusBadge extends StatelessWidget {
               fontFamily: Fonts.display,
               fontWeight: FontWeight.w800,
               fontSize: 11.5,
-              color: Palette.ink),
+              color: Color(0xFF1A1A17)), // hardal zemin her temada açık
         ),
       ),
     );

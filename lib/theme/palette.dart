@@ -81,7 +81,11 @@ class BrandColors {
 abstract final class Palette {
   static BrandColors _c = BrandColors.light;
 
+  static Brightness _brightness = Brightness.light;
+  static Brightness get brightness => _brightness;
+
   static void apply(Brightness brightness) {
+    _brightness = brightness;
     _c = BrandColors.forBrightness(brightness);
   }
 

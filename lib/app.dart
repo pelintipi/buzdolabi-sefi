@@ -36,7 +36,22 @@ class BuzdolabiSefiApp extends StatelessWidget {
       darkTheme: buildAppTheme(Brightness.dark),
       themeMode: themeMode,
       builder: (context, child) {
-        Palette.apply(Theme.of(context).brightness);
+        final brightness = Theme.of(context).brightness;
+        final changed = Palette.brightness != brightness;
+        Palette.apply(brightness);
+        if (changed) {
+          // Palette renkleri tema dinlemeyen widget'larda da kullanılıyor;
+          // açık sayfalar eski renkte kalmasın diye tamamı yeniden çizilir
+          // (ekran yığını ve yazılanlar korunur).
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            void mark(Element e) {
+              e.markNeedsBuild();
+              e.visitChildren(mark);
+            }
+
+            WidgetsBinding.instance.rootElement?.visitChildren(mark);
+          });
+        }
         return IconPrecache(child: child ?? const SizedBox.shrink());
       },
       locale: const Locale('tr'),
