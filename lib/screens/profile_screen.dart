@@ -95,7 +95,8 @@ class ProfileScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              SymBubble('🧑‍🍳', size: 72, color: Palette.butterSoft),
+              SymBubble('🧑‍🍳',
+                  size: 72, color: Palette.accent, iconColor: Palette.ground),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
