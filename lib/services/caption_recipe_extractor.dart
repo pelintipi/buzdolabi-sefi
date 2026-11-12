@@ -407,8 +407,20 @@ class CaptionRecipeExtractor {
   String? _acceptableTitle(String? title) {
     if (title == null || title.isEmpty) return null;
     if (_isIngredientListTitle(title)) return null;
+    if (_isMetaLine(title)) return null;
     return title;
   }
+
+  /// "6-8 kişilik Hazırlama: 20 Dakika Pişirme: 15 dakika", "Servings: 4",
+  /// "Süre: 30 dk" gibi porsiyon/süre satırları yemek adı değildir.
+  static final _metaLine = RegExp(
+      r'^\s*(\d+\s*[-–]?\s*\d*\s*(kişilik|porsiyon)|hazırlama|hazırlık|pişirme|'
+      r'süre|porsiyon|servings?|serves|prep|cook(ing)? time|total time)\b|'
+      r'(hazırlama|hazırlık|pişirme)\s*(süresi)?\s*[:：]',
+      caseSensitive: false);
+
+  static bool _isMetaLine(String title) =>
+      _metaLine.hasMatch(TurkishText.lower(title));
 
   bool _isIngredientListTitle(String title) {
     final cleaned = title

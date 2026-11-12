@@ -9,6 +9,8 @@ import 'package:buzdolabi_sefi/services/recipe_matcher.dart';
 import 'package:buzdolabi_sefi/services/storage_service.dart';
 import 'package:buzdolabi_sefi/services/video_import.dart';
 import 'package:buzdolabi_sefi/state/app_state.dart';
+import 'package:buzdolabi_sefi/widgets/video_source_card.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -207,6 +209,46 @@ void main() {
         'Yapılışı: Karıştırın.');
     expect(extractor.titleIsIngredientList('Yoğurt ve süt'), isTrue);
     expect(x.recipe.title.toLowerCase(), isNot(equals('yoğurt ve süt')));
+  });
+
+  test('"6-8 kişilik Hazırlama: 20 Dakika" başlık olmaz', () {
+    for (final caption in const [
+      '6-8 kişilik Hazırlama: 20 Dakika Pişirme: 15 dakika\n'
+          'Malzemeler: 500 gr kıyma, 2 soğan, 1 yemek kaşığı salça',
+      'Hazırlama süresi: 10 dk\nMalzemeler: 3 yumurta, 2 domates',
+      'Servings: 4\nIngredients: 2 eggs, 1 cup milk',
+    ]) {
+      final x = run(caption);
+      expect(
+          x.recipe.title.toLowerCase(),
+          isNot(anyOf(contains('kişilik'), contains('hazırlama'),
+              contains('servings'))),
+          reason: caption);
+    }
+  });
+
+  testWidgets(
+      'yapıştırılan metinden tarif: "Video videosu" yazmaz, '
+      '"Videoyu izle" çıkmaz', (tester) async {
+    Future<void> card(RecipeSource s) => tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+            body: SingleChildScrollView(child: VideoSourceCard(source: s)))));
+
+    await card(
+        const RecipeSource(url: 'yapistirilan-metin', platform: 'Video'));
+    expect(find.text('Yapıştırdığın tarif'), findsOneWidget);
+    expect(find.textContaining('Video videosu'), findsNothing);
+    expect(find.text('Videoyu izle'), findsNothing);
+
+    await card(const RecipeSource(
+        url: 'https://www.tiktok.com/@a/video/1', platform: 'TikTok'));
+    expect(find.text('TikTok tarifi'), findsOneWidget);
+    expect(find.text('Videoyu izle'), findsOneWidget);
+
+    await card(const RecipeSource(
+        url: 'https://www.nefisyemektarifleri.com/x', platform: 'Video'));
+    expect(find.text('nefisyemektarifleri.com'), findsOneWidget);
+    expect(find.text('Kaynağı aç'), findsOneWidget);
   });
 
   test('tarif yazmayan açıklama kullanılabilir sayılmaz', () {

@@ -56,7 +56,16 @@ class _ShareSheetState extends State<_ShareSheet> {
     final ok = await services.share.shareImage(data.buffer.asUint8List());
     if (!mounted) return;
     setState(() => _busy = false);
-    if (ok) Navigator.of(context).pop();
+    if (ok) {
+      Navigator.of(context).pop();
+    } else {
+      // Önceden sessizce hiçbir şey olmuyordu.
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(kIsWeb
+              ? 'Tarayıcıda paylaşılamadı: paylaş menüsü yalnızca güvenli '
+                  '(https) adreste açılır. iPhone uygulamasında çalışır.'
+              : 'Paylaşılamadı, tekrar dene.')));
+    }
   }
 
   @override

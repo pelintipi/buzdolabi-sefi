@@ -429,7 +429,8 @@ extension on _CookedScreenState {
             children: [
               Expanded(
                 child: ChunkyButton(
-                  label: photo == null ? 'Fotoğraf ekle' : 'Yeniden çek',
+                  // "Fotoğraf ekle" iki düğme yan yana sığmıyordu ("Fotoğr…").
+                  label: photo == null ? 'Fotoğraf' : 'Yeniden',
                   icon: '📷',
                   tone: ChunkyTone.soft,
                   height: 48,
@@ -449,6 +450,16 @@ extension on _CookedScreenState {
               ),
             ],
           ),
+          // Tarayıcı testi: kamera fotoğrafı saklanamaz, paylaş menüsü
+          // yalnızca https'te açılır. iPhone uygulamasında ikisi de çalışır.
+          if (kIsWeb) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Tarayıcıdaki testte fotoğraf saklanamaz ve paylaş menüsü '
+              'açılmayabilir; ikisi de iPhone uygulamasında çalışır.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
         ],
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -56,9 +57,38 @@ class VideoSourceCard extends StatelessWidget {
 
   final RecipeSource source;
 
+  /// Açılabilir bir video/web adresi var mı? Metin yapıştırılarak kaydedilen
+  /// tarifte adres "yapistirilan-metin" olur; "Videoyu izle" gösterilmez.
+  bool get _hasLink {
+    final u = Uri.tryParse(source.url);
+    return u != null && (u.scheme == 'http' || u.scheme == 'https');
+  }
+
+  /// TikTok, Instagram, YouTube değilse "Video" adı anlamsız.
+  bool get _isKnownPlatform =>
+      const {'TikTok', 'Instagram', 'YouTube'}.contains(source.platform);
+
+  String get _title {
+    if (source.author != null) return '@${source.author}';
+    if (!_hasLink) return 'Yapıştırdığın tarif';
+    if (_isKnownPlatform) return '${source.platform} tarifi';
+    return Uri.parse(source.url).host.replaceFirst('www.', '');
+  }
+
+  String get _subtitle {
+    if (!_hasLink) return 'Yapıştırdığın metinden kaydedildi';
+    if (_isKnownPlatform) return '${source.platform} videosundan kaydedildi';
+    return 'Web sayfasından kaydedildi';
+  }
+
   Future<void> _open(BuildContext context) async {
+    // Tarayıcıda (telefon testinde) yeni sekmede; uygulamada TikTok/YouTube
+    // uygulamasında ya da Safari'de açılır.
     final ok = await launchUrl(Uri.parse(source.url),
-        mode: LaunchMode.externalApplication);
+        mode: kIsWeb
+            ? LaunchMode.platformDefault
+            : LaunchMode.externalApplication,
+        webOnlyWindowName: '_blank');
     if (!ok && context.mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Video açılamadı')));
@@ -81,24 +111,22 @@ class VideoSourceCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                        source.author == null
-                            ? '${source.platform} videosu'
-                            : '@${source.author}',
+                    Text(_title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleMedium),
-                    Text('${source.platform} videosundan kaydedildi',
-                        style: theme.textTheme.bodySmall),
-                    const SizedBox(height: 10),
-                    ChunkyButton(
-                      label: 'Videoyu izle',
-                      icon: '▶',
-                      tone: ChunkyTone.soft,
-                      expand: false,
-                      height: 42,
-                      onPressed: () => _open(context),
-                    ),
+                    Text(_subtitle, style: theme.textTheme.bodySmall),
+                    if (_hasLink) ...[
+                      const SizedBox(height: 10),
+                      ChunkyButton(
+                        label: _isKnownPlatform ? 'Videoyu izle' : 'Kaynağı aç',
+                        icon: '▶',
+                        tone: ChunkyTone.soft,
+                        expand: false,
+                        height: 42,
+                        onPressed: () => _open(context),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -118,8 +146,11 @@ class VideoSourceCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Tarifi video açıklamasından otomatik çıkardım. '
-                    'Miktarları videoyla bir karşılaştır.',
+                    _hasLink && _isKnownPlatform
+                        ? 'Tarifi video açıklamasından otomatik çıkardım. '
+                            'Miktarları videoyla bir karşılaştır.'
+                        : 'Tarifi yapıştırdığın metinden otomatik çıkardım. '
+                            'Miktarları bir kontrol et.',
                     style:
                         theme.textTheme.bodySmall?.copyWith(color: Palette.ink),
                   ),
