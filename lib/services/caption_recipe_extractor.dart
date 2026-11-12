@@ -463,10 +463,25 @@ class CaptionRecipeExtractor {
       for (final m in mains)
         if (!_stapleTitleIds.contains(m.id)) m
     ];
-    if (distinctive.length == 1) {
+    // En ağır belirgin ana malzeme (roller ağırlığa göre verilir):
+    // "Tavuk göğsü tarifi".
+    if (distinctive.isNotEmpty) {
       return '${distinctive.first.name} tarifi';
     }
     return null;
+  }
+
+  /// Kayıtlı tarifin başlığı bozuksa ("6-8 kişilik Hazırlama: 20…",
+  /// "Videodan tarif", malzeme listesi) malzemelerden yenisi; iyiyse null.
+  String? repairedTitle(Recipe r) {
+    final t = r.title.trim();
+    final bad = t.isEmpty ||
+        t == 'Videodan tarif' ||
+        _isMetaLine(t) ||
+        _isIngredientListTitle(t);
+    if (!bad) return null;
+    final better = _titleFromItems(r.items);
+    return better == null || better == t ? null : better;
   }
 
   String? _cleanTitle(String raw) {

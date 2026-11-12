@@ -7,6 +7,7 @@ import '../models/cook_log.dart';
 import '../models/pantry_item.dart';
 import '../models/recipe.dart';
 import '../models/user_profile.dart';
+import '../services/caption_recipe_extractor.dart';
 import '../services/collections.dart';
 import '../services/ingredient_repository.dart';
 import '../services/meal_planner.dart';
@@ -245,6 +246,15 @@ class AppState extends ChangeNotifier {
         }
       } catch (e) {
         debugPrint('Kaydedilen tarif okunamadı: $e');
+      }
+    }
+    // Eski sürümlerin bıraktığı bozuk başlıklar ("6-8 kişilik Hazırlama:
+    // 20…", "Videodan tarif") malzemelerden düzeltilir: "Tavuk göğsü tarifi".
+    final extractor = CaptionRecipeExtractor(repo);
+    for (var i = 0; i < result.length; i++) {
+      final better = extractor.repairedTitle(result[i]);
+      if (better != null) {
+        result[i] = Recipe.fromJson({...result[i].toJson(), 'title': better});
       }
     }
     // Eski sürümlerde aynı video farklı linkle iki kez kaydedilebiliyordu;

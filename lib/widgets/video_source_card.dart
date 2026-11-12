@@ -53,9 +53,12 @@ class VideoThumb extends StatelessWidget {
 /// Tarif sahibine hak veren kart: kapak, hesap adı ve videoya dönüş linki.
 /// Altında tarifin otomatik çıkarıldığı uyarısı ve tanınamayan malzemeler.
 class VideoSourceCard extends StatelessWidget {
-  const VideoSourceCard({super.key, required this.source});
+  const VideoSourceCard({super.key, required this.source, this.recipeTitle});
 
   final RecipeSource source;
+
+  /// Kartın başlığı tarifin adı ("Tavuk göğsü tarifi"); verilmezse kaynak.
+  final String? recipeTitle;
 
   /// Açılabilir bir video/web adresi var mı? Metin yapıştırılarak kaydedilen
   /// tarifte adres "yapistirilan-metin" olur; "Videoyu izle" gösterilmez.
@@ -69,6 +72,9 @@ class VideoSourceCard extends StatelessWidget {
       const {'TikTok', 'Instagram', 'YouTube'}.contains(source.platform);
 
   String get _title {
+    if (recipeTitle != null && recipeTitle!.trim().isNotEmpty) {
+      return recipeTitle!;
+    }
     if (source.author != null) return '@${source.author}';
     if (!_hasLink) return 'Yapıştırdığın tarif';
     if (_isKnownPlatform) return '${source.platform} tarifi';
@@ -76,6 +82,11 @@ class VideoSourceCard extends StatelessWidget {
   }
 
   String get _subtitle {
+    if (source.author != null && recipeTitle != null) {
+      return _isKnownPlatform
+          ? '@${source.author} · ${source.platform}'
+          : '@${source.author}';
+    }
     if (!_hasLink) return 'Yapıştırdığın metinden kaydedildi';
     if (_isKnownPlatform) return '${source.platform} videosundan kaydedildi';
     return 'Web sayfasından kaydedildi';

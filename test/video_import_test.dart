@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'support/test_catalog.dart';
@@ -249,6 +250,47 @@ void main() {
         url: 'https://www.nefisyemektarifleri.com/x', platform: 'Video'));
     expect(find.text('nefisyemektarifleri.com'), findsOneWidget);
     expect(find.text('Kaynağı aç'), findsOneWidget);
+  });
+
+  test('eski kayıttaki bozuk başlık açılışta tarifin adına döner', () async {
+    SharedPreferences.setMockInitialValues({});
+    final storage = StorageService();
+    final a = AppState(repo: repo, recipes: recipeCatalog, storage: storage);
+    await a.load();
+    final bad = Recipe.fromJson({
+      ...run('Malzemeler: 500 gr tavuk göğsü, 2 kapya biber, 1 soğan\n'
+              'Yapılışı: Tavukları doğrayın. Biberle soteleyin.')
+          .recipe
+          .toJson(),
+      'title': '6-8 kişilik Hazırlama: 20 Dakika Pişirme: 15…',
+    });
+    a.saveImported(bad);
+    await Future<void>.delayed(Duration.zero);
+
+    final b = AppState(repo: repo, recipes: recipeCatalog, storage: storage);
+    await b.load();
+    expect(b.importedRecipes.single.title, 'Tavuk göğsü tarifi');
+  });
+
+  testWidgets('kartın başlığı tarifin adı, altında hesap', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final s =
+        AppState(repo: repo, recipes: recipeCatalog, storage: StorageService());
+    await s.load();
+    await tester.pumpWidget(ChangeNotifierProvider.value(
+        value: s,
+        child: const MaterialApp(
+            home: Scaffold(
+                body: SingleChildScrollView(
+                    child: VideoSourceCard(
+                        recipeTitle: 'Tavuk göğsü tarifi',
+                        source: RecipeSource(
+                            url: 'https://www.tiktok.com/@sef/video/1',
+                            platform: 'TikTok',
+                            author: 'sef')))))));
+    expect(find.text('Tavuk göğsü tarifi'), findsOneWidget);
+    expect(find.text('@sef · TikTok'), findsOneWidget);
+    expect(find.text('Videoyu izle'), findsOneWidget);
   });
 
   test('tarif yazmayan açıklama kullanılabilir sayılmaz', () {

@@ -235,7 +235,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           ),
           if (recipe.source != null) ...[
             const SizedBox(height: 12),
-            VideoSourceCard(source: recipe.source!),
+            VideoSourceCard(source: recipe.source!, recipeTitle: recipe.title),
           ],
           if (conflicts.isNotEmpty) ...[
             const SizedBox(height: 12),
