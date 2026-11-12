@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/ingredient.dart';
-import '../models/pantry_item.dart';
 import '../services/recipe_matcher.dart';
 import '../state/app_state.dart';
 import '../theme/palette.dart';
@@ -28,10 +27,14 @@ class _LeftoverScreenState extends State<LeftoverScreen> {
     if (existing.isNotEmpty) _selected = existing.first.ingredientId;
   }
 
-  void _pick(Ingredient ing, ApproxLevel level) {
-    context.read<AppState>().upsertPantry(ing.id, level: level);
-    setState(() => _selected = ing.id);
-  }
+  /// Kutuya dokunmak yalnızca seçer ve tarifleri gösterir; dolaba eklemez
+  /// (önceden göz atmak bile dolaba "yarım" ekliyordu).
+  void _select(Ingredient ing) => setState(() => _selected = ing.id);
+
+  /// Kaç porsiyon kaldığını söyleyince dolaba tam o kadar girer; "Bitti"
+  /// dolaptan çıkarır.
+  void _setPortions(String id, int portions) =>
+      context.read<AppState>().setLeftoverPortions(id, portions);
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +72,7 @@ class _LeftoverScreenState extends State<LeftoverScreen> {
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
         children: [
           Text('Neyin kaldı?', style: theme.textTheme.headlineSmall),
-          Text(
-              'Seç, onu değerlendiren tarifleri göstereyim. Dolabına 2 günlük eklenir.',
+          Text('Seç, onu değerlendiren tarifleri göstereyim.',
               style:
                   theme.textTheme.bodyMedium?.copyWith(color: Palette.inkSoft)),
           const SizedBox(height: 14),
@@ -80,38 +82,56 @@ class _LeftoverScreenState extends State<LeftoverScreen> {
             physics: const NeverScrollableScrollPhysics(),
             mainAxisSpacing: 10,
             crossAxisSpacing: 10,
-            childAspectRatio: 0.9,
+            childAspectRatio: 0.82,
             children: [
               for (final ing in options)
                 _LeftoverTile(
                   ingredient: ing,
                   selected: _selected == ing.id,
-                  inPantry: inPantry.containsKey(ing.id),
-                  onTap: () => _pick(ing, ApproxLevel.biraz),
+                  status: inPantry.containsKey(ing.id)
+                      ? portionText(state.leftoverPortions(ing.id))
+                      : null,
+                  onTap: () => _select(ing),
                 ),
             ],
           ),
           if (_selected != null) ...[
             const SizedBox(height: 14),
-            Row(
-              children: [
-                Text('Ne kadar?', style: theme.textTheme.titleMedium),
-                const Spacer(),
-                for (final level in ApproxLevel.values)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 6),
-                    child: ChoiceChip(
-                      label: Text(switch (level) {
-                        ApproxLevel.bol => 'Bolca',
-                        ApproxLevel.biraz => 'Yarım',
-                        ApproxLevel.az => 'Azıcık',
-                      }),
-                      selected: inPantry[_selected]?.level == level,
-                      onSelected: (_) =>
-                          _pick(state.repo.byId(_selected!), level),
+            Text('Ne kadar kaldı?', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 6),
+            Builder(builder: (_) {
+              final id = _selected!;
+              final have = inPantry.containsKey(id)
+                  ? state.leftoverPortions(id).round().clamp(1, 99)
+                  : 0;
+              return Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final n in const [1, 2, 3, 4])
+                    ChoiceChip(
+                      label: Text('$n porsiyon'),
+                      selected: have == n,
+                      onSelected: (_) => _setPortions(id, n),
                     ),
-                  ),
-              ],
+                  if (have > 0)
+                    ActionChip(
+                      avatar: Icon(Icons.check_rounded,
+                          size: 18, color: Palette.tomatoText),
+                      label: Text('Bitti',
+                          style: TextStyle(color: Palette.tomatoText)),
+                      onPressed: () => _setPortions(id, 0),
+                    ),
+                ],
+              );
+            }),
+            const SizedBox(height: 4),
+            Text(
+              inPantry.containsKey(_selected)
+                  ? 'Bunu kullanan bir tarifi pişirince dolabından düşer; '
+                      'bitince kendiliğinden kalkar.'
+                  : 'Kaç porsiyon kaldığını seç; dolabına 2 günlük eklenir.',
+              style: theme.textTheme.bodySmall,
             ),
             const SizedBox(height: 14),
             SectionTitle(
@@ -133,13 +153,15 @@ class _LeftoverTile extends StatelessWidget {
   const _LeftoverTile({
     required this.ingredient,
     required this.selected,
-    required this.inPantry,
+    required this.status,
     required this.onTap,
   });
 
   final Ingredient ingredient;
   final bool selected;
-  final bool inPantry;
+
+  /// "1 porsiyon dolabında"; dolapta yoksa null.
+  final String? status;
   final VoidCallback onTap;
 
   @override
@@ -166,8 +188,11 @@ class _LeftoverTile extends StatelessWidget {
                 maxLines: 2,
                 style: const TextStyle(
                     fontWeight: FontWeight.w800, fontSize: 13, height: 1.1)),
-            if (inPantry)
-              Text('dolabında',
+            if (status != null)
+              Text('$status var',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 11,
@@ -177,4 +202,10 @@ class _LeftoverTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// "1 porsiyon", "2 porsiyon"; yarımdan azsa "biraz".
+String portionText(double portions) {
+  if (portions < 0.75) return 'biraz';
+  return '${portions.round()} porsiyon';
 }

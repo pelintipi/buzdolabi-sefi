@@ -608,7 +608,11 @@ class AppState extends ChangeNotifier {
       }
       final left = have - take;
       final idx = _pantry.indexWhere((p) => p.id == item.id);
-      if (left < 1 || left <= have * 0.02) {
+      // Artıktan yarım porsiyondan az kaldıysa "bitti" sayılır; dolapta
+      // birkaç gramlık pilav takılı kalmasın.
+      final leftoverCrumbs =
+          ing.leftover && left < leftoverPortionGrams(ing.id) / 2;
+      if (left < 1 || left <= have * 0.02 || leftoverCrumbs) {
         _pantry.removeAt(idx);
       } else {
         _pantry[idx] = item.copyWith(
@@ -763,6 +767,46 @@ class AppState extends ChangeNotifier {
         for (final p in _pantry)
           if (repo.tryById(p.ingredientId)?.leftover ?? false) p
       ];
+
+  /// Artıklar "kaç porsiyon kaldı" diye girilir; bir porsiyonun gramı
+  /// (tariflerdeki kişi başı kullanıma göre).
+  static const _leftoverPortionGrams = {
+    'pismis_pilav': 150.0,
+    'pismis_makarna': 150.0,
+    'pismis_tavuk': 100.0,
+    'haslanmis_patates': 150.0,
+    'bayat_ekmek': 50.0, // yaklaşık 2 dilim
+  };
+
+  static double leftoverPortionGrams(String ingredientId) =>
+      _leftoverPortionGrams[ingredientId] ?? 150;
+
+  /// Dolaptaki artığın kaç porsiyon olduğu (dolapta yoksa 0).
+  double leftoverPortions(String ingredientId) {
+    var grams = 0.0;
+    for (final p in _pantry) {
+      if (p.ingredientId != ingredientId) continue;
+      final ing = repo.byId(ingredientId);
+      grams += UnitConverter.baseToGrams(ing, p.baseAmount(ing));
+    }
+    return grams / leftoverPortionGrams(ingredientId);
+  }
+
+  /// "2 porsiyon kaldı" → dolapta tam o kadar; 0 → artık dolaptan çıkar.
+  void setLeftoverPortions(String ingredientId, int portions) {
+    if (portions <= 0) {
+      _pantry.removeWhere((p) => p.ingredientId == ingredientId);
+      _changed();
+      return;
+    }
+    final ing = repo.byId(ingredientId);
+    _upsert(
+        ingredientId,
+        UnitConverter.gramsToBase(
+            ing, portions * leftoverPortionGrams(ingredientId)),
+        null);
+    _changed();
+  }
 
   // ---------------------------------------------------------------- Koleksiyonlar
 

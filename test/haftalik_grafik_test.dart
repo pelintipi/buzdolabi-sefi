@@ -47,12 +47,16 @@ void main() {
     ]) {
       final r = recipeCatalog.firstWhere((x) => x.id == id);
       s.recordCook(r, 1, const {});
-      s.updateLog(s.logs.last.cookedAt, (l) => CookLog.fromJson({
-            ...l.toJson(),
-            'cookedAt': now.subtract(Duration(days: daysAgo)).toIso8601String(),
-          }));
+      s.updateLog(
+          s.logs.last.cookedAt,
+          (l) => CookLog.fromJson({
+                ...l.toJson(),
+                'cookedAt':
+                    now.subtract(Duration(days: daysAgo)).toIso8601String(),
+              }));
     }
-    final r = ScreenshotReport('degisiklik_raporlari/2026-11-12_haftalik-grafik',
+    final r = ScreenshotReport(
+        'degisiklik_raporlari/2026-11-12_haftalik-grafik',
         'Haftalık grafik · Ekran testi');
 
     debugDisableShadows = false;

@@ -673,9 +673,12 @@ class WeeklySlots extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Hedef 5-7 olunca yuvalar sığsın diye genişliğe göre küçülür.
+    // Hedef aşıldıysa fazlası sonda "+2" rozeti olarak (5/3 → 3 dolu + "+2").
+    final extra = done - goal;
+    final slots = goal + (extra > 0 ? 1 : 0);
     return LayoutBuilder(builder: (context, c) {
       final fit =
-          c.maxWidth.isFinite ? (c.maxWidth - 8 * (goal - 1)) / goal : size;
+          c.maxWidth.isFinite ? (c.maxWidth - 8 * (slots - 1)) / slots : size;
       final s = fit < size ? fit : size;
       return Row(
         mainAxisSize: MainAxisSize.min,
@@ -702,6 +705,29 @@ class WeeklySlots extends StatelessWidget {
                             fontWeight: FontWeight.w800,
                             color: Palette.lineDeep,
                             fontSize: 16)),
+              ),
+            ),
+          if (extra > 0)
+            Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: Semantics(
+                label: 'Hedefin $extra fazlası',
+                child: Container(
+                  height: s,
+                  constraints: BoxConstraints(minWidth: s),
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  decoration: BoxDecoration(
+                    color: Palette.butter,
+                    borderRadius: BorderRadius.circular(s),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text('+$extra',
+                      style: TextStyle(
+                          fontFamily: Fonts.display,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          fontSize: s * 0.38)),
+                ),
               ),
             ),
         ],

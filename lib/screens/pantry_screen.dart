@@ -7,6 +7,7 @@ import '../models/ingredient.dart';
 import '../models/pantry_item.dart';
 import '../state/app_state.dart';
 import '../theme/palette.dart';
+import '../services/unit_converter.dart';
 import '../utils/format.dart';
 import '../widgets/amount_controls.dart';
 import '../widgets/ui.dart';
@@ -97,6 +98,12 @@ class PantryScreen extends StatelessWidget {
 }
 
 String pantryAmountText(PantryItem item, Ingredient ing) {
+  // Artıklar porsiyonla: "2 porsiyon" ("300 g pişmiş pilav" yerine).
+  if (ing.leftover) {
+    final grams = UnitConverter.baseToGrams(ing, item.baseAmount(ing));
+    final n = grams / AppState.leftoverPortionGrams(ing.id);
+    return n < 0.75 ? 'Biraz' : '${n.round()} porsiyon';
+  }
   final q = item.quantity;
   if (q != null) return formatBase(ing, q);
   return (item.level ?? ApproxLevel.biraz).label;
