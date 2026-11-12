@@ -218,7 +218,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           title: 'Alerjin var mı?',
           why:
               'Seçtiklerini içeren tarifler hiç çıkmaz. "Kuruyemiş" hepsini gizler; '
-              "yalnızca biri (ör. ceviz) içinse Diğer'e yaz. Yoksa boş bırak. "
+              "yalnızca biri (ör. ceviz) içinse Diğer'e yaz. "
               'Bu bilgi yalnızca telefonunda saklanır.',
           options: [
             for (final a in Allergen.values) _Option(a, a.label, a.emoji)
@@ -232,6 +232,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             onChanged: (v) => setState(() => _customAllergies = v),
           ),
           extraCount: _customAllergies.length,
+          onNone: () {
+            setState(() {
+              _allergies = {};
+              _customAllergies = const [];
+            });
+            _next();
+          },
         ),
         _SearchableHavePage(
           options: _haveOptions,
@@ -685,7 +692,8 @@ class _Question<T> extends StatelessWidget {
         onToggle = null,
         minSelected = 0,
         footer = null,
-        extraCount = 0;
+        extraCount = 0,
+        onNone = null;
 
   const _Question.multi({
     super.key,
@@ -699,6 +707,7 @@ class _Question<T> extends StatelessWidget {
     this.minSelected = 1,
     this.footer,
     this.extraCount = 0,
+    this.onNone,
   })  : selectedMany = selected,
         selectedOne = null,
         onPick = null;
@@ -725,6 +734,9 @@ class _Question<T> extends StatelessWidget {
 
   /// Seçeneklerin dışında seçilmiş sayılanlar ("Devam (3)" sayısına girer).
   final int extraCount;
+
+  /// Verilirse en üstte "Yok" seçeneği çıkar (ör. alerjim yok).
+  final VoidCallback? onNone;
 
   bool get _multi => selectedMany != null;
 
@@ -777,6 +789,17 @@ class _Question<T> extends StatelessWidget {
                     style: theme.textTheme.bodyMedium
                         ?.copyWith(color: Palette.inkSoft)),
                 const SizedBox(height: 18),
+                if (onNone != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _OptionTile(
+                      label: 'Yok',
+                      emoji: '✅',
+                      selected: false,
+                      multi: false,
+                      onTap: onNone!,
+                    ),
+                  ),
                 for (final o in options)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
