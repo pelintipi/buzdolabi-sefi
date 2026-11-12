@@ -65,6 +65,21 @@ const _types = {
 Future<void> _handle(HttpRequest req, Directory root) async {
   final res = req.response;
   if (req.uri.path.startsWith('/proxy/')) return _forward(req);
+  // Telefona bir kez yüklenen yerel imza yetkilisi (yalnızca ortak kısım;
+  // gizli anahtar ca.key asla sunulmaz).
+  if (req.uri.path == '/ca.crt') {
+    final ca = File('tool/certs/ca.pem');
+    if (!ca.existsSync()) {
+      res.statusCode = HttpStatus.notFound;
+      return res.close();
+    }
+    res.headers
+      ..contentType = ContentType('application', 'x-x509-ca-cert')
+      ..set('Content-Disposition',
+          'attachment; filename="buzdolabi-sefi-ca.crt"');
+    await res.addStream(ca.openRead());
+    return res.close();
+  }
   var path = Uri.decodeComponent(req.uri.path);
   if (path.endsWith('/')) path = '${path}index.html';
   final file =
