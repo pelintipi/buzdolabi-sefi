@@ -254,11 +254,13 @@ class AppState extends ChangeNotifier {
     for (var i = 0; i < result.length; i++) {
       final better = extractor.repairedTitle(result[i]);
       final emoji = extractor.repairedEmoji(result[i]);
-      if (better != null || emoji != null) {
+      final items = extractor.repairedItems(result[i]);
+      if (better != null || emoji != null || items != null) {
         result[i] = Recipe.fromJson({
           ...result[i].toJson(),
           if (better != null) 'title': better,
           if (emoji != null) 'emoji': emoji,
+          if (items != null) 'items': items,
         });
       }
     }

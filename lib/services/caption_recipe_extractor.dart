@@ -519,8 +519,7 @@ class CaptionRecipeExtractor {
       for (final i in r.items)
         if (repo.tryById(i.ingredientId)?.emoji == r.emoji) i.ingredientId
     ];
-    final bland = r.emoji == '🍽️' ||
-        current.every(_stapleTitleIds.contains);
+    final bland = r.emoji == '🍽️' || current.every(_stapleTitleIds.contains);
     if (!bland || mains.first.emoji == r.emoji) return null;
     return mains.first.emoji;
   }
@@ -582,10 +581,60 @@ class CaptionRecipeExtractor {
     return _Item(ing, amount, measure, optional);
   }
 
+  /// Miktarı yazılmamış malzemeye 2 kişilik tipik miktar. Önceden salça ve
+  /// yağ bile "1 tutam" (yarım gram) sayılıyor, tarifin kalori ve maliyeti
+  /// neredeyse sıfır çıkıyordu.
+  /// Eski sürümün "1 tutam" saydığı salça/yağ gibi malzemeleri 2 yemek
+  /// kaşığına çevirir; değişiklik yoksa null.
+  List<Map<String, dynamic>>? repairedItems(Recipe r) {
+    var changed = false;
+    final out = <Map<String, dynamic>>[];
+    for (final i in r.items) {
+      final j = i.toJson();
+      final ing = repo.tryById(i.ingredientId);
+      if (ing != null &&
+          i.measure == Measure.tutam &&
+          i.amount <= 1 &&
+          _spoonful.contains(ing.id)) {
+        j['amount'] = 2;
+        j['measure'] = Measure.yemekKasigi.name;
+        changed = true;
+      }
+      out.add(j);
+    }
+    return changed ? out : null;
+  }
+
+  static const _spoonful = {
+    'salca',
+    'zeytinyagi',
+    'sivi_yag',
+    'tereyagi',
+    'bal',
+    'pekmez',
+    'tahin',
+    'soya_sosu',
+    'hardal',
+    'krema',
+    'fistik_ezmesi',
+    'un',
+    'seker',
+    'nisasta',
+    'kakao',
+    'yogurt',
+  };
+
   (double, Measure) _defaultAmount(Ingredient ing) {
+    if (_spoonful.contains(ing.id)) return (2, Measure.yemekKasigi);
+    final tags = repo.tagsOf(ing.id);
+    // Et, tavuk, balık: kişi başı ~150 g.
+    if (tags.contains(FoodTag.meat) || tags.contains(FoodTag.fish)) {
+      return (300, Measure.gram);
+    }
     if (ing.isStaple) return (1, Measure.tutam);
-    if (ing.baseUnit == BaseUnit.piece) return (1, Measure.adet);
-    return (100, ing.baseUnit == BaseUnit.ml ? Measure.ml : Measure.gram);
+    if (ing.baseUnit == BaseUnit.piece) return (2, Measure.adet);
+    if (ing.baseUnit == BaseUnit.ml) return (200, Measure.ml);
+    return (200, Measure.gram);
   }
 
   /// En ağır iki temel (dolapta hep bulunmayan) malzeme "ana" malzemedir.
@@ -666,7 +715,8 @@ class CaptionRecipeExtractor {
   String _emojiFor(Iterable<_Item> items) {
     final main = items
         .where((i) =>
-            !i.ingredient.isStaple && !_stapleTitleIds.contains(i.ingredient.id))
+            !i.ingredient.isStaple &&
+            !_stapleTitleIds.contains(i.ingredient.id))
         .toList()
       ..sort((a, b) => UnitConverter.toGrams(b.ingredient, b.amount, b.measure)
           .compareTo(UnitConverter.toGrams(a.ingredient, a.amount, a.measure)));
